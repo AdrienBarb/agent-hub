@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
+    "dev": "dotenv -e ../../.env.local -- next dev --turbopack",
+    "build": "dotenv -e ../../.env.local -- next build",
+    "start": "dotenv -e ../../.env.local -- next start",
     "typecheck": "tsc --noEmit",
     "lint": "next lint",
     "clean": "rm -rf node_modules .next .turbo"

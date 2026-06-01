@@ -19,9 +19,9 @@
     "lint": "echo 'no lint configured' && exit 0",
     "clean": "rm -rf node_modules .turbo",
     "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:deploy": "prisma migrate deploy",
-    "db:studio": "prisma studio",
+    "db:migrate": "dotenv -e ../../.env.local -- prisma migrate dev",
+    "db:deploy": "dotenv -e ../../.env.local -- prisma migrate deploy",
+    "db:studio": "dotenv -e ../../.env.local -- prisma studio",
     "postinstall": "prisma generate"
   },
   "dependencies": {
