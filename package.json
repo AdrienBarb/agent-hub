@@ -4,11 +4,24 @@
   "private": true,
   "description": "Personal hub for autonomous AI agents",
   "scripts": {
-    "build": "turbo run build",
     "dev": "turbo run dev",
+    "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
-    "clean": "turbo run clean && rm -rf node_modules"
+    "clean": "turbo run clean && rm -rf node_modules",
+
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:status": "supabase status",
+    "supabase:reset": "supabase db reset",
+    "supabase:studio": "open http://127.0.0.1:54423",
+
+    "db:migrate": "pnpm --filter @hub/core db:migrate",
+    "db:deploy": "pnpm --filter @hub/core db:deploy",
+    "db:push": "pnpm --filter @hub/core db:push",
+    "db:reset": "pnpm --filter @hub/core db:reset",
+    "db:studio": "pnpm --filter @hub/core db:studio",
+    "db:generate": "pnpm --filter @hub/core db:generate"
   },
   "devDependencies": {
     "dotenv-cli": "^11.0.0",
