@@ -4,7 +4,7 @@ export const config = {
   matcher: ["/agents/:path*"],
 };
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const expected = process.env.HUB_ACCESS_TOKEN;
   const token = request.cookies.get("hub_token")?.value;
 
