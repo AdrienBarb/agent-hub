@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { MODELS } from "@hub/core/llm";
 
 type AgentSummary = {
@@ -5,6 +6,7 @@ type AgentSummary = {
   name: string;
   cron: string;
   description: string;
+  href: string | null;
 };
 
 const agents: AgentSummary[] = [
@@ -14,6 +16,7 @@ const agents: AgentSummary[] = [
     cron: "0 6 * * *",
     description:
       "Daily multi-board scrape, dedupe, fit-evaluation, and ATS-tailored resume + cover letter generation.",
+    href: "/agents/job-hunt",
   },
   {
     slug: "get-news",
@@ -21,6 +24,7 @@ const agents: AgentSummary[] = [
     cron: "0 7 * * *",
     description:
       "Pulls Feedbin, deep-reads with subagents, summarizes in French, voices via ElevenLabs, sends to Telegram.",
+    href: null,
   },
 ];
 
@@ -41,33 +45,47 @@ export default function Home() {
       <section>
         <h2 style={{ fontSize: "1.2rem", color: "#aaa" }}>Agents</h2>
         <ul style={{ listStyle: "none", padding: 0 }}>
-          {agents.map((agent) => (
-            <li
-              key={agent.slug}
-              style={{
-                border: "1px solid #222",
-                borderRadius: 8,
-                padding: "1.25rem",
-                marginBottom: "1rem",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "baseline",
-                }}
-              >
-                <strong style={{ fontSize: "1.05rem" }}>{agent.name}</strong>
-                <code style={{ color: "#666", fontSize: "0.85rem" }}>
-                  {agent.cron}
-                </code>
-              </div>
-              <p style={{ color: "#888", margin: "0.5rem 0 0", fontSize: "0.9rem" }}>
-                {agent.description}
-              </p>
-            </li>
-          ))}
+          {agents.map((agent) => {
+            const card = (
+              <>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "baseline",
+                  }}
+                >
+                  <strong style={{ fontSize: "1.05rem" }}>{agent.name}</strong>
+                  <code style={{ color: "#666", fontSize: "0.85rem" }}>
+                    {agent.cron}
+                  </code>
+                </div>
+                <p style={{ color: "#888", margin: "0.5rem 0 0", fontSize: "0.9rem" }}>
+                  {agent.description}
+                </p>
+              </>
+            );
+            const cardStyle = {
+              border: "1px solid #222",
+              borderRadius: 8,
+              padding: "1.25rem",
+              marginBottom: "1rem",
+              display: "block",
+              color: "inherit",
+              textDecoration: "none",
+            } as const;
+            return (
+              <li key={agent.slug} style={{ listStyle: "none" }}>
+                {agent.href ? (
+                  <Link href={agent.href} style={cardStyle}>
+                    {card}
+                  </Link>
+                ) : (
+                  <div style={cardStyle}>{card}</div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </section>
     </main>

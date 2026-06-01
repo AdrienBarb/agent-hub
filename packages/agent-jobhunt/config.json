@@ -1,0 +1,42 @@
+{
+  "slug": "job-hunt",
+  "name": "Job Hunt",
+  "cron": "0 6 * * *",
+  "timezone": "Europe/Zurich",
+
+  "boards": {
+    "jobup": {
+      "listing_urls": [
+        "https://www.jobup.ch/en/jobs/?term=software%20engineer",
+        "https://www.jobup.ch/en/jobs/?term=full-stack%20developer",
+        "https://www.jobup.ch/en/jobs/?term=frontend%20developer"
+      ],
+      "firecrawl": {
+        "waitFor": 12000,
+        "onlyMainContent": false
+      }
+    }
+  },
+
+  "filters": {
+    "accept_all_switzerland": true,
+    "cities": [
+      "Zurich", "Geneva", "Lausanne", "Bern", "Basel",
+      "Lugano", "Fribourg", "Neuchâtel", "Sion", "Vevey", "Montreux"
+    ],
+    "salary_floor_chf": 80000,
+    "languages_acceptable": ["en", "fr"]
+  },
+
+  "keywords": {
+    "must_match": [
+      "javascript", "typescript", "react", "next", "node",
+      "fullstack", "full-stack", "frontend"
+    ],
+    "bonus": ["claude", "openai", "ai", "llm", "agent"]
+  },
+
+  "select": {
+    "fit_threshold_percent": 60
+  }
+}

@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@hub/core"],
+  transpilePackages: ["@hub/core", "@hub/agent-jobhunt"],
   serverExternalPackages: [
     "@prisma/client",
     "@opentelemetry/sdk-node",

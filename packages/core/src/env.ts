@@ -11,6 +11,8 @@ const envSchema = z.object({
 
   ANTHROPIC_API_KEY: z.string().min(1),
 
+  FIRECRAWL_API_KEY: z.string().min(1),
+
   INNGEST_EVENT_KEY: z.string().min(1),
   INNGEST_SIGNING_KEY: z.string().min(1),
 

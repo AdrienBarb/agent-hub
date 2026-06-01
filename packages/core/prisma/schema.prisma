@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -16,16 +15,62 @@ enum AgentRunStatus {
   failed
 }
 
+enum JobStatus {
+  new
+  duplicate
+  not_a_fit
+  evaluated
+  tailored
+  applied
+  rejected
+}
+
 model AgentRun {
-  id               String         @id @default(cuid())
-  agentSlug        String
-  status           AgentRunStatus @default(pending)
-  startedAt        DateTime       @default(now())
-  finishedAt       DateTime?
-  costUsd          Decimal?       @db.Decimal(10, 4)
-  langfuseTraceId  String?
-  errorMessage     String?
+  id              String         @id @default(cuid())
+  agentSlug       String
+  status          AgentRunStatus @default(pending)
+  startedAt       DateTime       @default(now())
+  finishedAt      DateTime?
+  costUsd         Decimal?       @db.Decimal(10, 4)
+  langfuseTraceId String?
+  errorMessage    String?
+
+  jobs Job[]
 
   @@index([agentSlug, startedAt(sort: Desc)])
   @@index([status])
+}
+
+model Job {
+  id             String    @id @default(cuid())
+  board          String
+  slug           String
+  url            String
+  title          String
+  company        String?
+  city           String?
+  salary         String?
+  salaryMin      Int?
+  salaryMax      Int?
+  tech           String[]  @default([])
+  rawMarkdownUrl String?
+  fingerprint    String?
+  fitScore       Decimal?  @db.Decimal(3, 1)
+  fitReasoning   String?
+  status         JobStatus @default(new)
+  firstSeenAt    DateTime  @default(now())
+  lastSeenAt     DateTime  @default(now())
+
+  duplicateOfId String?
+  duplicateOf   Job?    @relation("Duplicates", fields: [duplicateOfId], references: [id])
+  duplicates    Job[]   @relation("Duplicates")
+
+  runId    String?
+  agentRun AgentRun? @relation(fields: [runId], references: [id])
+
+  @@unique([board, slug])
+  @@index([fingerprint])
+  @@index([status])
+  @@index([firstSeenAt(sort: Desc)])
+  @@index([lastSeenAt(sort: Desc)])
 }
