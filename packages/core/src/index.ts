@@ -5,4 +5,4 @@ export { supabase } from "./supabase";
 export { anthropic, MODELS } from "./llm";
 export type { ModelKey } from "./llm";
 export { inngest } from "./inngest";
-export { setupLangfuse, flushLangfuse } from "./langfuse";
+export { setupLangfuse, flushLangfuse, shutdownLangfuse } from "./langfuse";

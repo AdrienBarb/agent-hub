@@ -1,3 +1,4 @@
+import "server-only";
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
 import { env } from "./env";
@@ -19,7 +20,12 @@ export function setupLangfuse(): void {
 }
 
 export async function flushLangfuse(): Promise<void> {
-  if (processor) {
-    await processor.forceFlush();
-  }
+  await processor?.forceFlush();
+}
+
+export async function shutdownLangfuse(): Promise<void> {
+  await processor?.forceFlush();
+  await sdk?.shutdown();
+  sdk = null;
+  processor = null;
 }

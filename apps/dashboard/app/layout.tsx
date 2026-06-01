@@ -1,8 +1,14 @@
 import type { ReactNode } from "react";
+import type { Viewport } from "next";
 
 export const metadata = {
   title: "Agent Hub",
   description: "Personal hub for autonomous AI agents",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

@@ -1,3 +1,4 @@
+import "server-only";
 import { z } from "zod";
 
 const envSchema = z.object({
@@ -25,9 +26,11 @@ let cached: Env | undefined;
 function load(): Env {
   if (cached) return cached;
 
-  if (process.env.SKIP_ENV_VALIDATION === "true") {
+  const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
+  if (process.env.SKIP_ENV_VALIDATION === "true" && isBuildPhase) {
     cached = new Proxy({} as Env, {
-      get: () => "__build_placeholder__",
+      get: (_t, key: string) =>
+        key.endsWith("_URL") ? "http://localhost" : "__build_placeholder__",
     });
     return cached;
   }
