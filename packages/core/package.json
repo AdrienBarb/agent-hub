@@ -1,0 +1,43 @@
+{
+  "name": "@hub/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./db": "./src/db.ts",
+    "./env": "./src/env.ts",
+    "./llm": "./src/llm.ts",
+    "./inngest": "./src/inngest.ts",
+    "./langfuse": "./src/langfuse.ts",
+    "./supabase": "./src/supabase.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit",
+    "lint": "echo 'no lint configured' && exit 0",
+    "clean": "rm -rf node_modules .turbo dist",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.0",
+    "@langfuse/otel": "^5.4.1",
+    "@opentelemetry/sdk-node": "^0.207.0",
+    "@prisma/client": "^6.0.0",
+    "@supabase/supabase-js": "^2.105.0",
+    "ai": "^5.0.0",
+    "inngest": "^3.30.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "prisma": "^6.0.0",
+    "typescript": "^5.7.2"
+  }
+}
