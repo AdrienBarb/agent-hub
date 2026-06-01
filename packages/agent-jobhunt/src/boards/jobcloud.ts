@@ -105,7 +105,6 @@ function makeJobcloudParser(opts: {
 export const jobup: BoardAdapter = {
   id: "jobup",
   displayName: "jobup.ch",
-  defaults: { waitFor: 12000, onlyMainContent: false },
   parse: makeJobcloudParser({
     id: "jobup",
     host: "www.jobup.ch",
@@ -116,7 +115,6 @@ export const jobup: BoardAdapter = {
 export const jobsch: BoardAdapter = {
   id: "jobsch",
   displayName: "jobs.ch",
-  defaults: { waitFor: 12000, onlyMainContent: false },
   parse: makeJobcloudParser({
     id: "jobsch",
     host: "www.jobs.ch",

@@ -3,6 +3,7 @@ import { inngest } from "@hub/core/inngest";
 import { db } from "@hub/core/db";
 import { flushLangfuse } from "@hub/core/langfuse";
 import { jobHuntGraph } from "./graph";
+import { manifest } from "./manifest";
 
 export const jobHuntDailyRun = inngest.createFunction(
   {
@@ -10,13 +11,13 @@ export const jobHuntDailyRun = inngest.createFunction(
     name: "Job Hunt — daily run",
   },
   [
-    { cron: "TZ=Europe/Zurich 0 6 * * *" },
+    { cron: `TZ=${manifest.timezone} ${manifest.cron}` },
     { event: "jobhunt/run.requested" },
   ],
   async ({ step, logger }) => {
     const run = await step.run("create-agent-run", async () => {
       return db.agentRun.create({
-        data: { agentSlug: "job-hunt", status: "running" },
+        data: { agentSlug: manifest.slug, status: "running" },
       });
     });
 

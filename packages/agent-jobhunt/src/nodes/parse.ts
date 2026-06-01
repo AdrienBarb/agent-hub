@@ -6,20 +6,22 @@ import type { ParsedJob } from "../boards/types";
 import type { JobHuntStateType } from "../state";
 import config from "../../config.json" with { type: "json" };
 
+const MIN_KEYWORD_SCORE = 1;
+
 export async function parseNode(
   state: JobHuntStateType,
 ): Promise<Partial<JobHuntStateType>> {
   const parsed: ParsedJob[] = [];
   const seenSlugs = new Set<string>();
 
-  for (const scrape of state.rawScrapes) {
-    const adapter = boardRegistry[scrape.board];
+  for (const listing of state.scrapedListings) {
+    const adapter = boardRegistry[listing.board];
     if (!adapter) {
-      console.warn(`[parse] no adapter for board "${scrape.board}"`);
+      console.warn(`[parse] no adapter for board "${listing.board}"`);
       continue;
     }
 
-    const jobs = adapter.parse(scrape.markdown);
+    const jobs = adapter.parse(listing.markdown);
     let kept = 0;
     let droppedFilter = 0;
     let droppedKeyword = 0;
@@ -44,7 +46,7 @@ export async function parseNode(
         config.keywords.must_match,
         config.keywords.bonus,
       );
-      if (kwScore < 1) {
+      if (kwScore < MIN_KEYWORD_SCORE) {
         droppedKeyword++;
         continue;
       }
@@ -54,7 +56,7 @@ export async function parseNode(
     }
 
     console.log(
-      `[parse] ${scrape.board} ${scrape.url}: parsed=${jobs.length} kept=${kept} dropped(filter/kw/dup)=${droppedFilter}/${droppedKeyword}/${droppedDup}`,
+      `[parse] ${listing.board} ${listing.url}: parsed=${jobs.length} kept=${kept} dropped(filter/kw/dup)=${droppedFilter}/${droppedKeyword}/${droppedDup}`,
     );
   }
 

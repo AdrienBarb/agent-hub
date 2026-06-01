@@ -1,7 +1,3 @@
-/**
- * Output of a board parser: one parsed JD card. Field names match the Prisma
- * Job model so persist can spread without remapping.
- */
 export interface ParsedJob {
   slug: string;
   board: string;
@@ -18,6 +14,5 @@ export interface ParsedJob {
 export interface BoardAdapter {
   id: string;
   displayName: string;
-  defaults: { waitFor: number; onlyMainContent: boolean };
   parse(md: string): ParsedJob[];
 }

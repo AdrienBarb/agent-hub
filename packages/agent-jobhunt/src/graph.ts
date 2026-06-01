@@ -5,31 +5,23 @@ import { scrapeNode } from "./nodes/scrape";
 import { parseNode } from "./nodes/parse";
 import { persistNode } from "./nodes/persist";
 import {
-  dedupeStub,
-  evaluateStub,
-  tailorStub,
-  renderStub,
-} from "./nodes/stubs";
+  dedupePlaceholder,
+  evaluatePlaceholder,
+  tailorPlaceholder,
+  renderPlaceholder,
+} from "./nodes/placeholders";
 
-/**
- * Job-hunt pipeline graph.
- *
- *   START → scrape → parse → persist → dedupe → evaluate → tailor → render → END
- *
- * Real nodes (iter 1):  scrape, parse, persist
- * Stub nodes (iter 1):  dedupe, evaluate, tailor, render
- *
- * Each stub logs and passes state through. Replace one stub at a time per
- * iteration; the graph topology stays stable.
- */
+// scrape → parse → persist → dedupe → evaluate → tailor → render → END
+// iter 1 real:        scrape, parse, persist
+// iter 1 placeholder: dedupe, evaluate, tailor, render
 export const jobHuntGraph = new StateGraph(JobHuntState)
   .addNode("scrape", scrapeNode)
   .addNode("parse", parseNode)
   .addNode("persist", persistNode)
-  .addNode("dedupe", dedupeStub)
-  .addNode("evaluate", evaluateStub)
-  .addNode("tailor", tailorStub)
-  .addNode("render", renderStub)
+  .addNode("dedupe", dedupePlaceholder)
+  .addNode("evaluate", evaluatePlaceholder)
+  .addNode("tailor", tailorPlaceholder)
+  .addNode("render", renderPlaceholder)
   .addEdge(START, "scrape")
   .addEdge("scrape", "parse")
   .addEdge("parse", "persist")

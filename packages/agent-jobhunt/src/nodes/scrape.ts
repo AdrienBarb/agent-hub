@@ -1,18 +1,22 @@
 import "server-only";
 import Firecrawl from "@mendable/firecrawl-js";
 import { env } from "@hub/core/env";
-import type { JobHuntStateType, RawScrape } from "../state";
+import type { JobHuntStateType, ScrapedListing } from "../state";
 import config from "../../config.json" with { type: "json" };
+
+const MIN_MARKDOWN_BYTES = 1024;
 
 const firecrawl = new Firecrawl({ apiKey: env.FIRECRAWL_API_KEY });
 
 export async function scrapeNode(
   _state: JobHuntStateType,
 ): Promise<Partial<JobHuntStateType>> {
-  const scrapes: RawScrape[] = [];
+  const scrapes: ScrapedListing[] = [];
+  let attempted = 0;
 
   for (const [boardId, boardCfg] of Object.entries(config.boards)) {
     for (const url of boardCfg.listing_urls) {
+      attempted++;
       try {
         const res = await firecrawl.scrape(url, {
           formats: ["markdown"],
@@ -21,7 +25,7 @@ export async function scrapeNode(
         });
 
         const md = (res as { markdown?: string }).markdown ?? "";
-        if (md.length < 1024) {
+        if (md.length < MIN_MARKDOWN_BYTES) {
           console.warn(`[scrape] ${boardId} ${url}: thin markdown (${md.length}B), skipping`);
           continue;
         }
@@ -29,10 +33,17 @@ export async function scrapeNode(
         scrapes.push({ board: boardId, url, markdown: md });
         console.log(`[scrape] ${boardId} ${url}: ${md.length}B`);
       } catch (err) {
-        console.error(`[scrape] ${boardId} ${url} failed:`, err);
+        const message = err instanceof Error ? err.message : "unknown error";
+        console.error(`[scrape] ${boardId} ${url} failed: ${message}`);
       }
     }
   }
 
-  return { rawScrapes: scrapes };
+  if (attempted > 0 && scrapes.length === 0) {
+    throw new Error(
+      `scrape: 0/${attempted} listing URLs returned usable markdown — treating as outage`,
+    );
+  }
+
+  return { scrapedListings: scrapes };
 }

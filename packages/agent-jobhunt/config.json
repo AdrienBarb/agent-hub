@@ -24,8 +24,7 @@
       "Zurich", "Geneva", "Lausanne", "Bern", "Basel",
       "Lugano", "Fribourg", "Neuchâtel", "Sion", "Vevey", "Montreux"
     ],
-    "salary_floor_chf": 80000,
-    "languages_acceptable": ["en", "fr"]
+    "salary_floor_chf": 80000
   },
 
   "keywords": {
@@ -36,7 +35,13 @@
     "bonus": ["claude", "openai", "ai", "llm", "agent"]
   },
 
-  "select": {
-    "fit_threshold_percent": 60
+  "_planned": {
+    "_comment": "Fields below are not consumed yet. Activated in later iterations.",
+    "filters_iter2": {
+      "languages_acceptable": ["en", "fr"]
+    },
+    "select_iter3": {
+      "fit_threshold_percent": 60
+    }
   }
 }

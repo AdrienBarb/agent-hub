@@ -2,8 +2,6 @@ import { db } from "@hub/core/db";
 import { manifest } from "@hub/agent-jobhunt";
 import { triggerJobHuntRun } from "./actions";
 
-export const dynamic = "force-dynamic";
-
 export default async function JobHuntPage() {
   const [recentRuns, recentJobs] = await Promise.all([
     db.agentRun.findMany({

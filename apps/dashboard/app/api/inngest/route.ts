@@ -5,7 +5,7 @@ import { jobHuntFunctions } from "@hub/agent-jobhunt/inngest";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 800;
+export const maxDuration = 60;
 
 export const { GET, POST, PUT } = serve({
   client: inngest,

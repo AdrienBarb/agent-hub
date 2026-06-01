@@ -13,6 +13,8 @@ const envSchema = z.object({
 
   FIRECRAWL_API_KEY: z.string().min(1),
 
+  HUB_ACCESS_TOKEN: z.string().min(8),
+
   INNGEST_EVENT_KEY: z.string().min(1),
   INNGEST_SIGNING_KEY: z.string().min(1),
 
