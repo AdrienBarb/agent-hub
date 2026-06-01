@@ -1,6 +1,6 @@
 # Agent Hub
 
-Personal hub for autonomous AI agents. See [agent-hub-plan.md](../agent-hub-plan.md) for the project plan.
+Personal hub for autonomous AI agents. See [agent-hub-plan.md](./agent-hub-plan.md) for the project plan.
 
 ## Structure
 

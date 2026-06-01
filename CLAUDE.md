@@ -4,7 +4,7 @@ Personal hub for autonomous AI agents. Each agent is a LangGraph workflow trigge
 
 Current state: iteration 1 of `/job-hunt` ported (scraping + persistence; dedupe/eval/tailor/render are placeholder nodes). `/get-news` not started.
 
-Full plan: `../agent-hub-plan.md`.
+Full plan with status markers: `./agent-hub-plan.md`.
 
 ---
 
