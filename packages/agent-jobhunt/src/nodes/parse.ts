@@ -1,12 +1,8 @@
 import "server-only";
+import { env } from "@hub/core/env";
 import { boardRegistry } from "../boards";
-import { passesFilters } from "../filters";
-import { scoreJob } from "../keywords";
 import type { ParsedJob } from "../boards/types";
 import type { JobHuntStateType } from "../state";
-import config from "../../config.json" with { type: "json" };
-
-const MIN_KEYWORD_SCORE = 1;
 
 export async function parseNode(
   state: JobHuntStateType,
@@ -23,8 +19,6 @@ export async function parseNode(
 
     const jobs = adapter.parse(listing.markdown);
     let kept = 0;
-    let droppedFilter = 0;
-    let droppedKeyword = 0;
     let droppedDup = 0;
 
     for (const job of jobs) {
@@ -35,29 +29,20 @@ export async function parseNode(
       }
       seenSlugs.add(dedupKey);
 
-      const filterResult = passesFilters(job, config.filters);
-      if (!filterResult.ok) {
-        droppedFilter++;
-        continue;
-      }
-
-      const kwScore = scoreJob(
-        job,
-        config.keywords.must_match,
-        config.keywords.bonus,
-      );
-      if (kwScore < MIN_KEYWORD_SCORE) {
-        droppedKeyword++;
-        continue;
-      }
-
       parsed.push(job);
       kept++;
     }
 
     console.log(
-      `[parse] ${listing.board} ${listing.url}: parsed=${jobs.length} kept=${kept} dropped(filter/kw/dup)=${droppedFilter}/${droppedKeyword}/${droppedDup}`,
+      `[parse] ${listing.board} ${listing.url}: parsed=${jobs.length} kept=${kept} droppedDup=${droppedDup}`,
     );
+  }
+
+  if (env.JOBHUNT_MAX_JOBS && parsed.length > env.JOBHUNT_MAX_JOBS) {
+    console.log(
+      `[parse] JOBHUNT_MAX_JOBS=${env.JOBHUNT_MAX_JOBS} — truncating ${parsed.length} → ${env.JOBHUNT_MAX_JOBS}`,
+    );
+    parsed.length = env.JOBHUNT_MAX_JOBS;
   }
 
   return { parsedJobs: parsed };

@@ -20,6 +20,7 @@
     "db:deploy": "pnpm --filter @hub/core db:deploy",
     "db:push": "pnpm --filter @hub/core db:push",
     "db:reset": "pnpm --filter @hub/core db:reset",
+    "db:wipe": "dotenv -e .env.local -- pnpm --filter @hub/core exec prisma db push --force-reset --accept-data-loss",
     "db:studio": "pnpm --filter @hub/core db:studio",
     "db:generate": "pnpm --filter @hub/core db:generate",
 

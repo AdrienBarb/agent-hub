@@ -3,7 +3,7 @@ import { manifest } from "@hub/agent-jobhunt";
 import { triggerJobHuntRun } from "./actions";
 
 export default async function JobHuntPage() {
-  const [recentRuns, recentJobs] = await Promise.all([
+  const [recentRuns, recentJobs, jobsWithJd] = await Promise.all([
     db.agentRun.findMany({
       where: { agentSlug: "job-hunt" },
       orderBy: { startedAt: "desc" },
@@ -12,8 +12,25 @@ export default async function JobHuntPage() {
     db.job.findMany({
       orderBy: { firstSeenAt: "desc" },
       take: 30,
+      select: {
+        id: true,
+        board: true,
+        url: true,
+        title: true,
+        company: true,
+        city: true,
+        salary: true,
+        firstSeenAt: true,
+      },
+    }),
+    db.job.findMany({
+      where: { rawMarkdown: { not: null } },
+      orderBy: { firstSeenAt: "desc" },
+      take: 30,
+      select: { id: true },
     }),
   ]);
+  const hasJd = new Set(jobsWithJd.map((j) => j.id));
 
   return (
     <main style={{ maxWidth: 1100, margin: "0 auto", padding: "3rem 2rem" }}>
@@ -114,6 +131,9 @@ export default async function JobHuntPage() {
                 <div style={{ textAlign: "right", color: "#666", fontSize: "0.75rem" }}>
                   <code style={{ color: "#888" }}>{j.board}</code>
                   <div>{j.firstSeenAt.toISOString().slice(0, 10)}</div>
+                  <div style={{ color: hasJd.has(j.id) ? "#4ade80" : "#555", marginTop: "0.2rem" }}>
+                    JD {hasJd.has(j.id) ? "✓" : "✗"}
+                  </div>
                 </div>
               </li>
             ))}

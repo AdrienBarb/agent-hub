@@ -54,6 +54,7 @@ model Job {
   salaryMax      Int?
   tech           String[]  @default([])
   rawMarkdownUrl String?
+  rawMarkdown    String?
   fingerprint    String?
   fitScore       Decimal?  @db.Decimal(3, 1)
   fitReasoning   String?

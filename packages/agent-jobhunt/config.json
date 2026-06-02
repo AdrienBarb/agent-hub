@@ -18,28 +18,8 @@
     }
   },
 
-  "filters": {
-    "accept_all_switzerland": true,
-    "cities": [
-      "Zurich", "Geneva", "Lausanne", "Bern", "Basel",
-      "Lugano", "Fribourg", "Neuchâtel", "Sion", "Vevey", "Montreux"
-    ],
-    "salary_floor_chf": 80000
-  },
-
-  "keywords": {
-    "must_match": [
-      "javascript", "typescript", "react", "next", "node",
-      "fullstack", "full-stack", "frontend"
-    ],
-    "bonus": ["claude", "openai", "ai", "llm", "agent"]
-  },
-
   "_planned": {
-    "_comment": "Fields below are not consumed yet. Activated in later iterations.",
-    "filters_iter2": {
-      "languages_acceptable": ["en", "fr"]
-    },
+    "_comment": "Fit decision (keywords/cities/salary/language) moves to the LLM evaluator in iter 3.",
     "select_iter3": {
       "fit_threshold_percent": 60
     }

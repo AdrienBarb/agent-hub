@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "dotenv -e ../../.env.local -- next dev --turbopack",
+    "dev": "dotenv -e ../../.env.local -- next dev",
     "build": "dotenv -e ../../.env.local -- next build",
     "start": "dotenv -e ../../.env.local -- next start",
     "typecheck": "tsc --noEmit",
@@ -14,10 +14,13 @@
   "dependencies": {
     "@hub/agent-jobhunt": "workspace:*",
     "@hub/core": "workspace:*",
+    "import-in-the-middle": "^3.0.1",
     "inngest": "^3.30.0",
     "next": "^15.1.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "require-in-the-middle": "^8.0.1",
+    "undici": "^8.3.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

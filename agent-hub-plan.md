@@ -65,7 +65,9 @@ Traces  → Langfuse                     ← 🚧 wiring present, no real keys
 
 | Stage | Status |
 |---|---|
-| scrape | 🚧 jobup only (sequential, not parallel); jobs.ch parser exists but not enabled in config; swissdevjobs adapter not written |
+| scrape (listing) | 🚧 jobup only (sequential, not parallel); jobs.ch parser exists but not enabled in config; swissdevjobs adapter not written |
+| persist | ✅ race-safe upsert + skip-if-seen-today (Europe/Zurich) |
+| deep-scrape (JD) | ✅ Firecrawl per Job URL, concurrency 5, idempotent (filter `rawMarkdown: null`), thin-sentinel + outage threshold |
 | dedupe | ⬜ placeholder pass-through |
 | fan-out evaluators | ⬜ placeholder pass-through |
 | aggregate | ⬜ placeholder pass-through |
@@ -89,7 +91,7 @@ Traces  → Langfuse                     ← 🚧 wiring present, no real keys
 - ✅ `proxy.ts` (Next 16 convention) for `/agents/*` auth gate via `HUB_ACCESS_TOKEN` cookie
 - ✅ `/auth` page + signIn server action
 
-### Phase 2 — Port `/job-hunt` 🚧 (iter 1 of 5)
+### Phase 2 — Port `/job-hunt` 🚧 (iter 1 done + deep-scrape from iter 3)
 
 **Iter 1 — scaffold + jobup scraper** 🚧 code complete, never run
 - ✅ `packages/agent-jobhunt` package
@@ -110,8 +112,8 @@ Traces  → Langfuse                     ← 🚧 wiring present, no real keys
 - ⬜ Fix array-reducer retry footgun (F15 from review) once checkpointer is in
 - ⬜ Per-node `step.run` wrapping (or rely on graph checkpoint resumption) — fix F14
 
-**Iter 3 — fit evaluator subgraph** ⬜
-- ⬜ Deep-scrape per JD via Firecrawl (writes `rawMarkdownUrl` to Supabase Storage)
+**Iter 3 — fit evaluator subgraph** 🚧 (deep-scrape done; eval pending)
+- ✅ Deep-scrape per JD via Firecrawl → stored in `Job.rawMarkdown` (DB column, not Storage). Concurrency 5, thin-content sentinel, outage threshold ≥3, 60s timeout per URL
 - ⬜ Evaluator subgraph: extract-requirements → compare-profile → score → self-critique (conditional edge)
 - ⬜ Vercel AI SDK `generateObject` with Zod schema for structured fit output
 - ⬜ Sonnet 4.6 with prompt caching on candidate profile (`me.md` + `resume-master.yaml`)

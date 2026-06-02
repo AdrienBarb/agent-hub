@@ -30,6 +30,11 @@ export const JobHuntState = Annotation.Root({
     reducer: (_a, b) => b,
     default: () => 0,
   }),
+
+  deepScrapedCount: Annotation<number>({
+    reducer: (_a, b) => b,
+    default: () => 0,
+  }),
 });
 
 export type JobHuntStateType = typeof JobHuntState.State;
