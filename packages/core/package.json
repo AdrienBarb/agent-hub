@@ -12,7 +12,8 @@
     "./llm": "./src/llm.ts",
     "./inngest": "./src/inngest.ts",
     "./langfuse": "./src/langfuse.ts",
-    "./supabase": "./src/supabase.ts"
+    "./supabase": "./src/supabase.ts",
+    "./prisma": "./src/prisma.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

@@ -58,6 +58,7 @@ model Job {
   fingerprint    String?
   fitScore       Decimal?  @db.Decimal(3, 1)
   fitReasoning   String?
+  fitDetails     Json?
   status         JobStatus @default(new)
   firstSeenAt    DateTime  @default(now())
   lastSeenAt     DateTime  @default(now())

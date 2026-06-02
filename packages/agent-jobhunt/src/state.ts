@@ -1,11 +1,18 @@
 import "server-only";
 import { Annotation } from "@langchain/langgraph";
+import { JobStatus } from "@hub/core/prisma";
 import type { ParsedJob } from "./boards/types";
 
 export interface ScrapedListing {
   board: string;
   url: string;
   markdown: string;
+}
+
+export interface EvaluationResult {
+  jobId: string;
+  fitScore: number;
+  status: JobStatus;
 }
 
 export const JobHuntState = Annotation.Root({
@@ -34,6 +41,11 @@ export const JobHuntState = Annotation.Root({
   deepScrapedCount: Annotation<number>({
     reducer: (_a, b) => b,
     default: () => 0,
+  }),
+
+  evaluations: Annotation<EvaluationResult[]>({
+    reducer: (a, b) => [...a, ...b],
+    default: () => [],
   }),
 });
 

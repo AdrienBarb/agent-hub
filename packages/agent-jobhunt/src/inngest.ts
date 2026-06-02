@@ -3,6 +3,7 @@ import { inngest } from "@hub/core/inngest";
 import { db } from "@hub/core/db";
 import { flushLangfuse } from "@hub/core/langfuse";
 import { jobHuntGraph } from "./graph";
+import { setupCheckpointer } from "./checkpointer";
 import { manifest } from "./manifest";
 
 export const jobHuntDailyRun = inngest.createFunction(
@@ -15,6 +16,8 @@ export const jobHuntDailyRun = inngest.createFunction(
     { event: "jobhunt/run.requested" },
   ],
   async ({ step, logger }) => {
+    await step.run("setup-checkpointer", () => setupCheckpointer());
+
     const run = await step.run("create-agent-run", async () => {
       return db.agentRun.create({
         data: { agentSlug: manifest.slug, status: "running" },
@@ -31,6 +34,7 @@ export const jobHuntDailyRun = inngest.createFunction(
           persistedCount: final.persistedCount ?? 0,
           skippedCount: final.skippedCount ?? 0,
           parsedCount: final.parsedJobs?.length ?? 0,
+          evaluatedCount: final.evaluations?.length ?? 0,
         };
       });
 

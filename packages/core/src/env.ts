@@ -23,6 +23,7 @@ const envSchema = z.object({
   LANGFUSE_BASE_URL: z.string().url().default("https://cloud.langfuse.com"),
 
   JOBHUNT_MAX_JOBS: z.coerce.number().int().positive().optional(),
+  JOBHUNT_FIT_THRESHOLD: z.coerce.number().int().min(1).max(10).default(6),
 });
 
 export type Env = z.infer<typeof envSchema>;

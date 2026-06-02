@@ -13,6 +13,5 @@ function makePlaceholder(name: string, plannedFor: string) {
 }
 
 export const dedupePlaceholder = makePlaceholder("dedupe", "iter 2: fingerprint dedup across boards");
-export const evaluatePlaceholder = makePlaceholder("evaluate", "iter 3: LLM fit scoring subgraph");
 export const tailorPlaceholder = makePlaceholder("tailor", "iter 4: resume + cover tailoring subgraph");
 export const renderPlaceholder = makePlaceholder("render", "iter 5: Typst PDF render");

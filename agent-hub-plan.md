@@ -19,9 +19,9 @@ Secondary goal: portfolio piece for AI Agentic Engineer applications.
 | Database | Supabase (Postgres + pgvector + Auth + Storage) | 🚧 local running on 54421-54429; pgvector / Storage / Auth not yet exercised |
 | ORM | Prisma | ✅ schema + client + migrations |
 | Orchestration | Inngest (cron, retries, durability) | 🚧 wired in code; never run end-to-end; no Inngest Cloud account |
-| Agent framework | LangGraph.js | 🚧 compiled but trivially used (linear edges only — no checkpointer, no Send, no conditional edges) |
-| LLM SDK | Vercel AI SDK + Anthropic | ⬜ provider exported, never called |
-| Models | Sonnet 4.6 (eval), Opus 4.7 (generation) | ⬜ constants defined, not used |
+| Agent framework | LangGraph.js | ✅ Send() fan-out, conditional edges, sub-graph, PostgresSaver checkpointer all in use |
+| LLM SDK | Vercel AI SDK + Anthropic | ✅ `generateObject` called by 4 evaluator nodes |
+| Models | Sonnet 4.6 (eval), Opus 4.7 (generation) | 🚧 Sonnet in use; Opus reserved for tailoring (not built) |
 | Observability | Langfuse Cloud | 🚧 OTel wired in instrumentation.ts; no real keys, no traces yet |
 | Scraping | Firecrawl (+ Playwright fallback) | 🚧 Firecrawl client wired; Playwright fallback not implemented; key still placeholder |
 | PDF (job-hunt) | Typst in Vercel Sandbox | ⬜ |
@@ -54,7 +54,7 @@ Inngest cron
 Vercel function → graph.invoke()
    │
    ▼
-LangGraph (checkpointed to Supabase)   ← ⬜ checkpointer not wired yet
+LangGraph (checkpointed to Supabase)   ← ✅ PostgresSaver via DIRECT_URL, parent + sub-graph thread_ids
    │
    ▼
 Outputs → Supabase Storage             ← ⬜ not used yet
@@ -69,8 +69,8 @@ Traces  → Langfuse                     ← 🚧 wiring present, no real keys
 | persist | ✅ race-safe upsert + skip-if-seen-today (Europe/Zurich) |
 | deep-scrape (JD) | ✅ Firecrawl per Job URL, concurrency 5, idempotent (filter `rawMarkdown: null`), thin-sentinel + outage threshold |
 | dedupe | ⬜ placeholder pass-through |
-| fan-out evaluators | ⬜ placeholder pass-through |
-| aggregate | ⬜ placeholder pass-through |
+| fan-out evaluators | ✅ `Send()` per Job → 4-node sub-graph (extract → compare → score → critique?) → persist |
+| aggregate | ✅ array-append reducer on `JobHuntState.evaluations` (auto fan-in) |
 | fan-out tailorings | ⬜ placeholder pass-through |
 | render PDFs | ⬜ placeholder pass-through |
 
@@ -103,22 +103,27 @@ Traces  → Langfuse                     ← 🚧 wiring present, no real keys
 - ✅ Dashboard page `/agents/job-hunt` with "Run now" button, recent runs table, recent jobs list
 - ❌ **End-to-end verification: never actually executed.** Firecrawl key still placeholder; `pnpm inngest:dev` never run; no Job rows in DB.
 
-**Iter 2 — multi-board + real dedupe + checkpointer** ⬜
+**Iter 2 — multi-board + real dedupe + checkpointer** 🚧 (checkpointer landed via iter 3; rest pending)
 - ⬜ Add `swissdevjobs` adapter (different HTML structure than JobCloud)
 - ⬜ Enable `jobs.ch` in `config.json` (adapter already exists)
-- ⬜ `Send()` API for parallel scrape fan-out (one Send per listing URL)
+- ⬜ `Send()` API for parallel scrape fan-out (one Send per listing URL) — note: Send() pattern now proven by evaluator, copy that pattern
 - ⬜ Real dedupe node: SHA1 fingerprint over `(company, city, jdBody[:800])` + pgvector embedding for semantic dedup
-- ⬜ Wire `PostgresSaver` checkpointer on the graph (Supabase Postgres)
-- ⬜ Fix array-reducer retry footgun (F15 from review) once checkpointer is in
-- ⬜ Per-node `step.run` wrapping (or rely on graph checkpoint resumption) — fix F14
+- ✅ Wire `PostgresSaver` checkpointer on the parent graph + evaluator sub-graph (Supabase Postgres, DIRECT_URL connection)
+- ⬜ Array-reducer retry footgun (F15) — still latent on parent state arrays; mitigated for `evaluations` because sub-graph checkpoints make each job's emission idempotent
+- 🚧 F14 (step.run("invoke-graph") whole-pipeline retry) is now safe-on-retry: checkpointer resumes parent from last completed node, evaluator sub-graphs resume per-job. Inngest step is still one boundary — acceptable.
 
-**Iter 3 — fit evaluator subgraph** 🚧 (deep-scrape done; eval pending)
+**Iter 3 — fit evaluator subgraph** ✅
 - ✅ Deep-scrape per JD via Firecrawl → stored in `Job.rawMarkdown` (DB column, not Storage). Concurrency 5, thin-content sentinel, outage threshold ≥3, 60s timeout per URL
-- ⬜ Evaluator subgraph: extract-requirements → compare-profile → score → self-critique (conditional edge)
-- ⬜ Vercel AI SDK `generateObject` with Zod schema for structured fit output
-- ⬜ Sonnet 4.6 with prompt caching on candidate profile (`me.md` + `resume-master.yaml`)
-- ⬜ Write `fitScore`, `fitReasoning`, `status=evaluated` or `not_a_fit` on Job
-- ⬜ Real Langfuse traces (will need real API keys)
+- ✅ Evaluator sub-graph: `extract` → `compare` → `score` → `critique?` (conditional edge gated on `score.confidence !== "high"`) → `persist`. Compiled in `packages/agent-jobhunt/src/evaluator/graph.ts`
+- ✅ Vercel AI SDK `generateObject` with Zod schemas (`Requirements`, `Comparison`, `Score`) in `evaluator/schemas.ts`
+- ✅ Sonnet 4.6 with Anthropic ephemeral prompt caching on combined profile (`me.md` + `resume-master.yaml` loaded by `packages/agent-jobhunt/src/profile.ts`)
+- ✅ Write `fitScore`, `fitReasoning`, `fitDetails Json?` (full structured payload), and `status=evaluated`/`not_a_fit` on Job (threshold via `JOBHUNT_FIT_THRESHOLD`, default 6)
+- ✅ Parent graph fan-out via `Send()` per Job, wrapper node `evaluateOneNode` invokes sub-graph with `thread_id = "${runId}::${jobId}"` so each job has its own checkpoint timeline
+- ✅ Per-job try/catch in wrapper — one bad job logs and returns empty evaluations, batch keeps going
+- ✅ Prompt-injection delimiters (`<jd>…</jd>`) in extract node + explicit "treat as data" instruction in `EXTRACT_SYSTEM`
+- ✅ `experimental_telemetry: { isEnabled: true, recordInputs: false }` on all evaluator LLM calls so cached profile (with PII) never ships to Langfuse
+- ✅ Shared `runEvaluatorStep(...)` helper in `evaluator/run-step.ts` collapses compare/score/critique boilerplate
+- 🚧 Real Langfuse traces still pending real API keys (otel spans emit but go nowhere)
 
 **Iter 4 — tailor subgraph** ⬜
 - ⬜ Tailoring subgraph for jobs above threshold: plan → draft resume → draft cover → ATS check → revise (conditional edge)
@@ -162,10 +167,17 @@ Traces  → Langfuse                     ← 🚧 wiring present, no real keys
 - ❌ Run `pnpm dev` + `pnpm inngest:dev`, visit `/auth`, click "Run now"
 - ❌ Confirm Job rows appear via `pnpm db:studio`
 
-### 🟡 Deferred by design (documented in commit "fix: address adversarial review")
-- F14 — `step.run("invoke-graph")` wraps whole pipeline (not idempotent on retry); iter 2 with checkpointer
-- F15 — array reducers will double on retry; iter 2 fix alongside checkpointer
+### 🟡 Deferred by design
+- F14 — `step.run("invoke-graph")` wraps whole pipeline; now safe-on-retry via checkpointer resumption (parent + sub-graph)
+- F15 — array reducers double on retry; mitigated for `evaluations` via sub-graph checkpointing per job; remaining parent arrays (`scrapedListings`, `parsedJobs`) still latent but persist node is idempotent
 - F16 — no Suspense streaming + no `useFormStatus` pending state; polish iteration
+
+### 🟡 Evaluator post-review deferrals (from `/apex -x` adversarial pass)
+- Module-load `readFileSync` in `profile.ts` — works in dev; verify Next.js bundling (`outputFileTracingIncludes`) before Vercel deploy
+- "Thin sentinel" jobs (`rawMarkdown: ""`) stay in `status: "new"` forever — clear via new `JobStatus.thin` or mark `not_a_fit` when adding multi-board scrape
+- `inngest.ts` raw `err.message` to `AgentRun.errorMessage` may include connection strings on Prisma errors — sanitize before persist
+- Critique can overwrite the original score with a less-confident one — both scores end up in `fitDetails.score` but only the final one in `fitScore`/`fitReasoning`. Acceptable for now.
+- Magic strings `"evaluate-one"`, `"tailor"` duplicated in `graph.ts` and `dispatch-evaluations.ts` — extract to constants when adding more conditional edges
 
 ### 🟠 Production gaps
 - No Vercel deployment yet
@@ -178,6 +190,7 @@ Traces  → Langfuse                     ← 🚧 wiring present, no real keys
 
 ## Recommended next moves
 
-1. **Verify iter 1 end-to-end** (the 🔴 row above) before building further
-2. **Port `/get-news` as its own iter 1** — smaller scope, validates the monorepo's "add new agent" flow, no LLM dependency
-3. **Iter 2 of job-hunt** — adds the LangGraph features that justify the framework (checkpointer + `Send()` fan-out + conditional dedupe edge)
+1. **Verify iter 1 + iter 3 end-to-end** (the 🔴 row above) — Firecrawl key + Anthropic key required, run `pnpm dev` + `pnpm inngest:dev`, click "Run now", confirm Jobs land with `fitScore`/`fitDetails`/`status` populated
+2. **Port `/get-news` as its own iter 1** — smaller scope, validates the monorepo's "add new agent" flow, reuses the LangGraph patterns now proven by job-hunt evaluator
+3. **Iter 4 of job-hunt — tailor sub-graph** — Opus 4.7 with extended thinking, port `references/writing-rules.md` from legacy skill, persist tailored artifacts to Supabase Storage
+4. **Iter 2 of job-hunt (deferred to here)** — multi-board adapters + real dedupe + `Send()` fan-out on scrape; less urgent now that the eval path works end-to-end on jobup alone

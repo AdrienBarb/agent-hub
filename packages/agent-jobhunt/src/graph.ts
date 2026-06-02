@@ -7,10 +7,14 @@ import { persistNode } from "./nodes/persist";
 import { deepScrapeNode } from "./nodes/deep-scrape";
 import {
   dedupePlaceholder,
-  evaluatePlaceholder,
   tailorPlaceholder,
   renderPlaceholder,
 } from "./nodes/placeholders";
+import {
+  dispatchEvaluationsEdge,
+  evaluateOneNode,
+} from "./nodes/dispatch-evaluations";
+import { checkpointer } from "./checkpointer";
 
 export const jobHuntGraph = new StateGraph(JobHuntState)
   .addNode("scrape", scrapeNode)
@@ -18,7 +22,7 @@ export const jobHuntGraph = new StateGraph(JobHuntState)
   .addNode("persist", persistNode)
   .addNode("deep-scrape", deepScrapeNode)
   .addNode("dedupe", dedupePlaceholder)
-  .addNode("evaluate", evaluatePlaceholder)
+  .addNode("evaluate-one", evaluateOneNode)
   .addNode("tailor", tailorPlaceholder)
   .addNode("render", renderPlaceholder)
   .addEdge(START, "scrape")
@@ -26,8 +30,11 @@ export const jobHuntGraph = new StateGraph(JobHuntState)
   .addEdge("parse", "persist")
   .addEdge("persist", "deep-scrape")
   .addEdge("deep-scrape", "dedupe")
-  .addEdge("dedupe", "evaluate")
-  .addEdge("evaluate", "tailor")
+  .addConditionalEdges("dedupe", dispatchEvaluationsEdge, [
+    "evaluate-one",
+    "tailor",
+  ])
+  .addEdge("evaluate-one", "tailor")
   .addEdge("tailor", "render")
   .addEdge("render", END)
-  .compile();
+  .compile({ checkpointer });
