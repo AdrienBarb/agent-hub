@@ -63,6 +63,13 @@ model Job {
   firstSeenAt    DateTime  @default(now())
   lastSeenAt     DateTime  @default(now())
 
+  resumeStoragePath  String?
+  coverStoragePath   String?
+  summaryStoragePath String?
+  diffStoragePath    String?
+  tailoredAt         DateTime?
+  tailorDetails      Json?
+
   duplicateOfId String?
   duplicateOf   Job?    @relation("Duplicates", fields: [duplicateOfId], references: [id])
   duplicates    Job[]   @relation("Duplicates")

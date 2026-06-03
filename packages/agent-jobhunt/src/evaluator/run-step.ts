@@ -22,6 +22,14 @@ export async function runEvaluatorStep<T extends z.ZodTypeAny>({
   const result = await generateObject({
     model: anthropic(MODELS.evaluator),
     schema,
+    allowSystemInMessages: true,
+    // Anthropic-native structured outputs (see tailor/run-step.ts for the full
+    // rationale). The evaluator schemas have no z.record/recursion, so native
+    // grammar-constrained decoding applies cleanly and avoids the jsonTool
+    // wrapping failure mode entirely.
+    providerOptions: {
+      anthropic: { structuredOutputMode: "outputFormat" },
+    },
     messages: [
       {
         role: "system",

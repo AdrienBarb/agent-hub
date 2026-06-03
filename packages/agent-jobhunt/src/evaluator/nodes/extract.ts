@@ -11,6 +11,11 @@ export async function extractNode(
   const result = await generateObject({
     model: anthropic(MODELS.evaluator),
     schema: RequirementsSchema,
+    allowSystemInMessages: true,
+    // Anthropic-native structured outputs — see tailor/run-step.ts + CLAUDE.md.
+    providerOptions: {
+      anthropic: { structuredOutputMode: "outputFormat" },
+    },
     messages: [
       { role: "system", content: EXTRACT_SYSTEM },
       {

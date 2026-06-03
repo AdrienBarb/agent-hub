@@ -125,11 +125,16 @@ Traces  → Langfuse                     ← 🚧 wiring present, no real keys
 - ✅ Shared `runEvaluatorStep(...)` helper in `evaluator/run-step.ts` collapses compare/score/critique boilerplate
 - 🚧 Real Langfuse traces still pending real API keys (otel spans emit but go nowhere)
 
-**Iter 4 — tailor subgraph** ⬜
-- ⬜ Tailoring subgraph for jobs above threshold: plan → draft resume → draft cover → ATS check → revise (conditional edge)
-- ⬜ Opus 4.7 with extended thinking
-- ⬜ Humanizer rules inline (no em-dashes, no AI vocab — port `references/writing-rules.md`)
-- ⬜ Persist tailored artifacts (resume.yaml, cover.md) to Supabase Storage
+**Iter 4 — tailor subgraph** ✅ (run end-to-end: 2/2 evaluated jobs → `status=tailored`, artifacts in Storage)
+- ✅ Tailoring subgraph for jobs above threshold: `plan → draft-resume → draft-cover → ats-check → revise? → persist`. Conditional edge gates `revise` on `!atsCheckResult.ok`. Single pass — no loop. Compiled in `packages/agent-jobhunt/src/tailor/graph.ts` with PostgresSaver `checkpointer`.
+- ✅ Opus 4.7 via `generateObject` with **`structuredOutputMode: "outputFormat"`** (Anthropic-native structured outputs). The first end-to-end run failed every tailoring with `AI_NoObjectGeneratedError: response did not match schema` — root-caused (wire capture) to the SDK's default `"jsonTool"` mode, where Opus nests the object under a spurious key (`{input:{…}}`) or returns `{}`. Native mode (grammar-constrained decoding) fixed it: Opus 6/6 on plan AND the full resume schema. Because native mode forces `additionalProperties:false`, `skills` is modeled as an array (`ResumeDraftSchema`) and converted back to a map before storage. Shared helper `runTailorStep` in `tailor/run-step.ts`; profile cached via ephemeral `cacheControl`; `recordInputs: false`. Same fix applied to the evaluator's `run-step.ts`. See CLAUDE.md gotchas.
+- ✅ Humanizer rules ported VERBATIM from legacy `references/writing-rules.md` into both `DRAFT_RESUME_SYSTEM` and `DRAFT_COVER_SYSTEM` prompts (no em-dashes, no AI vocab blocklist, no compound coinages, cover checklist).
+- ✅ Parent graph fan-out via `Send()` per Job above threshold (`packages/agent-jobhunt/src/nodes/dispatch-tailorings.ts`). Wrapper `tailorOneNode` invokes sub-graph with `thread_id = "${runId}::${jobId}::tailor"` so the tailor timeline doesn't collide with the evaluator's `"${runId}::${jobId}"`.
+- ✅ Per-job try/catch in wrapper — bad job logs `tailorings: [{ jobId, status: "failed" }]`, batch keeps going.
+- ✅ ATS check is deterministic (no LLM) in iter 4 — validates resume.yaml structure (required keys, ≤3 bullets per role/engagement, summary length, education keys, skills present). The pdftotext-based check is deferred to iter 5.
+- ✅ Persist node uploads `resume.yaml`, `cover.md`, `summary.md`, `diff.md` to private Supabase Storage bucket `job-hunt` at `${runId}/${jobId}/...`. Bucket created via idempotent `pnpm storage:setup`. Job row gets 6 new columns: `resumeStoragePath`, `coverStoragePath`, `summaryStoragePath`, `diffStoragePath`, `tailoredAt`, `tailorDetails Json?` (plan + ATS result snapshot).
+- ✅ Parent graph rewired with no-op fan-in `post-eval`: `evaluate-one → post-eval → dispatchTailoringsEdge → ["tailor-one", "render"]`; `tailor-one → render`. The fan-in is required because conditional edges placed directly on a Send-fanned node fire per-branch (caught during first end-to-end run — tailorings dispatched 3× the same jobs).
+- 🚧 Real Langfuse traces still pending real API keys (otel spans emit but go nowhere).
 
 **Iter 5 — render PDFs** ⬜
 - ⬜ Typst compilation via Vercel Sandbox

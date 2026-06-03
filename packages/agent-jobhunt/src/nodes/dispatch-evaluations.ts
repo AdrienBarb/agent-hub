@@ -25,9 +25,9 @@ export async function dispatchEvaluationsEdge(
 
   if (evaluable.length === 0) {
     console.log(
-      "[dispatch-evaluations] no jobs need evaluation, skipping to tailor",
+      "[dispatch-evaluations] no jobs need evaluation, skipping to post-eval",
     );
-    return "tailor";
+    return "post-eval";
   }
 
   console.log(

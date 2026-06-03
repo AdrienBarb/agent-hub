@@ -15,6 +15,11 @@ export interface EvaluationResult {
   status: JobStatus;
 }
 
+export interface TailoringResult {
+  jobId: string;
+  status: JobStatus | "failed";
+}
+
 export const JobHuntState = Annotation.Root({
   runId: Annotation<string>,
 
@@ -46,6 +51,11 @@ export const JobHuntState = Annotation.Root({
   evaluations: Annotation<EvaluationResult[]>({
     reducer: (a, b) => [...a, ...b],
     default: () => [],
+  }),
+
+  tailorings: Annotation<Record<string, TailoringResult>>({
+    reducer: (a, b) => ({ ...a, ...b }),
+    default: () => ({}),
   }),
 });
 

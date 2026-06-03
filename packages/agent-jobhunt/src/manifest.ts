@@ -7,3 +7,5 @@ export const manifest = {
 } as const;
 
 export type Manifest = typeof manifest;
+
+export const STORAGE_BUCKET = manifest.slug;

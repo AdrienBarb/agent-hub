@@ -10,3 +10,6 @@ out/
 .DS_Store
 *.log
 .vercel
+
+# Claude Code runtime (local-only state, e.g. scheduled-task locks)
+.claude/

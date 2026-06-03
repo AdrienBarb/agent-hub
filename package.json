@@ -24,11 +24,14 @@
     "db:studio": "pnpm --filter @hub/core db:studio",
     "db:generate": "pnpm --filter @hub/core db:generate",
 
+    "storage:setup": "dotenv -e .env.local -- tsx scripts/storage-setup.ts",
+
     "inngest:dev": "npx inngest-cli@latest dev -u http://localhost:3000/api/inngest",
     "jobhunt:trigger": "dotenv -e .env.local -- node -e \"import('inngest').then(m => new m.Inngest({id:'agent-hub',eventKey:process.env.INNGEST_EVENT_KEY}).send({name:'jobhunt/run.requested',data:{source:'cli'}}).then(r=>console.log('sent',r)))\""
   },
   "devDependencies": {
     "dotenv-cli": "^11.0.0",
+    "tsx": "^4.22.4",
     "turbo": "^2.3.3",
     "typescript": "^5.7.2"
   },
