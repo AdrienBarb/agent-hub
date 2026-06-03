@@ -5,7 +5,7 @@ import { env } from "@hub/core/env";
 import type { JobHuntStateType } from "../state";
 
 const CONCURRENCY = 5;
-const MIN_MARKDOWN_BYTES = 1024;
+const MIN_MARKDOWN_CHARS = 1024;
 const FIRECRAWL_TIMEOUT_MS = 60_000;
 const OUTAGE_MIN_SAMPLE = 3;
 
@@ -29,14 +29,14 @@ async function scrapeOne(job: { id: string; url: string }): Promise<ScrapeOutcom
     return "fetch-error";
   }
 
-  if (md.length < MIN_MARKDOWN_BYTES) {
+  if (md.length < MIN_MARKDOWN_CHARS) {
     try {
       await db.job.update({ where: { id: job.id }, data: { rawMarkdown: "" } });
     } catch (err) {
       const message = err instanceof Error ? err.message : "unknown error";
       console.error(`[deep-scrape] ${job.id} thin-sentinel update failed: ${message}`);
     }
-    console.warn(`[deep-scrape] ${job.id}: thin markdown (${md.length}B), sentinel set`);
+    console.warn(`[deep-scrape] ${job.id}: thin markdown (${md.length} chars), sentinel set`);
     return "thin";
   }
 
@@ -48,7 +48,7 @@ async function scrapeOne(job: { id: string; url: string }): Promise<ScrapeOutcom
     return "db-error";
   }
 
-  console.log(`[deep-scrape] ${job.id}: ${md.length}B`);
+  console.log(`[deep-scrape] ${job.id}: ${md.length} chars`);
   return "ok";
 }
 

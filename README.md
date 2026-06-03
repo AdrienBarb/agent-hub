@@ -7,13 +7,17 @@ Personal hub for autonomous AI agents. See [agent-hub-plan.md](./agent-hub-plan.
 ```
 agent-hub/
 ├── apps/
-│   └── dashboard/              Next.js dashboard
+│   └── dashboard/              Next.js dashboard — pages, server actions, auth proxy, API routes
 ├── packages/
-│   ├── core/                   Shared: db, llm, inngest, langfuse
-│   ├── agent-jobhunt/          (coming soon)
-│   └── agent-news/             (coming soon)
+│   ├── core/                   Shared infra: db, supabase, llm, inngest, langfuse, env
+│   └── agent-jobhunt/          Job-hunt agent: LangGraph workflow + Inngest function
 └── supabase/                   Local Supabase config (project_id: agent-hub)
 ```
+
+**`agent-jobhunt`** is a LangGraph workflow triggered daily (and on demand) by Inngest:
+scrape job boards via Firecrawl → fingerprint-dedupe → evaluate fit per JD → tailor a
+resume + cover letter for matches → render ATS-friendly PDFs via Typst in a Vercel Sandbox.
+State persists in Supabase (Prisma); runs are observed via Langfuse.
 
 ---
 

@@ -31,6 +31,15 @@ export const TailorState = Annotation.Root({
     default: () => undefined,
   }),
 
+  // Bounded counter for the ats-check -> revise -> ats-check loop. Computed from
+  // state (state.reviseCount + 1) with a replace-last reducer, so a checkpointer
+  // replay recomputes the same value instead of over-counting (an additive
+  // reducer would be unsafe under retry — see the CLAUDE.md reducer gotcha).
+  reviseCount: Annotation<number>({
+    reducer: (_a, b) => b,
+    default: () => 0,
+  }),
+
   finalStatus: Annotation<JobStatus | undefined>({
     reducer: (_a, b) => b,
     default: () => undefined,

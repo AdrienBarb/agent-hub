@@ -2,7 +2,6 @@ import "server-only";
 import { runTailorStep } from "../run-step";
 import { REVISE_SYSTEM } from "../prompts";
 import { ResumeDraftSchema } from "../schemas";
-import { runAtsValidation } from "./ats-check";
 import type { TailorStateType } from "../state";
 
 export async function reviseNode(
@@ -24,11 +23,14 @@ export async function reviseNode(
     schema: ResumeDraftSchema,
   });
 
-  const postReviseAts = runAtsValidation(revised);
-
+  // The back-edge sends this draft straight back to ats-check, which recomputes
+  // atsCheckResult and decides whether to loop again — so revise no longer runs
+  // its own validation (ats-check is the single source of truth). Bump the
+  // bounded loop counter (replace-last reducer, computed from state).
+  const pass = (state.reviseCount ?? 0) + 1;
   console.log(
-    `[tailor/revise] ${state.jobId} preIssues=${state.atsCheckResult.issues.length} postOk=${postReviseAts.ok} postIssues=${postReviseAts.issues.length}`,
+    `[tailor/revise] ${state.jobId} pass=${pass} fixing ${state.atsCheckResult.issues.length} issue(s) — re-checked by ats-check`,
   );
 
-  return { draftResume: revised, atsCheckResult: postReviseAts };
+  return { draftResume: revised, reviseCount: pass };
 }

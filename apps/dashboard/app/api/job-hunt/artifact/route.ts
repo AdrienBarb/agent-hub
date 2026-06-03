@@ -4,20 +4,7 @@ import { supabase } from "@hub/core/supabase";
 import { env } from "@hub/core/env";
 import { STORAGE_BUCKET } from "@hub/agent-jobhunt";
 import { safeStrEqual } from "@/lib/safe-equal";
-
-// Map of allowed artifact kinds → the Job column holding the storage path.
-// The client only ever sends a `kind`; the path is resolved server-side so a
-// caller can never request an arbitrary storage object.
-const KIND_TO_COLUMN = {
-  resume: "resumeStoragePath",
-  cover: "coverStoragePath",
-  summary: "summaryStoragePath",
-  diff: "diffStoragePath",
-  "resume-pdf": "resumePdfStoragePath",
-  "cover-pdf": "coverPdfStoragePath",
-} as const;
-
-type Kind = keyof typeof KIND_TO_COLUMN;
+import { KIND_TO_COLUMN, KIND_TO_FILENAME, type Kind } from "./kinds";
 
 const SIGNED_URL_TTL_SECONDS = 60;
 
@@ -31,7 +18,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   const jobId = request.nextUrl.searchParams.get("jobId");
   const kind = request.nextUrl.searchParams.get("kind") as Kind | null;
-  if (!jobId || !kind || !(kind in KIND_TO_COLUMN)) {
+  // hasOwnProperty, not `in` — `in` is true for inherited keys (toString, …),
+  // which would slip a non-kind past this allow-list guard.
+  if (!jobId || !kind || !Object.prototype.hasOwnProperty.call(KIND_TO_COLUMN, kind)) {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
   }
 
@@ -54,7 +43,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   const { data, error } = await supabase.storage
     .from(STORAGE_BUCKET)
-    .createSignedUrl(path, SIGNED_URL_TTL_SECONDS);
+    .createSignedUrl(path, SIGNED_URL_TTL_SECONDS, {
+      download: KIND_TO_FILENAME[kind],
+    });
   if (error || !data) {
     return NextResponse.json({ error: "Could not sign URL" }, { status: 500 });
   }

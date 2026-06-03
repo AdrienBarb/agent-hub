@@ -12,6 +12,15 @@ export const jobHuntDailyRun = inngest.createFunction(
   {
     id: "job-hunt-daily-run",
     name: "Job Hunt — daily run",
+    // One run in flight at a time. A manual "Run now" during the 06:00 cron
+    // (or a double-click) is SKIPPED, not queued — two overlapping graphs would
+    // share the module-level render-sandbox singleton (render/sandbox.ts), so
+    // one run's finalize would dispose the sandbox the other is still using;
+    // they'd also double-pay Firecrawl/Anthropic and race the Job upserts.
+    // `skip` (not a concurrency queue) drops the redundant trigger rather than
+    // re-running the whole pipeline; a legitimate manual re-run LATER (nothing
+    // in flight) still works, which a 24h idempotency key would have blocked.
+    singleton: { mode: "skip" },
   },
   [
     { cron: `TZ=${manifest.timezone} ${manifest.cron}` },
@@ -27,6 +36,14 @@ export const jobHuntDailyRun = inngest.createFunction(
     });
 
     try {
+      // The whole graph runs inside ONE Inngest step. Full per-phase step
+      // decomposition is deferred (L): the PostgresSaver checkpointer
+      // (thread_id: run.id) already resumes graph-internal state when this step
+      // retries and re-enters .invoke(), and splitting it would mean exposing
+      // the graph's phases out of graph.ts AND would risk the module-level
+      // render-sandbox singleton (render/sandbox.ts) plus the keyed-array
+      // reducer retry semantics. maxDuration=800 (route.ts) is the stopgap that
+      // lets a full run fit in one step.
       const result = await step.run("invoke-graph", async () => {
         const final = await jobHuntGraph.invoke(
           { runId: run.id },

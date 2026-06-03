@@ -63,7 +63,9 @@ export async function evaluateOneNode(
       evaluations: [
         {
           jobId,
-          fitScore: result.score.fitScore,
+          // Reconciled (post-critique) score; falls back to the baseline if the
+          // critique path was skipped.
+          fitScore: (result.finalScore ?? result.score).fitScore,
           status: result.finalStatus,
         },
       ],

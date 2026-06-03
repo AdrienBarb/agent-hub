@@ -7,7 +7,10 @@ import type { JobHuntStateType } from "../state";
 export async function parseNode(
   state: JobHuntStateType,
 ): Promise<Partial<JobHuntStateType>> {
-  const parsed: ParsedJob[] = [];
+  // Group kept jobs per board (preserving first-seen order within each board) so
+  // we can round-robin across boards before the JOBHUNT_MAX_JOBS cap. A flat
+  // board-then-URL list would let the cap silently discard whole later boards.
+  const byBoard = new Map<string, ParsedJob[]>();
   const seenSlugs = new Set<string>();
 
   for (const listing of state.scrapedListings) {
@@ -29,7 +32,9 @@ export async function parseNode(
       }
       seenSlugs.add(dedupKey);
 
-      parsed.push(job);
+      const bucket = byBoard.get(job.board);
+      if (bucket) bucket.push(job);
+      else byBoard.set(job.board, [job]);
       kept++;
     }
 
@@ -38,9 +43,22 @@ export async function parseNode(
     );
   }
 
+  // Round-robin interleave: take index 0 from every board, then index 1, etc.,
+  // so the cap below samples every board fairly instead of filling up from the
+  // first board in config order.
+  const lists = [...byBoard.values()];
+  const maxLen = lists.reduce((m, l) => Math.max(m, l.length), 0);
+  const parsed: ParsedJob[] = [];
+  for (let i = 0; i < maxLen; i++) {
+    for (const list of lists) {
+      const job = list[i];
+      if (job !== undefined) parsed.push(job);
+    }
+  }
+
   if (env.JOBHUNT_MAX_JOBS && parsed.length > env.JOBHUNT_MAX_JOBS) {
     console.log(
-      `[parse] JOBHUNT_MAX_JOBS=${env.JOBHUNT_MAX_JOBS} — truncating ${parsed.length} → ${env.JOBHUNT_MAX_JOBS}`,
+      `[parse] JOBHUNT_MAX_JOBS=${env.JOBHUNT_MAX_JOBS} — truncating ${parsed.length} → ${env.JOBHUNT_MAX_JOBS} (round-robin across ${lists.length} board(s))`,
     );
     parsed.length = env.JOBHUNT_MAX_JOBS;
   }

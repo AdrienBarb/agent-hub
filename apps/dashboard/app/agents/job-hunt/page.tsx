@@ -1,6 +1,6 @@
 import { db } from "@hub/core/db";
 import { manifest } from "@hub/agent-jobhunt";
-import { triggerJobHuntRun } from "./actions";
+import { RunNowButton } from "./_components/RunNowButton";
 
 export default async function JobHuntPage() {
   const [recentRuns, recentJobs, jobsWithJd] = await Promise.all([
@@ -43,22 +43,7 @@ export default async function JobHuntPage() {
             cron <code>{manifest.cron}</code> · timezone {manifest.timezone}
           </p>
         </div>
-        <form action={triggerJobHuntRun}>
-          <button
-            type="submit"
-            style={{
-              padding: "0.6rem 1.1rem",
-              background: "#fff",
-              color: "#000",
-              border: "none",
-              borderRadius: 6,
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            Run now
-          </button>
-        </form>
+        <RunNowButton />
       </header>
 
       <section style={{ marginBottom: "3rem" }}>
@@ -140,6 +125,8 @@ export default async function JobHuntPage() {
                     <div style={{ marginTop: "0.3rem", display: "flex", gap: "0.6rem", justifyContent: "flex-end" }}>
                       <a
                         href={`/api/job-hunt/artifact?jobId=${j.id}&kind=resume-pdf`}
+                        target="_blank"
+                        rel="noreferrer"
                         style={{ color: "#4ade80", textDecoration: "none" }}
                       >
                         Resume PDF
@@ -147,6 +134,8 @@ export default async function JobHuntPage() {
                       {j.coverPdfStoragePath ? (
                         <a
                           href={`/api/job-hunt/artifact?jobId=${j.id}&kind=cover-pdf`}
+                          target="_blank"
+                          rel="noreferrer"
                           style={{ color: "#4ade80", textDecoration: "none" }}
                         >
                           Cover PDF

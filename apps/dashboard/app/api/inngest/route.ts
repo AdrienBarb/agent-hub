@@ -5,7 +5,9 @@ import { jobHuntFunctions } from "@hub/agent-jobhunt/inngest";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+// A full job-hunt run (scrape + deep-scrape + N evaluators + N tailorings +
+// Typst render) cannot finish in 60s. 800s is the Vercel Pro function ceiling.
+export const maxDuration = 800;
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
