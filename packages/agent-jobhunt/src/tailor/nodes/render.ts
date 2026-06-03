@@ -49,6 +49,9 @@ export async function renderNode(
       jobId: job.id,
       resumeYaml,
       coverMd,
+      // Typeset in the same language the drafts were written in (plan decides it
+      // first; defaults to "en" if a plan is somehow absent).
+      lang: state.plan?.outputLanguage ?? "en",
     });
 
     const ats = checkAts(await extractPdfText(resumePdf));

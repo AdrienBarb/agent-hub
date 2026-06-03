@@ -9,7 +9,7 @@ import type { TailorStateType } from "../state";
 
 type Job = Awaited<ReturnType<typeof db.job.findUniqueOrThrow>>;
 
-function buildSummaryMd(job: Job): string {
+function buildSummaryMd(job: Job, outputLanguage: string): string {
   const today = new Intl.DateTimeFormat("sv-SE", {
     timeZone: "Europe/Zurich",
   }).format(new Date());
@@ -26,6 +26,7 @@ function buildSummaryMd(job: Job): string {
     city,
     salary,
     fit_score: fitScore,
+    output_language: outputLanguage,
     url: job.url,
     tailored_at: today,
     run_id: job.runId,
@@ -57,6 +58,7 @@ function buildDiffMd(state: TailorStateType, job: Job): string {
 
   const planLines = plan
     ? [
+        `- Output language: ${plan.outputLanguage}`,
         `- Location override: ${plan.locationOverride}`,
         `- Cover hook: ${plan.coverHook}`,
         "- Bullet selections:",
@@ -119,7 +121,7 @@ export async function persistNode(
 
   const resumeYaml = yamlStringify(resumeDraftToYaml(state.draftResume));
   const coverMd = state.draftCover.markdown;
-  const summaryMd = buildSummaryMd(job);
+  const summaryMd = buildSummaryMd(job, state.plan?.outputLanguage ?? "en");
   const diffMd = buildDiffMd(state, job);
 
   const resumePath = `${job.runId}/${job.id}/resume.yaml`;

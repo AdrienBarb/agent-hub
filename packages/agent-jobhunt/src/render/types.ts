@@ -7,6 +7,9 @@ export interface RenderInput {
   resumeYaml: string;
   /** Tailored cover letter body as Markdown/plain prose. */
   coverMd: string;
+  /** Document language for Typst typesetting ("en"|"fr"). Mirrors the resume's
+   *  prose language so French documents are typeset with French rules. */
+  lang: "en" | "fr";
 }
 
 export interface RenderOutput {

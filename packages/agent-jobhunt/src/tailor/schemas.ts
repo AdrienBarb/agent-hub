@@ -2,6 +2,17 @@ import "server-only";
 import { z } from "zod";
 
 export const PlanSchema = z.object({
+  // Decided FIRST (top of the schema) so every prose field generated after it
+  // (coverHook, summaryRewrite) is written in this language under constrained
+  // decoding. Keyed on the language the JD is WRITTEN in — distinct from the
+  // evaluator's `requirements.primaryLanguage` (the working language expected).
+  // Threaded verbatim into draft-resume / draft-cover via the serialized plan so
+  // the whole application document stays in one language. See CLAUDE.md.
+  outputLanguage: z
+    .enum(["en", "fr"])
+    .describe(
+      "Language for ALL candidate-facing prose (summary, cover letter, reworded bullets). Set 'fr' ONLY when the job description text is written in French. Set 'en' when the JD is written in English, German, Italian, or any other language (the candidate is fluent in French and English, no German).",
+    ),
   selectedBullets: z
     .array(
       z.object({

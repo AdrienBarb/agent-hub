@@ -145,7 +145,7 @@ export async function planNode(
   const repairedPlan: Plan = { ...plan, selectedBullets };
 
   console.log(
-    `[tailor/plan] ${state.jobId} location="${repairedPlan.locationOverride}" bullets=${repairedPlan.selectedBullets.length}`,
+    `[tailor/plan] ${state.jobId} lang=${repairedPlan.outputLanguage} location="${repairedPlan.locationOverride}" bullets=${repairedPlan.selectedBullets.length}`,
   );
 
   return { plan: repairedPlan };

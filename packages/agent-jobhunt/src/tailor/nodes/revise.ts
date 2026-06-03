@@ -14,6 +14,9 @@ export async function reviseNode(
   const userContent = [
     `<resume>\n${JSON.stringify(state.draftResume)}\n</resume>`,
     `<ats-issues>\n${JSON.stringify(state.atsCheckResult.issues)}\n</ats-issues>`,
+    // Pass the plan so revise honors plan.outputLanguage and never drifts/mixes
+    // languages while fixing ATS issues (revise otherwise has no language signal).
+    `<plan>\n${JSON.stringify(state.plan)}\n</plan>`,
   ].join("\n\n");
 
   const revised = await runTailorStep({

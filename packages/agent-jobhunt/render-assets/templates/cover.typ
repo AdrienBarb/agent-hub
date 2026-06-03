@@ -14,12 +14,17 @@
 #let data = yaml(data-path)
 #let body_text = if cover-path != "" { read(cover-path) } else { "" }
 
+// Document language ("en"|"fr"), passed via `--input lang=`. Drives French
+// typography (« » smart-quotes, spacing before ; : ! ?, justification) so a
+// French cover letter is typeset as French rather than with English rules.
+#let doc-lang = sys.inputs.at("lang", default: "en")
+
 #set document(
   title: data.profile.name + " — Cover Letter",
   author: data.profile.name,
 )
 #set page(paper: "a4", margin: (x: 0.7in, y: 0.7in))
-#set text(font: ("Arial", "Liberation Sans"), size: 11pt, lang: "en")
+#set text(font: ("Arial", "Liberation Sans"), size: 11pt, lang: doc-lang)
 #set par(leading: 0.6em, justify: true)
 
 // Header — plain, no photo (cover letters are textual)

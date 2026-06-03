@@ -124,7 +124,7 @@ function withPhotoPath(resumeYaml: string, photoPath: string): string {
 }
 
 export class SandboxRenderer implements Renderer {
-  async render({ jobId, resumeYaml, coverMd }: RenderInput): Promise<RenderOutput> {
+  async render({ jobId, resumeYaml, coverMd, lang }: RenderInput): Promise<RenderOutput> {
     if (!sandboxPromise) {
       // Reset the memo if creation fails so a later call can retry instead of
       // resolving the cached rejection forever.
@@ -150,6 +150,7 @@ export class SandboxRenderer implements Renderer {
       "--root", ROOT,
       "--font-path", FONTS_DIR,
       "--input", `data=/jobs/${jobId}/resume.yaml`,
+      "--input", `lang=${lang}`,
       `${TEMPLATES_DIR}/resume.typ`,
       `${workdir}/resume.pdf`,
     ]);
@@ -159,6 +160,7 @@ export class SandboxRenderer implements Renderer {
       "--font-path", FONTS_DIR,
       "--input", `data=/jobs/${jobId}/resume.yaml`,
       "--input", `cover=/jobs/${jobId}/cover.md`,
+      "--input", `lang=${lang}`,
       `${TEMPLATES_DIR}/cover.typ`,
       `${workdir}/cover.pdf`,
     ]);

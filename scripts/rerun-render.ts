@@ -41,6 +41,7 @@ async function main() {
       company: true,
       resumeStoragePath: true,
       coverStoragePath: true,
+      tailorDetails: true,
     },
   });
 
@@ -51,7 +52,15 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`Rendering ${job.id} (${job.title} @ ${job.company})`);
+  // Reuse the language the tailor step decided (persisted in tailorDetails.plan)
+  // so the smoke test typesets in the same language as the real run.
+  const lang =
+    (job.tailorDetails as { plan?: { outputLanguage?: string } } | null)?.plan
+      ?.outputLanguage === "fr"
+      ? "fr"
+      : "en";
+
+  console.log(`Rendering ${job.id} (${job.title} @ ${job.company}) lang=${lang}`);
   const resumeYaml = await download(job.resumeStoragePath);
   const coverMd = await download(job.coverStoragePath);
 
@@ -60,6 +69,7 @@ async function main() {
     jobId: job.id,
     resumeYaml,
     coverMd,
+    lang,
   });
   console.log(
     `Rendered in ${Date.now() - t0}ms — resume ${resumePdf.length}B, cover ${coverPdf.length}B`,

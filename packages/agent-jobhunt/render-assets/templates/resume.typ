@@ -12,6 +12,13 @@
 #let data-path = sys.inputs.at("data", default: "../data/resume-master.yaml")
 #let data = yaml(data-path)
 
+// Document language ("en"|"fr"), passed via `--input lang=`. Drives Typst
+// locale: French smart-quotes (« »), spacing before ; : ! ?, and justification
+// rules. Mirrors the resume's prose language so a French resume is typeset as
+// French, not with English typography. Named `doc-lang` to avoid shadowing the
+// `lang` loop variable in the Languages section below.
+#let doc-lang = sys.inputs.at("lang", default: "en")
+
 // ---- Page setup ----
 #set document(
   title: data.profile.name + " — " + data.profile.title,
@@ -24,7 +31,7 @@
 #set text(
   font: ("Arial", "Liberation Sans"),
   size: 10pt,
-  lang: "en",
+  lang: doc-lang,
   hyphenate: false,
 )
 #set par(leading: 0.55em, justify: false)
