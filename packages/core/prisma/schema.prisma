@@ -70,6 +70,11 @@ model Job {
   tailoredAt         DateTime?
   tailorDetails      Json?
 
+  resumePdfStoragePath String?
+  coverPdfStoragePath  String?
+  renderedAt           DateTime?
+  renderDetails        Json?
+
   duplicateOfId String?
   duplicateOf   Job?    @relation("Duplicates", fields: [duplicateOfId], references: [id])
   duplicates    Job[]   @relation("Duplicates")

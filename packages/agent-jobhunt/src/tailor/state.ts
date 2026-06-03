@@ -2,6 +2,7 @@ import "server-only";
 import { Annotation } from "@langchain/langgraph";
 import { JobStatus, type Prisma } from "@hub/core/prisma";
 import type { Plan, ResumeDraft, CoverDraft, AtsCheckResult } from "./schemas";
+import type { AtsResult } from "../render/ats";
 
 export const TailorState = Annotation.Root({
   jobId: Annotation<string>,
@@ -31,6 +32,21 @@ export const TailorState = Annotation.Root({
   }),
 
   finalStatus: Annotation<JobStatus | undefined>({
+    reducer: (_a, b) => b,
+    default: () => undefined,
+  }),
+
+  resumePdfPath: Annotation<string | undefined>({
+    reducer: (_a, b) => b,
+    default: () => undefined,
+  }),
+
+  coverPdfPath: Annotation<string | undefined>({
+    reducer: (_a, b) => b,
+    default: () => undefined,
+  }),
+
+  pdfAtsResult: Annotation<AtsResult | undefined>({
     reducer: (_a, b) => b,
     default: () => undefined,
   }),

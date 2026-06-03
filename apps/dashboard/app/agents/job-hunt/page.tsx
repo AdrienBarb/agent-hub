@@ -21,6 +21,8 @@ export default async function JobHuntPage() {
         city: true,
         salary: true,
         firstSeenAt: true,
+        resumePdfStoragePath: true,
+        coverPdfStoragePath: true,
       },
     }),
     db.job.findMany({
@@ -134,6 +136,24 @@ export default async function JobHuntPage() {
                   <div style={{ color: hasJd.has(j.id) ? "#4ade80" : "#555", marginTop: "0.2rem" }}>
                     JD {hasJd.has(j.id) ? "✓" : "✗"}
                   </div>
+                  {j.resumePdfStoragePath ? (
+                    <div style={{ marginTop: "0.3rem", display: "flex", gap: "0.6rem", justifyContent: "flex-end" }}>
+                      <a
+                        href={`/api/job-hunt/artifact?jobId=${j.id}&kind=resume-pdf`}
+                        style={{ color: "#4ade80", textDecoration: "none" }}
+                      >
+                        Resume PDF
+                      </a>
+                      {j.coverPdfStoragePath ? (
+                        <a
+                          href={`/api/job-hunt/artifact?jobId=${j.id}&kind=cover-pdf`}
+                          style={{ color: "#4ade80", textDecoration: "none" }}
+                        >
+                          Cover PDF
+                        </a>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               </li>
             ))}

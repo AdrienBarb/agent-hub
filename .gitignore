@@ -11,5 +11,8 @@ out/
 *.log
 .vercel
 
+# job-hunt render smoke-test output
+tmp-render/
+
 # Claude Code runtime (local-only state, e.g. scheduled-task locks)
 .claude/

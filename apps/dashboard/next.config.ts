@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
     "@opentelemetry/sdk-node",
     "@opentelemetry/api",
     "@langfuse/otel",
+    "@vercel/sandbox",
   ],
 };
 

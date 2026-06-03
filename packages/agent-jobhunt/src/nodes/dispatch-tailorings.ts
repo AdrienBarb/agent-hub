@@ -3,6 +3,7 @@ import { Send } from "@langchain/langgraph";
 import { db } from "@hub/core/db";
 import { JobStatus, type Prisma } from "@hub/core/prisma";
 import { tailorSubgraph } from "../tailor/graph";
+import { disposeRenderSandbox } from "../render";
 import type { JobHuntStateType } from "../state";
 
 type TailorPayload = {
@@ -15,6 +16,15 @@ type TailorPayload = {
 export async function postEvalFanInNode(
   _state: JobHuntStateType,
 ): Promise<Partial<JobHuntStateType>> {
+  return {};
+}
+
+// Terminal fan-in after tailor-one (or the skip path when nothing was
+// tailored). Tears down the warm render sandbox once per run.
+export async function finalizeNode(
+  _state: JobHuntStateType,
+): Promise<Partial<JobHuntStateType>> {
+  await disposeRenderSandbox();
   return {};
 }
 
@@ -37,9 +47,9 @@ export async function dispatchTailoringsEdge(
 
   if (tailorable.length === 0) {
     console.log(
-      "[dispatch-tailorings] no jobs above threshold, skipping to render",
+      "[dispatch-tailorings] no jobs above threshold, skipping to finalize",
     );
-    return "render";
+    return "finalize";
   }
 
   console.log(

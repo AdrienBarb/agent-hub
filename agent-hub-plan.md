@@ -24,7 +24,7 @@ Secondary goal: portfolio piece for AI Agentic Engineer applications.
 | Models | Sonnet 4.6 (eval), Opus 4.7 (generation) | 🚧 Sonnet in use; Opus reserved for tailoring (not built) |
 | Observability | Langfuse Cloud | 🚧 OTel wired in instrumentation.ts; no real keys, no traces yet |
 | Scraping | Firecrawl (+ Playwright fallback) | 🚧 Firecrawl client wired; Playwright fallback not implemented; key still placeholder |
-| PDF (job-hunt) | Typst in Vercel Sandbox | ⬜ |
+| PDF (job-hunt) | Typst in Vercel Sandbox | ✅ warm sandbox, musl Typst binary, Liberation Sans, unpdf ATS |
 | TTS (get-news) | ElevenLabs | ⬜ |
 | Monorepo | pnpm workspaces + Turborepo | ✅ |
 
@@ -71,8 +71,8 @@ Traces  → Langfuse                     ← 🚧 wiring present, no real keys
 | dedupe | ⬜ placeholder pass-through |
 | fan-out evaluators | ✅ `Send()` per Job → 4-node sub-graph (extract → compare → score → critique?) → persist |
 | aggregate | ✅ array-append reducer on `JobHuntState.evaluations` (auto fan-in) |
-| fan-out tailorings | ⬜ placeholder pass-through |
-| render PDFs | ⬜ placeholder pass-through |
+| fan-out tailorings | ✅ `Send()` per Job above threshold → tailor sub-graph |
+| render PDFs | ✅ folded into tailor sub-graph: warm Vercel Sandbox compiles Typst → resume.pdf + cover.pdf, unpdf ATS check, uploads to Storage |
 
 **get-news graph**: fetch Feedbin → fan-out deep-readers → summarize (French) → ElevenLabs TTS → send Telegram voice note — ⬜ entire agent not started
 
@@ -136,12 +136,13 @@ Traces  → Langfuse                     ← 🚧 wiring present, no real keys
 - ✅ Parent graph rewired with no-op fan-in `post-eval`: `evaluate-one → post-eval → dispatchTailoringsEdge → ["tailor-one", "render"]`; `tailor-one → render`. The fan-in is required because conditional edges placed directly on a Send-fanned node fire per-branch (caught during first end-to-end run — tailorings dispatched 3× the same jobs).
 - 🚧 Real Langfuse traces still pending real API keys (otel spans emit but go nowhere).
 
-**Iter 5 — render PDFs** ⬜
-- ⬜ Typst compilation via Vercel Sandbox
-- ⬜ Port Typst templates from existing skill (`templates/resume.typ`, `cover-letter.typ`)
-- ⬜ ATS validation: pdftotext extracts > 500 chars + standard section names
-- ⬜ Upload PDFs to Supabase Storage
-- ⬜ Dashboard shows download links per Job
+**Iter 5 — render PDFs** ✅ (folded into the tailor sub-graph; typechecks clean; live render gated on Vercel creds)
+- ✅ Typst compilation via **Vercel Sandbox** (`@vercel/sandbox` v2). Single backend — no local-CLI, no WASM. One **warm sandbox** per run (module-singleton memoized promise) reused across parallel tailor branches; Typst (musl static binary, `RENDER_TYPST_VERSION`) + fonts + templates installed/written once; `disposeRenderSandbox()` in the parent `finalize` node + inngest catch. Auth via explicit `Sandbox.create({token,teamId,projectId})` (SDK only auto-reads OIDC).
+- ✅ Ported `templates/resume.typ` + `cover.typ` into `packages/agent-jobhunt/render-assets/`. Two deltas: font fallback `("Arial", "Liberation Sans")` + bundled Liberation Sans via `--font-path`; `@preview/cmarker` dropped (cover body → blank-line paragraphs, no compile-time network).
+- ✅ ATS validation via **`unpdf` in-process** (replaces legacy pdftotext): ≥500 chars + Experience/Skills/Education. **Record-only** (no revise loop) → `Job.renderDetails.ats`.
+- ✅ Render node is **best-effort** (`ats-check → revise? → render → persist`): never throws, so a render failure keeps the text artifacts (`status=tailored`, no PDF). Uploads `resume.pdf`/`cover.pdf` to Storage `${runId}/${jobId}/`; `persist` records `resumePdfStoragePath`/`coverPdfStoragePath`/`renderedAt`/`renderDetails` (4 new nullable Job columns, added via raw `ALTER TABLE` since the repo has no migrations history).
+- ✅ Dashboard shows green **Resume PDF / Cover PDF** links per Job via a self-authenticating GET route (`app/api/job-hunt/artifact`) that mints a 60s signed URL (private bucket; `/api/*` isn't covered by the proxy matcher).
+- ✅ **Live render verified end-to-end** via `scripts/rerun-render.ts`: warm Vercel Sandbox booted, downloaded the musl Typst binary, compiled a real tailored `resume.yaml`/`cover.md` (resume 141 KB, cover 31 KB) in ~21s; `unpdf` ATS check `ok=true` (6208 chars, no missing sections); PDF visually correct (photo, accents, tailored skills order preserved). Vercel project linked (`adrienbrb/agent-hub`); creds in `.env.local`.
 
 ### Phase 3 — Port `/get-news` ⬜
 - ⬜ `packages/agent-news` package

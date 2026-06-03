@@ -24,6 +24,15 @@ const envSchema = z.object({
 
   JOBHUNT_MAX_JOBS: z.coerce.number().int().positive().optional(),
   JOBHUNT_FIT_THRESHOLD: z.coerce.number().int().min(1).max(10).default(6),
+
+  // Vercel Sandbox (job-hunt PDF render). Optional: absent locally until a
+  // Vercel project + personal access token exist. The render node throws a
+  // friendly error if VERCEL_TOKEN is unset at runtime. When deployed on
+  // Vercel, OIDC (VERCEL_OIDC_TOKEN) is auto-detected and these can be unset.
+  VERCEL_TOKEN: z.string().optional(),
+  VERCEL_TEAM_ID: z.string().optional(),
+  VERCEL_PROJECT_ID: z.string().optional(),
+  RENDER_TYPST_VERSION: z.string().default("0.14.2"),
 });
 
 export type Env = z.infer<typeof envSchema>;

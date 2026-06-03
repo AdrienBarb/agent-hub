@@ -1,4 +1,4 @@
 export { jobHuntFunctions, jobHuntDailyRun } from "./inngest";
 export { jobHuntGraph } from "./graph";
-export { manifest } from "./manifest";
+export { manifest, STORAGE_BUCKET } from "./manifest";
 export type { Manifest } from "./manifest";

@@ -137,6 +137,12 @@ export async function persistNode(
     atsCheckResult: state.atsCheckResult ?? null,
   };
 
+  // PDFs are uploaded by the render node (best-effort); persist just records
+  // their paths + the ATS result. resumePdfPath is absent when render failed.
+  const renderDetails: Prisma.InputJsonValue = {
+    ats: state.pdfAtsResult ?? null,
+  };
+
   await db.job.update({
     where: { id: state.jobId },
     data: {
@@ -146,6 +152,10 @@ export async function persistNode(
       diffStoragePath: diffPath,
       tailoredAt: new Date(),
       tailorDetails,
+      resumePdfStoragePath: state.resumePdfPath ?? null,
+      coverPdfStoragePath: state.coverPdfPath ?? null,
+      renderedAt: state.resumePdfPath ? new Date() : null,
+      renderDetails,
       status: JobStatus.tailored,
     },
   });

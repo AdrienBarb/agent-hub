@@ -4,6 +4,7 @@ import { db } from "@hub/core/db";
 import { flushLangfuse } from "@hub/core/langfuse";
 import { jobHuntGraph } from "./graph";
 import { setupCheckpointer } from "./checkpointer";
+import { disposeRenderSandbox } from "./render";
 import { manifest } from "./manifest";
 
 export const jobHuntDailyRun = inngest.createFunction(
@@ -51,6 +52,9 @@ export const jobHuntDailyRun = inngest.createFunction(
       return { runId: run.id, ...result };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
+      // Safety net: the finalize node disposes the warm sandbox on the happy
+      // path; if the graph threw before reaching it, tear it down here too.
+      await step.run("dispose-render-sandbox", () => disposeRenderSandbox());
       await step.run("fail-agent-run", async () => {
         await db.agentRun.update({
           where: { id: run.id },

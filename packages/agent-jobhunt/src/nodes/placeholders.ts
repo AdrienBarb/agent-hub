@@ -13,4 +13,3 @@ function makePlaceholder(name: string, plannedFor: string) {
 }
 
 export const dedupePlaceholder = makePlaceholder("dedupe", "iter 2: fingerprint dedup across boards");
-export const renderPlaceholder = makePlaceholder("render", "iter 5: Typst PDF render");
