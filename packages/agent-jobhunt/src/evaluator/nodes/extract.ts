@@ -26,6 +26,10 @@ export async function extractNode(
     experimental_telemetry: {
       isEnabled: true,
       functionId: "jobhunt/evaluate/extract",
+      // This block had neither flag: recordInputs:false stops capturing the raw
+      // scraped JD; recordOutputs:false stops the extracted requirements.
+      recordInputs: false,
+      recordOutputs: false,
     },
   });
 

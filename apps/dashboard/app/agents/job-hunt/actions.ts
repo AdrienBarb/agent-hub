@@ -4,11 +4,12 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { inngest } from "@hub/core/inngest";
 import { env } from "@hub/core/env";
+import { safeStrEqual } from "@/lib/safe-equal";
 
 export async function triggerJobHuntRun(): Promise<void> {
   const store = await cookies();
   const token = store.get("hub_token")?.value;
-  if (token !== env.HUB_ACCESS_TOKEN) {
+  if (!(await safeStrEqual(token, env.HUB_ACCESS_TOKEN))) {
     throw new Error("Unauthorized");
   }
 

@@ -3,6 +3,7 @@ import { db } from "@hub/core/db";
 import { supabase } from "@hub/core/supabase";
 import { env } from "@hub/core/env";
 import { STORAGE_BUCKET } from "@hub/agent-jobhunt";
+import { safeStrEqual } from "@/lib/safe-equal";
 
 // Map of allowed artifact kinds → the Job column holding the storage path.
 // The client only ever sends a `kind`; the path is resolved server-side so a
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   // The proxy matcher only covers /agents/*, NOT /api/*, so this route must
   // check the auth cookie itself.
   const token = request.cookies.get("hub_token")?.value;
-  if (token !== env.HUB_ACCESS_TOKEN) {
+  if (!(await safeStrEqual(token, env.HUB_ACCESS_TOKEN))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

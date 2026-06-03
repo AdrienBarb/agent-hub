@@ -44,6 +44,8 @@ export async function runEvaluatorStep<T extends z.ZodTypeAny>({
       isEnabled: true,
       functionId,
       recordInputs: false,
+      // Suppress the evaluator output (fit reasoning / critique) from Langfuse.
+      recordOutputs: false,
     },
   });
 

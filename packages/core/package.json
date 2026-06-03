@@ -13,7 +13,8 @@
     "./inngest": "./src/inngest.ts",
     "./langfuse": "./src/langfuse.ts",
     "./supabase": "./src/supabase.ts",
-    "./prisma": "./src/prisma.ts"
+    "./prisma": "./src/prisma.ts",
+    "./redact": "./src/redact.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

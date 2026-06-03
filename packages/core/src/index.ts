@@ -6,3 +6,4 @@ export { anthropic, MODELS } from "./llm";
 export type { ModelKey } from "./llm";
 export { inngest } from "./inngest";
 export { setupLangfuse, flushLangfuse, shutdownLangfuse } from "./langfuse";
+export { redactConnString } from "./redact";

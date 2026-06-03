@@ -2,6 +2,7 @@ import "server-only";
 import { inngest } from "@hub/core/inngest";
 import { db } from "@hub/core/db";
 import { flushLangfuse } from "@hub/core/langfuse";
+import { redactConnString } from "@hub/core/redact";
 import { jobHuntGraph } from "./graph";
 import { setupCheckpointer } from "./checkpointer";
 import { disposeRenderSandbox } from "./render";
@@ -51,7 +52,12 @@ export const jobHuntDailyRun = inngest.createFunction(
       logger.info("job-hunt complete", result);
       return { runId: run.id, ...result };
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
+      // Redact DB conn-string creds / secret env values before they land in the
+      // dashboard-visible AgentRun.errorMessage. `throw err` below re-throws the
+      // ORIGINAL (unredacted) error to Inngest's own auth-gated logs for debugging.
+      const message = redactConnString(
+        err instanceof Error ? err.message : String(err),
+      );
       // Safety net: the finalize node disposes the warm sandbox on the happy
       // path; if the graph threw before reaching it, tear it down here too.
       await step.run("dispose-render-sandbox", () => disposeRenderSandbox());

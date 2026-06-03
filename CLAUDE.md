@@ -2,9 +2,7 @@
 
 Personal hub for autonomous AI agents. Each agent is a LangGraph workflow triggered by Inngest (cron + manual events), persisting state in Supabase via Prisma, observed via Langfuse. The dashboard (Next.js 15) is the deployment target and the only UI.
 
-Current state: `/job-hunt` ported through iter 5 (scrape → persist → deep-scrape → evaluator sub-graph → tailor sub-graph → render PDFs). Render compiles Typst → PDF in a warm Vercel Sandbox (folded into the tailor sub-graph). Dedupe is still a placeholder. `/get-news` not started.
-
-Full plan with status markers: `./agent-hub-plan.md`.
+**Current state and what's left to do live in [`./agent-hub-plan.md`](./agent-hub-plan.md)** — the single source of truth for the roadmap. This file (CLAUDE.md) only holds setup, architecture, conventions, and gotchas that don't change run-to-run.
 
 ---
 
@@ -81,7 +79,8 @@ agent-hub/
 
 ## Gotchas
 
-- **`proxy.ts` not `middleware.ts`**. Next.js 16 deprecated middleware. We're on 15.5 but use the modern name.
+- **`proxy.ts` not `middleware.ts`** (Next 16 convention). On **Next 16** `proxy.ts` exporting `proxy` is picked up as middleware: it registers as `/_middleware` on the **Node.js runtime** (the `edge` runtime is NOT supported for `proxy`) and gates `/agents/:path*`. Verify with the `ƒ Proxy (Middleware)` line in `next build` output + the `/agents/:path*` matcher in `.next/server/functions-config-manifest.json`. ⚠️ On the prior Next 15.5 the `proxy.ts` filename was silently ignored (legacy convention is `middleware.ts`), so the auth gate never ran — the Next 16 upgrade is what activated it.
+- **`next build` uses `--webpack`, not the Next 16 default Turbopack.** Turbopack compiles fine but fails at page-data collection with `PageNotFoundError: Cannot find module for page: /auth` (server-actions page). `dev` still uses Turbopack (default). Retry dropping `--webpack` after a Next minor bump; if it builds, prefer Turbopack.
 - **Supabase local runs on 54421-54429** (not the default 54321 range) — other local Supabase projects on this machine use the defaults.
 - **Local Supabase has no pooler** — `DATABASE_URL` and `DIRECT_URL` both point to `:54422`. In Vercel production, `DATABASE_URL` becomes `:6543?pgbouncer=true&connection_limit=1`.
 - **Prisma client regeneration**: if you change `schema.prisma` and the new field doesn't show in TypeScript, run `pnpm db:generate` (or it runs automatically on `pnpm install` via postinstall).

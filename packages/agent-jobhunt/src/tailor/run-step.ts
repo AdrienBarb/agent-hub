@@ -48,6 +48,8 @@ export async function runTailorStep<T extends z.ZodTypeAny>({
         isEnabled: true,
         functionId,
         recordInputs: false,
+        // Suppress the tailored résumé/cover output from Langfuse traces (PII).
+        recordOutputs: false,
       },
     });
 
