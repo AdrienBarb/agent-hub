@@ -5,7 +5,7 @@ import { scrapeNode } from "./nodes/scrape";
 import { parseNode } from "./nodes/parse";
 import { persistNode } from "./nodes/persist";
 import { deepScrapeNode } from "./nodes/deep-scrape";
-import { dedupePlaceholder } from "./nodes/placeholders";
+import { dedupeNode } from "./nodes/dedupe";
 import {
   dispatchEvaluationsEdge,
   evaluateOneNode,
@@ -23,7 +23,7 @@ export const jobHuntGraph = new StateGraph(JobHuntState)
   .addNode("parse", parseNode)
   .addNode("persist", persistNode)
   .addNode("deep-scrape", deepScrapeNode)
-  .addNode("dedupe", dedupePlaceholder)
+  .addNode("dedupe", dedupeNode)
   .addNode("evaluate-one", evaluateOneNode)
   .addNode("post-eval", postEvalFanInNode)
   .addNode("tailor-one", tailorOneNode)

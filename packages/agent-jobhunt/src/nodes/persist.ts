@@ -2,17 +2,6 @@ import "server-only";
 import { db } from "@hub/core/db";
 import type { JobHuntStateType } from "../state";
 
-const ZURICH = "Europe/Zurich";
-
-function zurichDay(date: Date): string {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: ZURICH,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(date);
-}
-
 function isSafeUrl(url: string): boolean {
   return /^https:\/\//i.test(url);
 }
@@ -20,8 +9,6 @@ function isSafeUrl(url: string): boolean {
 export async function persistNode(
   state: JobHuntStateType,
 ): Promise<Partial<JobHuntStateType>> {
-  const today = zurichDay(new Date());
-
   // Filter out unsafe URLs at the persist boundary (defense in depth).
   const safeJobs = state.parsedJobs.filter((j) => {
     if (!isSafeUrl(j.url)) {
@@ -31,31 +18,17 @@ export async function persistNode(
     return true;
   });
   if (safeJobs.length === 0) {
-    return { persistedCount: 0, skippedCount: 0 };
+    return { persistedCount: 0 };
   }
 
-  // Batch lookup: which (board, slug) pairs already exist?
-  const existing = await db.job.findMany({
-    where: {
-      OR: safeJobs.map((j) => ({ board: j.board, slug: j.slug })),
-    },
-    select: { id: true, board: true, slug: true, lastSeenAt: true },
-  });
-  const existingMap = new Map(existing.map((r) => [`${r.board}::${r.slug}`, r]));
-
   let upserted = 0;
-  let skipped = 0;
 
   for (const job of safeJobs) {
-    const key = `${job.board}::${job.slug}`;
-    const prior = existingMap.get(key);
-
-    if (prior && zurichDay(prior.lastSeenAt) === today) {
-      skipped++;
-      continue;
-    }
-
-    // Upsert is race-safe across concurrent cron + manual runs.
+    // Upsert keyed on the unique (board, slug) — race-safe across concurrent
+    // cron + manual runs, and idempotent on re-listings (refreshes lastSeenAt).
+    // The unique index is the dedup; downstream re-processing is gated by Job
+    // status (new → evaluated → tailored), so re-upserting a known job is cheap
+    // and never re-scrapes or re-evaluates it.
     await db.job.upsert({
       where: { board_slug: { board: job.board, slug: job.slug } },
       create: {
@@ -87,6 +60,6 @@ export async function persistNode(
     upserted++;
   }
 
-  console.log(`[persist] upserted=${upserted} skipped(seen-today)=${skipped}`);
-  return { persistedCount: upserted, skippedCount: skipped };
+  console.log(`[persist] upserted=${upserted}`);
+  return { persistedCount: upserted };
 }

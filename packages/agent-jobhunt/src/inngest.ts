@@ -51,7 +51,6 @@ export const jobHuntDailyRun = inngest.createFunction(
         );
         return {
           persistedCount: final.persistedCount ?? 0,
-          skippedCount: final.skippedCount ?? 0,
           parsedCount: final.parsedJobs?.length ?? 0,
           evaluatedCount: final.evaluations?.length ?? 0,
         };

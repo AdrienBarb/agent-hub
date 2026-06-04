@@ -4,8 +4,6 @@ import { env } from "@hub/core/env";
 import type { JobHuntStateType, ScrapedListing } from "../state";
 import { boardConfigs } from "../config";
 
-const MIN_MARKDOWN_CHARS = 1024;
-
 const firecrawl = new Firecrawl({ apiKey: env.FIRECRAWL_API_KEY });
 
 export async function scrapeNode(
@@ -26,11 +24,6 @@ export async function scrapeNode(
         });
 
         const md = (res as { markdown?: string }).markdown ?? "";
-        if (md.length < MIN_MARKDOWN_CHARS) {
-          console.warn(`[scrape] ${boardId} ${url}: thin markdown (${md.length} chars), skipping`);
-          continue;
-        }
-
         scrapes.push({ board: boardId, url, markdown: md });
         console.log(`[scrape] ${boardId} ${url}: ${md.length} chars`);
       } catch (err) {

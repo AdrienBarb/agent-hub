@@ -54,11 +54,6 @@ export const JobHuntState = Annotation.Root({
     default: () => 0,
   }),
 
-  skippedCount: Annotation<number>({
-    reducer: (_a, b) => b,
-    default: () => 0,
-  }),
-
   deepScrapedCount: Annotation<number>({
     reducer: (_a, b) => b,
     default: () => 0,

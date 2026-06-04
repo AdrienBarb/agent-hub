@@ -26,14 +26,6 @@ PostgresSaver checkpointer + `Send()` fan-out + Anthropic-native structured outp
 
 ## Phase B — Features
 
-### B1 · Multi-board scrape
-- [ ] **Enable jobs.ch** — add a `jobsch` block under `config.json` `boards` (`listing_urls` + `firecrawl`). The adapter (`boards/jobcloud.ts:115`) and registry (`boards/index.ts:6`) already exist; the config `boardId` **must** equal the adapter key `jobsch`. **S**
-- [ ] **swissdevjobs adapter** — new `packages/agent-jobhunt/src/boards/swissdevjobs.ts` implementing `BoardAdapter` (`boards/types.ts:14`); it's not a JobCloud platform so it needs its own card/detail-URL parser (the `makeJobcloudParser` regex won't apply). Register in `boards/index.ts` + add a config block. **M**
-
-### B2 · Cross-board dedupe (activates the dead `fingerprint`/`duplicateOf`/`JobStatus.duplicate` columns)
-- [ ] **Exact-match tier (no migration needed — columns exist):** replace `dedupePlaceholder` (`nodes/placeholders.ts:4-15`) with a real `nodes/dedupe.ts`, wired at `graph.ts:26`. Compute `fingerprint = sha1(normalize(company) | normalize(city) | jdBody.slice(0,800))` (`node:crypto`), write it to each Job, group by fingerprint, keep the earliest `firstSeenAt` as canonical, `updateMany` the rest to `status='duplicate', duplicateOfId`. Skip empty-`rawMarkdown` thin sentinels. No edge change: `dispatch-evaluations.ts:12-19` already re-queries `status:'new'`, so duplicates fall out of eval + tailor for free. **M**
-- [ ] **Semantic tier (pgvector):** enable the `vector` extension (raw SQL migration — `db:push` fights the `checkpoint_*` tables), add `embedding Unsupported("vector(1536)")` + an HNSW index to `Job`, add `packages/core/src/embed.ts`, and run a cosine-KNN threshold query in the dedupe node to catch the same role with different board boilerplate (the case SHA1 misses). **L**
-- [ ] Add a `duplicateCount` annotation to `state.ts` so `finalize`/dashboard can report dupes removed. **S**
 
 ### B3 · Observability (activates the dead `costUsd`/`langfuseTraceId` columns)
 - [ ] **Write `langfuseTraceId`** — capture the active OTel trace id at run start and persist it in create-agent-run (`inngest.ts:22-26`, `schema.prisma:35`). The dashboard already renders `r.langfuseTraceId` (`page.tsx:89`) as a dead `—`; turn it into a deep-link to the trace. **S**

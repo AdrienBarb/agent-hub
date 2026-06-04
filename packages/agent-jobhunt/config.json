@@ -7,9 +7,20 @@
   "boards": {
     "jobup": {
       "listing_urls": [
-        "https://www.jobup.ch/en/jobs/?term=software%20engineer",
-        "https://www.jobup.ch/en/jobs/?term=full-stack%20developer",
-        "https://www.jobup.ch/en/jobs/?term=frontend%20developer"
+        "https://www.jobup.ch/en/jobs/?term=software%20engineer&sort-by=date",
+        "https://www.jobup.ch/en/jobs/?term=full-stack%20developer&sort-by=date",
+        "https://www.jobup.ch/en/jobs/?term=frontend%20developer&sort-by=date"
+      ],
+      "firecrawl": {
+        "waitFor": 12000,
+        "onlyMainContent": false
+      }
+    },
+    "jobsch": {
+      "listing_urls": [
+        "https://www.jobs.ch/en/vacancies/?term=software%20engineer&sort-by=date",
+        "https://www.jobs.ch/en/vacancies/?term=full-stack%20developer&sort-by=date",
+        "https://www.jobs.ch/en/vacancies/?term=frontend%20developer&sort-by=date"
       ],
       "firecrawl": {
         "waitFor": 12000,
