@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "dotenv -e ../../.env.local -- next dev",
+    "dev": "dotenv -e ../../.env.local -- next dev -p 3001",
     "build": "dotenv -e ../../.env.local -- next build --webpack",
-    "start": "dotenv -e ../../.env.local -- next start",
+    "start": "dotenv -e ../../.env.local -- next start -p 3001",
     "typecheck": "tsc --noEmit",
     "lint": "echo 'no lint configured' && exit 0",
     "clean": "rm -rf node_modules .next .turbo"

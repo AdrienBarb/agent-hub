@@ -19,8 +19,8 @@ pnpm storage:setup                # create the "job-hunt" Storage bucket (idempo
 ## Daily commands
 
 ```bash
-pnpm dev                          # Next.js dashboard → http://localhost:3000
-pnpm inngest:dev                  # Inngest local dev server (separate terminal)
+pnpm dev                          # Next.js dashboard → http://localhost:3001 (pinned via `next dev -p 3001`)
+pnpm inngest:dev                  # Inngest local dev server (separate terminal) → syncs against :3001
 pnpm supabase:studio              # Supabase Studio (Auth, Storage, SQL)
 pnpm db:studio                    # Prisma Studio (browse app tables)
 pnpm db:push                      # apply schema changes (prototyping)
