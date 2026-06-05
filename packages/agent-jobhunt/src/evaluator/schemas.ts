@@ -57,21 +57,28 @@ export const ComparisonSchema = z.object({
 });
 
 export const ScoreSchema = z.object({
-  fitScore: z
-    .number()
-    .int()
-    .min(1)
-    .max(10)
-    .describe("Integer 1-10 per the scoring rubric"),
+  // Generated FIRST, before the verdict (chain-of-thought). Grammar-constrained
+  // structured outputs emit fields in schema order, so putting `reasoning` ahead of
+  // `fitScore` forces the model to argue the fit BEFORE committing to a number,
+  // instead of emitting a score and rationalizing it after the fact. Directly fights
+  // the inflation SCORE_SYSTEM warns about. Used by both the score + critique nodes.
+  reasoning: z
+    .string()
+    .describe(
+      "Write this FIRST, before the score below. 2-3 sentences citing specific JD requirements and concrete candidate evidence (resume bullets, languages, geography). Weigh the tradeoffs here; confidence and fitScore must follow from this reasoning.",
+    ),
   confidence: z
     .enum(["high", "medium", "low"])
     .describe(
       "high = clearly above or below threshold; medium = uncertain; low = JD too sparse to score reliably",
     ),
-  reasoning: z
-    .string()
+  fitScore: z
+    .number()
+    .int()
+    .min(1)
+    .max(10)
     .describe(
-      "2-3 sentences citing specific JD requirements and candidate evidence",
+      "Integer 1-10 per the scoring rubric. Must follow from the reasoning above — do not inflate.",
     ),
 });
 

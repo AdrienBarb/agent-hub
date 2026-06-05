@@ -16,7 +16,7 @@ export async function critiqueNode(
   const revised = await runEvaluatorStep({
     functionId: "jobhunt/evaluate/critique",
     systemInstructions: CRITIQUE_SYSTEM,
-    userContent: `Requirements:\n${JSON.stringify(state.requirements, null, 2)}\n\nComparison:\n${JSON.stringify(state.comparison, null, 2)}\n\nOriginal score (to critique):\n${JSON.stringify(state.score, null, 2)}`,
+    userContent: `<requirements>\n${JSON.stringify(state.requirements, null, 2)}\n</requirements>\n\n<comparison>\n${JSON.stringify(state.comparison, null, 2)}\n</comparison>\n\n<score>\n${JSON.stringify(state.score, null, 2)}\n</score>`,
     schema: ScoreSchema,
   });
 

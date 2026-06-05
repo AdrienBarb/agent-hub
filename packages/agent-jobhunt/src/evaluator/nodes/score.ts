@@ -14,7 +14,7 @@ export async function scoreNode(
   const score = await runEvaluatorStep({
     functionId: "jobhunt/evaluate/score",
     systemInstructions: SCORE_SYSTEM,
-    userContent: `Requirements:\n${JSON.stringify(state.requirements, null, 2)}\n\nComparison:\n${JSON.stringify(state.comparison, null, 2)}`,
+    userContent: `<requirements>\n${JSON.stringify(state.requirements, null, 2)}\n</requirements>\n\n<comparison>\n${JSON.stringify(state.comparison, null, 2)}\n</comparison>`,
     schema: ScoreSchema,
   });
 

@@ -14,7 +14,7 @@ export async function compareNode(
   const comparison = await runEvaluatorStep({
     functionId: "jobhunt/evaluate/compare",
     systemInstructions: COMPARE_SYSTEM,
-    userContent: `Extracted job requirements:\n\n${JSON.stringify(state.requirements, null, 2)}`,
+    userContent: `<requirements>\n${JSON.stringify(state.requirements, null, 2)}\n</requirements>`,
     schema: ComparisonSchema,
   });
 
