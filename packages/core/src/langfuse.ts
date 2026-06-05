@@ -9,9 +9,15 @@ let processor: LangfuseSpanProcessor | null = null;
 export function setupLangfuse(): void {
   if (sdk) return;
 
+  const publicKey = env.LANGFUSE_PUBLIC_KEY;
+  const secretKey = env.LANGFUSE_SECRET_KEY;
+  // Optional observability: with no Langfuse account, skip OTel setup entirely.
+  // LLM telemetry spans then fall through to the global no-op tracer.
+  if (!publicKey || !secretKey) return;
+
   processor = new LangfuseSpanProcessor({
-    publicKey: env.LANGFUSE_PUBLIC_KEY,
-    secretKey: env.LANGFUSE_SECRET_KEY,
+    publicKey,
+    secretKey,
     baseUrl: env.LANGFUSE_BASE_URL,
   });
 

@@ -1,0 +1,4 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "if [ \"$VERCEL_ENV\" = \"production\" ]; then echo '→ applying Prisma migrations (production)' && pnpm --filter @hub/core exec prisma migrate deploy; else echo '→ skipping migrations (non-production deploy)'; fi && pnpm exec next build --webpack"
+}

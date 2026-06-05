@@ -18,8 +18,10 @@ const envSchema = z.object({
   INNGEST_EVENT_KEY: z.string().min(1),
   INNGEST_SIGNING_KEY: z.string().min(1),
 
-  LANGFUSE_PUBLIC_KEY: z.string().min(1),
-  LANGFUSE_SECRET_KEY: z.string().min(1),
+  // Langfuse is optional: tracing is skipped entirely when these are unset
+  // (no account configured). setupLangfuse() no-ops, LLM calls still run.
+  LANGFUSE_PUBLIC_KEY: z.string().min(1).optional(),
+  LANGFUSE_SECRET_KEY: z.string().min(1).optional(),
   LANGFUSE_BASE_URL: z.string().url().default("https://cloud.langfuse.com"),
 
   JOBHUNT_MAX_JOBS: z.coerce.number().int().positive().optional(),
