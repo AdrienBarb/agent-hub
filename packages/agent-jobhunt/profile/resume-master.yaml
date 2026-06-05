@@ -143,7 +143,7 @@ experience:
 
 # Single source of truth for skills. Each category splits into:
 #   expert    = I use it daily / shipped it recently  -> agent may sell as a strength
-#   knowledge = I know it but can't claim depth         -> listed only, never a strength
+#   knowledge = real but not a current strength (rusty or shallow) -> listed and kept as past fact, never sold as a strength
 # To re-tier a skill, move its name between the two lists. me.md lists no skills.
 skills:
   Languages:

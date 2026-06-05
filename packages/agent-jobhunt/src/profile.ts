@@ -22,14 +22,18 @@ export const PROFILE_RESUME_MASTER: ResumeMaster = ResumeMasterSchema.parse(
   yamlParse(PROFILE_RESUME_YAML),
 );
 
+// Cached reference material prepended to every tailor system prompt. Wrapped in
+// XML tags (not markdown headers) so Claude gets a clean data/instruction boundary
+// — the same convention the variable inputs use in the user message (<jd>, <plan>,
+// …). The prompts (CACHED_CONTEXT in prompts.ts) reference these tag names directly.
+// NOTE: this is TRUSTED content (it carries the skill-calibration rules the agent
+// must follow), so it is deliberately NOT listed in the prompt-injection note.
 export const PROFILE_COMBINED = [
-  "# Candidate Profile",
-  "",
+  "<candidate_profile>",
   PROFILE_ME_MD,
+  "</candidate_profile>",
   "",
-  "---",
-  "",
-  "# Resume Master (structured experience)",
-  "",
+  "<resume_master>",
   PROFILE_RESUME_YAML,
+  "</resume_master>",
 ].join("\n");

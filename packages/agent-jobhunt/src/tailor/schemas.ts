@@ -2,12 +2,26 @@ import "server-only";
 import { z } from "zod";
 
 export const PlanSchema = z.object({
-  // Decided FIRST (top of the schema) so every prose field generated after it
-  // (coverHook, summaryRewrite) is written in this language under constrained
-  // decoding. Keyed on the language the JD is WRITTEN in — distinct from the
-  // evaluator's `requirements.primaryLanguage` (the working language expected).
-  // Threaded verbatim into draft-resume / draft-cover via the serialized plan so
-  // the whole application document stays in one language. See CLAUDE.md.
+  // Chain-of-thought scratchpad, generated FIRST under constrained decoding.
+  // Native structured outputs leave no room to "think" before the object, so this
+  // leading field IS the reasoning space: the model works through the honesty
+  // routing (which JD term maps to which EXPERT skill, each bridge's route, which
+  // `knowledge` names merely stay as facts) BEFORE it commits to summaryRewrite /
+  // coverHook. It is internal (never rendered) but does ride along in the
+  // serialized plan to the draft steps, keeping their prose consistent with the
+  // routing. Directly targets résumé overselling. See CLAUDE.md + prompts.ts.
+  reasoning: z
+    .string()
+    .describe(
+      "Think HERE before filling any other field — this is generated first and is internal (never shown to anyone), so reason freely in English. Work through the honesty routing: (1) list the JD's required skills/tech and must-haves; (2) route each per the honesty rules — backed directly by an EXPERT skill (name it) / SAME-SUBSET through an expert host / TRANSFERABLE sibling (cover only) / UNRELATED (omit) / umbrella term (omit the term, surface concrete EXPERT tools); (3) note which KNOWLEDGE skills the JD names that may stay only as plain facts, never sold; (4) decide which EXPERT skills the summary will lead with. Then write every field below to match this routing.",
+    ),
+  // Decided first among the COMMITTED fields (right after the internal `reasoning`
+  // scratchpad) so every prose field generated after it (coverHook, summaryRewrite)
+  // is written in this language under constrained decoding. Keyed on the language the
+  // JD is WRITTEN in — distinct from the evaluator's `requirements.primaryLanguage`
+  // (the working language expected). Threaded verbatim into draft-resume / draft-cover
+  // via the serialized plan so the whole application document stays in one language.
+  // See CLAUDE.md.
   outputLanguage: z
     .enum(["en", "fr"])
     .describe(
