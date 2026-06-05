@@ -49,13 +49,7 @@ model Job {
   title          String
   company        String?
   city           String?
-  salary         String?
-  salaryMin      Int?
-  salaryMax      Int?
-  tech           String[]  @default([])
-  rawMarkdownUrl String?
   rawMarkdown    String?
-  fingerprint    String?
   fitScore       Decimal?  @db.Decimal(3, 1)
   fitReasoning   String?
   fitDetails     Json?
@@ -83,7 +77,6 @@ model Job {
   agentRun AgentRun? @relation(fields: [runId], references: [id])
 
   @@unique([board, slug])
-  @@index([fingerprint])
   @@index([status])
   @@index([firstSeenAt(sort: Desc)])
   @@index([lastSeenAt(sort: Desc)])

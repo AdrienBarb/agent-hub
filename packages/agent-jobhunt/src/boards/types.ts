@@ -4,10 +4,6 @@ export interface ParsedJob {
   title: string;
   company: string | null;
   city: string | null;
-  salary: string | null;
-  salaryMin: number | null;
-  salaryMax: number | null;
-  tech: string[];
   url: string;
 }
 

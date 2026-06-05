@@ -14,7 +14,6 @@ function buildSummaryMd(job: Job, outputLanguage: string): string {
     timeZone: "Europe/Zurich",
   }).format(new Date());
 
-  const salary = job.salary ?? "not disclosed";
   const city = job.city ?? "";
   const fitScore = job.fitScore?.toString() ?? "n/a";
   const reasoning = job.fitReasoning ?? "(no reasoning recorded)";
@@ -24,7 +23,6 @@ function buildSummaryMd(job: Job, outputLanguage: string): string {
     title: job.title,
     company: job.company ?? "",
     city,
-    salary,
     fit_score: fitScore,
     output_language: outputLanguage,
     url: job.url,
@@ -37,7 +35,7 @@ ${frontmatter}---
 
 # ${job.title} — Fit ${fitScore}/10
 
-**${job.company ?? ""}** · ${city} · ${salary}
+**${job.company ?? ""}** · ${city}
 
 ## Apply
 ${job.url}

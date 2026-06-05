@@ -91,10 +91,6 @@ function makeJobcloudParser(opts: {
         title,
         company: company || null,
         city: city || null,
-        salary: null,
-        salaryMin: null,
-        salaryMax: null,
-        tech: [],
         url,
       });
     }
