@@ -1,5 +1,8 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  // rhel-openssl-3.0.x = the Vercel serverless runtime (Node 24); "native" = local
+  // dev. Both engines are generated so the deployed lambda has a matching binary.
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {

@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@hub/core/db";
 import { supabase } from "@hub/core/supabase";
-import { STORAGE_BUCKET } from "@hub/agent-jobhunt";
+import { STORAGE_BUCKET } from "@hub/agent-jobhunt/manifest";
 import { requireHubAuth } from "@/lib/api-auth";
 import { KIND_TO_COLUMN, KIND_TO_FILENAME, type Kind } from "./kinds";
 

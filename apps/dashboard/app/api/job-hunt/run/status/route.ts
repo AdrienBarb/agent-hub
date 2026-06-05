@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@hub/core/db";
-import { manifest } from "@hub/agent-jobhunt";
+import { manifest } from "@hub/agent-jobhunt/manifest";
 import { requireHubAuth } from "@/lib/api-auth";
 import type { RunStatusResponse } from "@/lib/job-hunt/types";
 

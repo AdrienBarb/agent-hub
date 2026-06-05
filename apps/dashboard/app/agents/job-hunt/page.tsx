@@ -1,5 +1,5 @@
 import { Fraunces, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
-import { manifest } from "@hub/agent-jobhunt";
+import { manifest } from "@hub/agent-jobhunt/manifest";
 import { RunNowButton } from "./_components/RunNowButton";
 import { JobsBoard } from "./_components/JobsBoard";
 
