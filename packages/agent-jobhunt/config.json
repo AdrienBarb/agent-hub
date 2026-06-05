@@ -5,6 +5,15 @@
   "timezone": "Europe/Zurich",
 
   "boards": {
+    "swissdevjobs": {
+      "listing_urls": [
+        "https://swissdevjobs.ch/fr/jobs/JavaScript/all"
+      ],
+      "firecrawl": {
+        "waitFor": 5000,
+        "onlyMainContent": true
+      }
+    },
     "jobup": {
       "listing_urls": [
         "https://www.jobup.ch/en/jobs/?term=software%20engineer&sort-by=date",

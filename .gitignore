@@ -14,5 +14,8 @@ out/
 # job-hunt render smoke-test output
 tmp-render/
 
+# swissdevjobs adapter smoke-test output
+tmp-swissdevjobs/
+
 # Claude Code runtime (local-only state, e.g. scheduled-task locks)
 .claude/
