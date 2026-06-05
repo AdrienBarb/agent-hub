@@ -1,7 +1,7 @@
 import "server-only";
 import { runTailorStep } from "../run-step";
 import { PLAN_SYSTEM } from "../prompts";
-import { PlanSchema, type Plan, type ResumeYaml } from "../schemas";
+import { PlanSchema, type Plan, type ResumeMaster } from "../schemas";
 import { PROFILE_RESUME_MASTER } from "../../profile";
 import type { TailorStateType } from "../state";
 
@@ -10,7 +10,7 @@ type Selection = Plan["selectedBullets"][number];
 // First role/engagement in the master that actually has bullets. Used as a
 // last-resort selection so a fully-hallucinated plan still yields a non-empty
 // resume instead of failing the whole tailoring.
-function firstUsableSelection(master: ResumeYaml): Selection | null {
+function firstUsableSelection(master: ResumeMaster): Selection | null {
   for (let r = 0; r < master.experience.length; r++) {
     const role = master.experience[r];
     if (!role) continue;
@@ -35,7 +35,7 @@ function firstUsableSelection(master: ResumeYaml): Selection | null {
 // old all-or-nothing validator that failed the entire tailoring on one bad index.
 function repairPlanIndices(
   plan: Plan,
-  master: ResumeYaml,
+  master: ResumeMaster,
 ): { selectedBullets: Selection[]; warnings: string[] } {
   const warnings: string[] = [];
   const repaired: Selection[] = [];

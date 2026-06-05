@@ -24,11 +24,23 @@ experience:
       PostClaw (postclaw.io) is an AI social media manager. It learns each user's tone by analyzing their existing posts, then generates new content in that voice across their social channels.
     bullets:
       - text: "Designed and shipped the entire product as sole engineer, from architecture and auth to billing and deployment. Currently serving 10+ paying customers."
-        tags: [saas, ai, founder, full-stack, product, 0-to-1, architecture, auth, billing]
+        tags:
+          [
+            saas,
+            ai,
+            founder,
+            full-stack,
+            product,
+            0-to-1,
+            architecture,
+            auth,
+            billing,
+          ]
       - text: "Built the LLM voice-learning pipeline that analyzes a user's existing posts to learn their tone, then generates new content in that voice."
         tags: [llm, ai, pipeline, content-generation]
       - text: "Built the chat-first UX with the Vercel AI SDK and Claude, using AI SDK tool calls to handle posting, editing, and scheduling automatically across 9 social platforms (Instagram, TikTok, X, LinkedIn, YouTube, and more)."
-        tags: [vercel-ai-sdk, claude, tool-calls, chat-ux, multi-platform, social]
+        tags:
+          [vercel-ai-sdk, claude, tool-calls, chat-ux, multi-platform, social]
       - text: "Built the Stripe billing system: subscriptions, webhook handling, proration on plan changes."
         tags: [stripe, billing, subscriptions, webhooks]
     stack: "Next.js (App Router), TypeScript, Supabase, Prisma, Stripe, Vercel, Vercel AI SDK, Claude API."
@@ -47,7 +59,8 @@ experience:
           Salomon is a global sports and outdoor brand (skis, trail running, hiking apparel and footwear), part of the Amer Sports group, sold in 40+ international markets.
         bullets:
           - text: "Worked on the migration of Salomon's e-commerce platform to a Next.js App Router architecture (40+ international markets)."
-            tags: [nextjs, app-router, ecommerce, migration, i18n, headless, scale]
+            tags:
+              [nextjs, app-router, ecommerce, migration, i18n, headless, scale]
           - text: "Built API endpoints on top of Commerce Layer (headless e-commerce) to handle orders and line items."
             tags: [api, commerce-layer, headless, backend]
           - text: "Built the pages, components, and API calls for the purchase funnel."
@@ -128,16 +141,47 @@ experience:
         tags: [mysql, mongodb, databases]
     stack: "React, Node.js, MySQL, MongoDB, REST APIs."
 
+# Single source of truth for skills. Each category splits into:
+#   expert    = I use it daily / shipped it recently  -> agent may sell as a strength
+#   knowledge = I know it but can't claim depth         -> listed only, never a strength
+# To re-tier a skill, move its name between the two lists. me.md lists no skills.
 skills:
-  Languages: [TypeScript, JavaScript, HTML, CSS, Python]
-  Frontend: [React, "Next.js (App Router)", "Tailwind CSS", Redux, "React Native"]
-  Backend: [Node.js, Express, "REST APIs", GraphQL]
-  "Databases & ORM": [PostgreSQL, Supabase, MongoDB, MySQL, Prisma]
-  Payments: [Stripe, Adyen, "Apple Pay", "Commerce Layer"]
-  "DevOps & Cloud": [Vercel, Docker, "GitHub Actions", "GitLab CI", "CI/CD"]
-  Testing: [Vitest, Jest, "React Testing Library"]
-  "AI & LLM": ["Claude API", "Vercel AI SDK", "Claude Code (headless/CI)", OpenAI, "LLM integration", "agent orchestration"]
-  Tools: [Git, GitHub, GitLab, Figma, Linear]
+  Languages:
+    expert: [TypeScript, JavaScript, HTML, CSS]
+    knowledge: [Ruby, Python]
+  Frontend:
+    expert: [React, "Next.js (App Router)", "Tailwind CSS", Zustand]
+    knowledge: [Redux, "React Native"]
+  Backend:
+    expert: [Node.js, "REST APIs"]
+    knowledge: [Express, GraphQL]
+  "Databases & ORM":
+    expert: [Supabase, Prisma]
+    knowledge: [PostgreSQL, MongoDB, MySQL]
+  Payments:
+    expert: [Stripe, Adyen, "Apple Pay", "Commerce Layer"]
+    knowledge: []
+  "DevOps & Cloud":
+    expert: [Vercel]
+    knowledge: [Docker, "GitHub Actions", "GitLab CI", "CI/CD"]
+  Testing:
+    expert: [Vitest]
+    knowledge: [Jest, "React Testing Library"]
+  "AI & LLM":
+    expert:
+      [
+        "Claude API",
+        "Vercel AI SDK",
+        "LLM integration",
+        "Claude Code (headless/CI)",
+        OpenAI,
+        "agent orchestration",
+        LangGraph,
+      ]
+    knowledge: []
+  Tools:
+    expert: [Figma, Git, GitHub, GitLab]
+    knowledge: []
 
 education:
   - school: Le Wagon

@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { parse as yamlParse } from "yaml";
-import { ResumeYamlSchema, type ResumeYaml } from "./tailor/schemas";
+import { ResumeMasterSchema, type ResumeMaster } from "./tailor/schemas";
 
 const PROFILE_DIR = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -18,7 +18,7 @@ export const PROFILE_RESUME_YAML = readFileSync(
   "utf8",
 );
 
-export const PROFILE_RESUME_MASTER: ResumeYaml = ResumeYamlSchema.parse(
+export const PROFILE_RESUME_MASTER: ResumeMaster = ResumeMasterSchema.parse(
   yamlParse(PROFILE_RESUME_YAML),
 );
 

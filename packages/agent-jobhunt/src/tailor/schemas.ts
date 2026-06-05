@@ -122,6 +122,23 @@ export const ResumeYamlSchema = z.object({
   languages: z.array(LanguageSchema).optional(),
 });
 
+// Per-category skill tiers in the hand-written master. `expert` = used daily /
+// recently shipped (the agent may frame as a strength); `knowledge` = known but
+// not deep (listed on the resume, never framed as a strength, never in the
+// summary/bullets). This is the SINGLE source of truth for skills — me.md lists none.
+const SkillTierSchema = z.object({
+  expert: z.array(z.string()).default([]),
+  knowledge: z.array(z.string()).default([]),
+});
+
+// Hand-written master shape: identical to the serialized resume EXCEPT skills
+// carry expert/knowledge tiers. Parsed from resume-master.yaml in profile.ts. The
+// tiers are read by the LLM (via PROFILE_COMBINED) for honest framing; the
+// rendered/serialized resume (ResumeYamlSchema) flattens skills back to name lists.
+export const ResumeMasterSchema = ResumeYamlSchema.extend({
+  skills: z.record(z.string(), SkillTierSchema),
+});
+
 const SkillCategorySchema = z.object({
   category: z.string().describe("Skill category name, e.g. 'Frontend'"),
   items: z.array(z.string()).describe("Skills listed under this category"),
@@ -166,6 +183,7 @@ export const AtsCheckResultSchema = z.object({
 
 export type Plan = z.infer<typeof PlanSchema>;
 export type ResumeYaml = z.infer<typeof ResumeYamlSchema>;
+export type ResumeMaster = z.infer<typeof ResumeMasterSchema>;
 export type ResumeDraft = z.infer<typeof ResumeDraftSchema>;
 export type CoverDraft = z.infer<typeof CoverDraftSchema>;
 export type AtsCheckResult = z.infer<typeof AtsCheckResultSchema>;

@@ -28,6 +28,29 @@ const HUMANIZER_RULES = `## Writing rules (hard bans — never appear in output)
 - Avoid the rule-of-three trap (X, Y, and Z). Use one or two if that's accurate.
 - Don't over-hedge. "may, possibly, potentially, often" stacked together = AI tell.`;
 
+const HONESTY_RULES = `## Honesty — no proficiency inflation (HARD rule, overrides keyword-matching)
+
+A skill's NAME is a fact (it may appear in the master's skills list). Its PROFICIENCY is a SEPARATE claim that is only true if the master's EXPERIENCE proves it. Listing a skill is honest; claiming a level in it is not, unless backed.
+
+In the master's \`skills\` block every skill is tagged \`expert\` or \`knowledge\` (the two tiers below). Obey them in ALL prose you emit — summary, cover letter, role/engagement blurbs, and reworded bullet text:
+- EXPERT: skills the candidate uses daily / has recently shipped. MAY be framed as strong / expert / deep / extensive / primary, used in the summary headline, and led with.
+- KNOWLEDGE: skills the candidate knows but cannot claim depth in. NEVER a strength/expert qualifier (strong, expert, deep, extensive, solid, advanced, seasoned, mastery, "strong skills in", "proficient in"). NEVER mentioned in the SUMMARY or in résumé BULLETS — omit them and lead with EXPERT skills. Do NOT disclaim them in the summary either: a summary that name-drops a skill only to deny it ("Python is not my stack") still surfaces the weakness and reads poorly; just leave it out.
+
+Where gaps go (surface matters):
+- The COVER LETTER is the ONLY place to acknowledge a KNOWLEDGE skill or a gap, and only when the JD makes it unavoidable: state it plainly ("I have not worked with X in production") without implying competence. Never volunteer a gap the JD did not ask about.
+
+Honest bridging — connect the JD's wording to a skill the candidate genuinely has. Relatedness means real technical similarity, NEVER mere keyword co-occurrence. Three cases:
+- SAME / SUBSET of an EXPERT skill: when the JD's term is the same concrete technology under another name, or one an EXPERT skill fully contains (JD "JavaScript" is contained by EXPERT "TypeScript"; JD "PostgreSQL" is the database inside EXPERT "Supabase"; JD "single-page app" via EXPERT "React"/"Next.js"), it is genuinely true — claim it THROUGH that expert skill, leading with the expert skill. You may name the JD's term, and this holds even if the term is itself tagged \`knowledge\`, because an EXPERT skill subsumes it.
+- TRANSFERABLE sibling: when the JD's term is a sibling in the same family but NOT the same tool (JD "Vue" vs EXPERT "React"; JD "Fastify" vs EXPERT "Express"/"Node.js"; JD "GitLab CI" vs "GitHub Actions"), the COVER LETTER may note the adjacent expert experience transfers ("my deep React experience transfers cleanly to Vue"). Never claim the specific tool as used/owned, and never put it in the summary or bullets.
+- UNRELATED: no genuine technical relationship (e.g. JD "Python" with no Python experience) → no bridge exists; leave it out. The generic-competency ban below ("SQL", "OOP", "DevOps") holds even when a JD demands it — those are never claimed, bridged, or under-claimed.
+When unsure whether a link is "same/subset" or merely "transferable", treat it as transferable.
+
+Hard bans, whatever the JD asks for:
+- Never attach a strength/expert qualifier to a KNOWLEDGE skill.
+- Never name a generic umbrella competency ("SQL", "OOP", "DevOps", "scripting", "object-oriented programming") AT ALL — not to claim it, not to under-claim it ("my SQL isn't expert-level" still asserts an SQL level the master never backs), not even to deny it. When a JD demands one, say nothing about the umbrella term; instead surface the concrete EXPERT tools that embody it (for "SQL": lead with Supabase / Prisma / Postgres-via-Supabase). Echo a JD keyword ONLY through an EXPERT skill the master backs — directly, or via an honest bridge (above).
+- Never inflate the VERB or SCOPE of a role beyond the master. Keep the master's verb: do not escalate "built" or "worked on" into ownership/leadership words (led, owned, owning, architected, drove, spearheaded, headed) or into any wider scope than the bullet states.
+- Never promote "I know X" into "I'm strong at X". Any skill not in the EXPERT list is KNOWLEDGE by default — leave it out of the summary and bullets. When unsure, under-claim. Honest beats impressive.`;
+
 const COVER_CHECKLIST = `## Cover letter checklist (self-audit before returning)
 
 - Zero em-dashes.
@@ -53,8 +76,8 @@ You will receive (in user message):
 - The structured fit assessment from the prior evaluation step, wrapped in <fit-details>…</fit-details> (requirements, comparison, score).
 
 You have already been given (cached system context above):
-- The candidate profile (me.md): preferences, geography, languages, anti-criteria.
-- The candidate's resume master (resume-master.yaml): structured experience with tagged bullets.
+- The candidate profile (me.md): preferences, geography, languages, anti-criteria, and the skill-calibration rule (what \`expert\` vs \`knowledge\` skills may be claimed).
+- The candidate's resume master (resume-master.yaml): structured experience with tagged bullets, and skills tagged \`expert\` / \`knowledge\` per category.
 
 ${PROMPT_INJECTION_NOTE}
 
@@ -72,9 +95,11 @@ Your job: produce a Plan with five parts.
 
 4. \`coverHook\`: 1-2 sentences, written in \`outputLanguage\`, naming a specific thing this company does (from the JD: product area, mission, scale, recent funding, tech bet) and how it connects to a concrete fact from the candidate's master. Used as the seed for paragraph 1 of the cover letter.
 
-5. \`summaryRewrite\`: a rewritten resume summary (~3 sentences), written in \`outputLanguage\`, echoing JD keywords (primary stack, role type) but using ONLY true facts from the master. NO em-dashes. NO AI vocabulary. Plain language.
+5. \`summaryRewrite\`: a rewritten resume summary (~3 sentences), written in \`outputLanguage\`. It may re-emphasize and re-order what the master already proves, and echo JD keywords ONLY through EXPERT-tier skills. It must NOT mention a KNOWLEDGE-tier skill (or any skill that lacks a backing experience bullet), and must NOT attach a strength/expert qualifier to a KNOWLEDGE skill (honesty rules below). NO em-dashes. NO AI vocabulary. Plain language.
 
-Do NOT fabricate experience, dates, tech, or claims. Bullets and facts must trace to the master. If you cannot find a real fact for a JD requirement, leave it out — do not invent.`;
+Do NOT fabricate experience, dates, tech, or claims. Bullets and facts must trace to the master. If you cannot find a real fact for a JD requirement, leave it out — do not invent.
+
+${HONESTY_RULES}`;
 
 export const DRAFT_RESUME_SYSTEM = `You produce a tailored resume in structured form.
 
@@ -93,13 +118,15 @@ Your job: emit a single Resume object that mirrors the master's shape exactly. T
 REQUIREMENTS:
 - LANGUAGE: write every candidate-facing SENTENCE in \`plan.outputLanguage\` (\`"en"\` or \`"fr"\`) — namely \`summary\`, every bullet \`text\`, every role/engagement \`blurb\`, and every \`education[].bullets\` entry. When \`outputLanguage\` is \`"fr"\`, render those in natural French: this is a TRANSLATION of the master's facts into French, never new or altered content — every fact, number, and date stays identical. ${LANGUAGE_KEEP_AS_MASTER}
 - \`profile.location\` MUST equal \`plan.locationOverride\`. Everything else in \`profile\` (name, title, phone, email, photo, links) copied unchanged from master.
-- \`summary\` MUST equal \`plan.summaryRewrite\` verbatim — it is already written in \`plan.outputLanguage\` (apply humanizer rules below before writing it; if the input still violates a rule, fix it inline).
+- \`summary\` MUST equal \`plan.summaryRewrite\` verbatim — it is already written in \`plan.outputLanguage\` (apply the humanizer AND honesty rules below before writing it; if the input still violates a rule — e.g. a strength/expert qualifier on a KNOWLEDGE skill, or any mention of a KNOWLEDGE skill — fix it inline).
 - \`experience\`: keep ALL roles in the same order as master. For each role/engagement, keep ONLY the bullets at the indices in \`plan.selectedBullets\` for that role/engagement. Bullet \`text\`: when \`outputLanguage\` is \`"fr"\`, TRANSLATE every kept bullet into natural French — never leave a bullet in the master's English. In any language you may also LIGHTLY reword to echo JD keywords, but never change underlying facts (dates, tech, scope, numbers). Preserve every other key on the role (company, role, url, start, end, blurb, stack, duration, location) and every engagement key (name, duration, blurb, stack); when \`outputLanguage\` is \`"fr"\`, the \`blurb\` text is translated to French while company/role/stack stay as master. If a role has \`engagements\`, keep the engagements array; for each engagement, apply the same bullet selection.
-- \`skills\`: an array of \`{ category, items }\` objects, one per category from master (e.g. \`{ category: "Frontend", items: ["React", "Next.js"] }\`). Keep ALL categories and all their items from master, untranslated. You may reorder so JD-matching categories come first.
+- \`skills\`: an array of \`{ category, items }\` objects, one per category from master. In the master each category splits into \`expert\` and \`knowledge\` skill lists; MERGE both into a single \`items\` array (the résumé shows skill NAMES, never the tier — keep every skill, including \`knowledge\` ones). Untranslated. You may reorder so JD-matching categories come first. The tier governs only how you may describe a skill in PROSE (see the honesty rules), never whether it appears in this list.
 - \`education\`: keep every key (school, degree, start, end, bullets) with school/degree/dates exactly as master; when \`outputLanguage\` is \`"fr"\`, translate each \`bullets\` entry to French (facts unchanged).
 - \`languages\`: copy unchanged from master.
 
 NEVER fabricate experience, skills, numbers, companies, dates, tech, or claims. Every bullet must trace to a master bullet.
+
+${HONESTY_RULES}
 
 ${HUMANIZER_RULES}
 
@@ -127,6 +154,8 @@ Write the ENTIRE letter in \`plan.outputLanguage\` (\`"en"\` or \`"fr"\`); \`pla
 
 Use first person. Be specific. Acknowledge honest gaps if the JD asks for something the master does not contain. Never invent facts, numbers, or experience.
 
+${HONESTY_RULES}
+
 ${HUMANIZER_RULES}
 
 ${COVER_CHECKLIST}
@@ -152,7 +181,9 @@ REQUIREMENTS:
 - Fix only what the issues call out. Do not redesign sections that were fine.
 - If an issue says "too many bullets in role X", drop the lowest-relevance bullet(s) for that role.
 - If an issue says a required key is missing, restore it from the master.
-- Never fabricate facts. Never change dates, tech, or numbers.
+- Never fabricate facts. Never change dates, tech, or numbers. Never upgrade a skill's framing above its me.md tier while fixing an issue.
+
+${HONESTY_RULES}
 
 ${HUMANIZER_RULES}
 
