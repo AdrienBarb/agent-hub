@@ -1,8 +1,28 @@
 # Agent Hub
 
-Personal hub for autonomous AI agents. Each agent is a LangGraph workflow triggered by Inngest (cron + manual events), persisting state in Supabase via Prisma, observed via Langfuse. The dashboard (Next.js 15) is the deployment target and the only UI.
+Personal hub for autonomous AI agents. Each agent is a LangGraph workflow triggered by Inngest (cron + manual events), persisting state in Supabase via Prisma, observed via Langfuse. The dashboard (Next.js 16 + React 19) is the deployment target and the only UI.
 
 **Current state and what's left to do live in [`./agent-hub-plan.md`](./agent-hub-plan.md)** — the single source of truth for the roadmap. This file (CLAUDE.md) only holds setup, architecture, conventions, and gotchas that don't change run-to-run.
+
+---
+
+## Stack
+
+| Layer | Tech |
+|---|---|
+| Monorepo | pnpm workspaces + Turborepo |
+| Dashboard | Next.js 16 (App Router, **webpack** build), React 19 |
+| Client data | **TanStack Query v5** + **axios** (`lib/http.ts`) + **react-hot-toast** |
+| Auth | cookie (`hub_token`) gate via `proxy.ts`; every `/api/*` re-checks it |
+| Agents | LangGraph — one compiled graph per agent |
+| Orchestration | Inngest (cron + manual events) |
+| LLM | Vercel AI SDK v5 + `@ai-sdk/anthropic` (Claude Opus/Sonnet, native structured outputs) |
+| DB / ORM | Supabase Postgres + Prisma 6 (`db:push` only — no migrations) |
+| Storage | Supabase Storage (private buckets, short-TTL signed URLs) |
+| PDF render | Typst in a Vercel Sandbox |
+| Observability | Langfuse |
+| Validation | Zod |
+| Tests | Vitest |
 
 ---
 
@@ -38,7 +58,7 @@ pnpm build                        # uses SKIP_ENV_VALIDATION via apps/dashboard 
 ```
 agent-hub/
 ├── apps/
-│   └── dashboard/          Next.js 15 app — pages, server actions, proxy (auth), API routes
+│   └── dashboard/          Next.js 16 app — pages, REST API routes, TanStack Query client, proxy (auth)
 ├── packages/
 │   ├── core/               Shared infra: db, supabase, llm, inngest client, langfuse, env
 │   └── agent-jobhunt/      One agent's workflow: config, nodes, graph, Inngest function
@@ -54,13 +74,29 @@ agent-hub/
 
 ---
 
+## Dashboard data fetching
+
+The dashboard talks to its **own REST API routes** via **axios + TanStack Query** — not Server Actions. Server Actions are reserved for the auth sign-in form (`app/auth/actions.ts`). The **job-hunt page is the reference implementation**; every new agent page follows the same layering:
+
+- **Routes** — `apps/dashboard/app/api/<slug>/…/route.ts` (`GET`/`PATCH`/`POST`). Each calls `requireHubAuth(request)` from `lib/api-auth.ts` **first** (`proxy.ts` only gates `/agents/*`, never `/api/*`). `GET` handlers set `export const dynamic = "force-dynamic"`. Validate inputs against an allow-list; never write client-supplied arbitrary fields. Map Prisma rows to a JSON-safe shape in a colocated `serialize.ts`.
+- **Transport types** — `lib/<slug>/types.ts`: the request/response contract, shared by routes and client. UI-free (no React, no presentation helpers).
+- **axios** — `lib/http.ts`: one instance (`baseURL: "/api"`, `withCredentials`). A response interceptor surfaces API failures via **react-hot-toast** (deduped under a single toast id; skips `AbortSignal` cancellations). `<Toaster/>` is mounted once in `app/providers.tsx`.
+- **Fetchers** — `lib/<slug>/api.ts`: typed thin wrappers over the routes; thread the query's `AbortSignal` into axios so unmount/refetch cancels in-flight reads.
+- **Query keys** — `lib/<slug>/keys.ts`: a key factory so queries and invalidations can't drift.
+- **Hooks** — `app/agents/<slug>/_hooks/*`: `useQuery`/`useMutation`. Mutations are optimistic (`onMutate` snapshot → `onError` rollback → `onSettled` invalidate) and resolve the **live cached row by id**, not a stale closure. Errors toast via the interceptor — don't re-handle them per call.
+- **Page** is a thin static RSC shell; the client component fetches with a **loading skeleton + error state** (deliberately NO SSR prefetch). `app/providers.tsx` holds `QueryClientProvider` (one client per browser session via `useState`) + `<Toaster/>`, wired into `layout.tsx`.
+
+**Polling**: poll a `GET …/run/status` query while a run is active and drive the data query's `refetchInterval` off `running`; force one final refetch on the run's `true→false` edge (`useRefreshJobsOnRunComplete`) so the last batch written at completion isn't missed. Gate the full-screen error on `isError && !data` so a failed background poll doesn't blank a populated board.
+
+---
+
 ## Adding a new agent
 
 1. `packages/agent-<name>/` with `package.json` (depends on `@hub/core`), `src/manifest.ts`, `src/graph.ts`, `src/inngest.ts`, `src/index.ts`
 2. Add `"@hub/agent-<name>": "workspace:*"` to `apps/dashboard/package.json` deps
 3. Add `"@hub/agent-<name>"` to `transpilePackages` in `apps/dashboard/next.config.ts`
 4. Import the agent's Inngest functions and spread into `serve({ functions: [...] })` in `apps/dashboard/app/api/inngest/route.ts`
-5. Create `apps/dashboard/app/agents/<slug>/page.tsx` + `actions.ts`
+5. Create `apps/dashboard/app/agents/<slug>/page.tsx` (thin shell) + REST routes under `apps/dashboard/app/api/<slug>/` + the client data layer (see **Dashboard data fetching**)
 6. Add manifest to home page `agents[]` array in `apps/dashboard/app/page.tsx`
 
 ---
@@ -68,8 +104,8 @@ agent-hub/
 ## Conventions
 
 - **Single root `.env.local`** loaded via `dotenv-cli` in package scripts. Never create per-package `.env` files.
-- **`import "server-only"`** on every file in `packages/core/src/` that touches secrets or DB. Prevents accidental client bundle leak.
-- **Server actions live next to the page that uses them**: `apps/dashboard/app/<route>/actions.ts`. They're tied to routes; don't put them in packages.
+- **`import "server-only"`** on every file in `packages/core/src/` that touches secrets or DB (and on dashboard server-only helpers like `lib/api-auth.ts` / `api/**/serialize.ts`). Prevents accidental client bundle leak.
+- **Dashboard data goes through REST routes + axios + TanStack Query** (see **Dashboard data fetching**), not Server Actions. The only Server Action is the auth sign-in form (`app/auth/actions.ts`).
 - **One LangGraph per agent**, compiled in the agent's `graph.ts`. Nodes are async functions returning `Partial<State>`. State uses `Annotation.Root` with reducers.
 - **Inngest functions own AgentRun lifecycle**: create row → invoke graph → mark completed/failed → flush Langfuse.
 - **Manifest = business card**. Slug, cron, timezone, dashboardPath. Anything that needs to *know about* an agent (without running it) reads the manifest.
@@ -126,7 +162,10 @@ All loaded from root `.env.local` into both Next.js and Prisma via `dotenv-cli`.
 
 - ❌ Per-package `.env` files (always edit root `.env.local`)
 - ❌ Importing `@hub/core/db` or `@hub/core/supabase` from a Client Component (`"use client"`) — `server-only` will throw
-- ❌ Tailwind classes — not configured yet. Pages currently use inline styles intentionally; don't migrate piecemeal.
+- ❌ Fetching/mutating dashboard data with Server Actions — use a REST route + axios + TanStack Query (see **Dashboard data fetching**)
+- ❌ Calling `fetch`/axios directly from a component — go through a `lib/<slug>/api.ts` fetcher + a query/mutation hook
+- ❌ A new `/api/*` route without `requireHubAuth` as its first line — the proxy only gates `/agents/*`
+- ❌ Tailwind classes — not configured yet. Pages currently use inline styles / scoped `<style>` intentionally; don't migrate piecemeal.
 - ❌ Adding `output =` to Prisma schema (was tried, broke pnpm resolution)
 - ❌ Creating a `middleware.ts` file — use `proxy.ts` (Next 16 convention)
 - ❌ Calling LLMs directly from React components — always via Inngest function → graph node

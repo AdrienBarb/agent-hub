@@ -7,7 +7,7 @@ Personal hub for autonomous AI agents. See [agent-hub-plan.md](./agent-hub-plan.
 ```
 agent-hub/
 ├── apps/
-│   └── dashboard/              Next.js dashboard — pages, server actions, auth proxy, API routes
+│   └── dashboard/              Next.js 16 dashboard — pages, REST API routes, TanStack Query client, auth proxy
 ├── packages/
 │   ├── core/                   Shared infra: db, supabase, llm, inngest, langfuse, env
 │   └── agent-jobhunt/          Job-hunt agent: LangGraph workflow + Inngest function
@@ -18,6 +18,27 @@ agent-hub/
 scrape job boards via Firecrawl → fingerprint-dedupe → evaluate fit per JD → tailor a
 resume + cover letter for matches → render ATS-friendly PDFs via Typst in a Vercel Sandbox.
 State persists in Supabase (Prisma); runs are observed via Langfuse.
+
+---
+
+## Stack
+
+| Layer | Tech |
+|---|---|
+| Monorepo | pnpm workspaces + Turborepo |
+| Dashboard | Next.js 16 (App Router, webpack build), React 19 |
+| Client data | TanStack Query v5 + axios + react-hot-toast |
+| Agents | LangGraph (one graph per agent) |
+| Orchestration | Inngest (cron + manual events) |
+| LLM | Vercel AI SDK v5 + `@ai-sdk/anthropic` (Claude) |
+| DB / ORM | Supabase Postgres + Prisma 6 (`db:push` only) |
+| Storage | Supabase Storage (private buckets, signed URLs) |
+| PDF render | Typst in a Vercel Sandbox |
+| Observability | Langfuse · Validation: Zod · Tests: Vitest |
+
+The dashboard fetches **all** its data through its own REST API routes (`app/api/<slug>/…`)
+using axios + TanStack Query — never Server Actions (those are reserved for the auth
+sign-in form). See **Dashboard data fetching** in [`CLAUDE.md`](./CLAUDE.md) for the full pattern.
 
 ---
 
@@ -40,9 +61,12 @@ Local Supabase runs on ports **54421-54429** (custom range to avoid collisions w
 
 | Command | What it does |
 |---|---|
-| `pnpm dev` | Start the Next.js dashboard on http://localhost:3000 |
+| `pnpm dev` | Start the Next.js dashboard on http://localhost:3001 |
+| `pnpm inngest:dev` | Inngest local dev server (separate terminal) — required for agent runs |
 | `pnpm build` | Production build of all packages |
 | `pnpm typecheck` | TypeScript check across the workspace |
+
+> **Two terminals for local agent runs:** `pnpm dev` + `pnpm inngest:dev`. Without the second, Inngest events go nowhere.
 
 ### Local Supabase
 
@@ -56,14 +80,14 @@ Local Supabase runs on ports **54421-54429** (custom range to avoid collisions w
 
 ### Database (Prisma)
 
+> **This project uses `db:push` only — there is no migrations history.** Don't run `db:migrate` / `db:deploy`; apply every schema change with `db:push`. (See the gotcha in [`CLAUDE.md`](./CLAUDE.md).)
+
 | Command | What it does | When to use |
 |---|---|---|
-| `pnpm db:push` | Push schema to DB without creating a migration file | Prototyping — edit `schema.prisma`, push, repeat |
-| `pnpm db:migrate` | Create a new migration file and apply it | Permanent schema change |
-| `pnpm db:deploy` | Apply pending migrations (no creation) | Production / CI |
-| `pnpm db:reset` | Drop DB, re-apply all migrations | Wipe and start over |
+| `pnpm db:push` | Push `schema.prisma` to the DB (no migration file) | **How we apply schema changes** — edit, push, repeat |
+| `pnpm db:generate` | Regenerate the Prisma Client | After editing `schema.prisma` (also runs on `pnpm install`) |
 | `pnpm db:studio` | Open Prisma Studio (http://localhost:5555) | Browse/edit table data |
-| `pnpm db:generate` | Regenerate the Prisma Client | After editing `schema.prisma` |
+| `pnpm db:wipe` | `prisma db push --force-reset` | Wipe and rebuild the local DB from scratch |
 
 ### Two studios, different purposes
 
@@ -75,8 +99,7 @@ Local Supabase runs on ports **54421-54429** (custom range to avoid collisions w
 ## Where things live
 
 - **`.env.local`** at the repo root — single source of truth for env vars. Loaded into Next.js and Prisma via `dotenv-cli`.
-- **Prisma schema** — `packages/core/prisma/schema.prisma`
-- **Prisma migrations** — `packages/core/prisma/migrations/`
+- **Prisma schema** — `packages/core/prisma/schema.prisma` (applied via `db:push`; no `migrations/` dir)
 - **Supabase config** — `supabase/config.toml`
 - **Generated Prisma client** — `packages/core/node_modules/.prisma/client`
 
@@ -86,7 +109,7 @@ Local Supabase runs on ports **54421-54429** (custom range to avoid collisions w
 
 | Service | Port |
 |---|---|
-| Next.js dashboard | 3000 |
+| Next.js dashboard | 3001 |
 | Prisma Studio | 5555 |
 | Supabase API (Kong) | 54421 |
 | Supabase Postgres | 54422 |

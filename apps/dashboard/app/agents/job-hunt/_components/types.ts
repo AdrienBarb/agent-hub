@@ -1,29 +1,11 @@
-// Plain (no "server-only") module so client components can import the shared
-// shape + presentation helpers. The server (page.tsx) maps Prisma rows into
-// JobView, converting the Decimal fitScore to a number and resolving which
-// artifact `kind` each download link should request.
+// Presentation helpers for the job-hunt cards. The data contract itself
+// (JobView and the download-kind types) lives in `@/lib/job-hunt/types` so the
+// API route and client share one source of truth; it's re-exported here so the
+// card components can keep importing everything they need from one module.
 
 import type { Kind } from "@/app/api/job-hunt/artifact/kinds";
 
-// Tie the download kinds back to the route's authoritative allow-list so a
-// rename in kinds.ts is a compile error here, not a silent runtime 400.
-export type ResumeKind = Extract<Kind, "resume-pdf" | "resume"> | null;
-export type CoverKind = Extract<Kind, "cover-pdf" | "cover"> | null;
-
-export type JobView = {
-  id: string;
-  title: string;
-  company: string | null;
-  city: string | null;
-  url: string;
-  board: string;
-  firstSeen: string; // YYYY-MM-DD
-  fitScore: number | null; // 1–10
-  fitReasoning: string | null;
-  status: string; // JobStatus value ("tailored" | "applied" | "rejected" | …)
-  resumeKind: ResumeKind;
-  coverKind: CoverKind;
-};
+export type { JobView, ResumeKind, CoverKind } from "@/lib/job-hunt/types";
 
 export type ScoreTier = "strong" | "good" | "weak";
 

@@ -1,13 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { markJob } from "../actions";
+import { useEffect, useRef, useState } from "react";
+import {
+  useJobs,
+  useMarkJob,
+  useRefreshJobsOnRunComplete,
+  useRunStatus,
+} from "../_hooks/useJobHunt";
 import { JobCard } from "./JobCard";
 import { OldJobCard } from "./OldJobCard";
 import type { JobView } from "./types";
+import type { MarkableStatus } from "@/lib/job-hunt/types";
 
 // Keep in sync with the .jh-card--out / .jh-old--out transition in page.tsx so
-// the row finishes animating before we drop it from the list.
+// the row finishes animating before the optimistic mutation drops it.
 const ANIM_MS = 300;
 
 function omit<T>(map: Record<string, T>, id: string): Record<string, T> {
@@ -16,51 +22,85 @@ function omit<T>(map: Record<string, T>, id: string): Record<string, T> {
   return next;
 }
 
-export function JobsBoard({
-  active: initialActive,
-  old: initialOld,
-}: {
-  active: JobView[];
-  old: JobView[];
-}) {
-  const [active, setActive] = useState(initialActive);
-  const [old, setOld] = useState(initialOld);
-  // Per-id transient UI state, separate from the persisted lists.
-  const [marking, setMarking] = useState<Record<string, "applied" | "rejected">>({});
+export function JobsBoard() {
+  const { data: runStatus } = useRunStatus();
+  const isRunning = runStatus?.running ?? false;
+  useRefreshJobsOnRunComplete(isRunning);
+
+  const { data, isPending, isError, refetch } = useJobs(isRunning);
+  const markJob = useMarkJob();
+
+  // Per-id transient view state for the exit animation, kept separate from the
+  // query cache (which is the data source of truth).
+  const [dismissing, setDismissing] = useState<
+    Record<string, "applied" | "rejected">
+  >({});
   const [restoring, setRestoring] = useState<Record<string, boolean>>({});
 
-  async function handleMark(job: JobView, status: "applied" | "rejected") {
-    if (marking[job.id]) return;
-    setMarking((m) => ({ ...m, [job.id]: status }));
-    const res = await markJob(job.id, status);
-    if (!res.ok) {
-      console.error("markJob failed:", res.message);
-      setMarking((m) => omit(m, job.id));
-      return;
-    }
-    // Let the card animate out, then move it into Old jobs.
-    window.setTimeout(() => {
-      setActive((list) => list.filter((j) => j.id !== job.id));
-      setOld((list) => [{ ...job, status }, ...list]);
-      setMarking((m) => omit(m, job.id));
+  // Pending animation timers, cleared on unmount so a mutation never fires (and
+  // no state update lands) after the board has gone away.
+  const timers = useRef<number[]>([]);
+  useEffect(
+    () => () => timers.current.forEach((t) => window.clearTimeout(t)),
+    [],
+  );
+
+  // Let the card animate out, then commit the move. The optimistic mutation
+  // removes the row from the cache only after it's faded, so there's no flicker.
+  // Errors roll back in the hook and toast via the axios interceptor; the
+  // component only clears its own animation state on settle.
+  function commitAfterAnimation(
+    job: JobView,
+    status: MarkableStatus,
+    clear: () => void,
+  ) {
+    const timer = window.setTimeout(() => {
+      markJob.mutate({ job, status }, { onSettled: clear });
     }, ANIM_MS);
+    timers.current.push(timer);
   }
 
-  async function handleRestore(job: JobView) {
+  function handleMark(job: JobView, status: "applied" | "rejected") {
+    if (dismissing[job.id]) return;
+    setDismissing((m) => ({ ...m, [job.id]: status }));
+    commitAfterAnimation(job, status, () =>
+      setDismissing((m) => omit(m, job.id)),
+    );
+  }
+
+  function handleRestore(job: JobView) {
     if (restoring[job.id]) return;
     setRestoring((m) => ({ ...m, [job.id]: true }));
-    const res = await markJob(job.id, "tailored");
-    if (!res.ok) {
-      console.error("markJob failed:", res.message);
-      setRestoring((m) => omit(m, job.id));
-      return;
-    }
-    window.setTimeout(() => {
-      setOld((list) => list.filter((j) => j.id !== job.id));
-      setActive((list) => [{ ...job, status: "tailored" }, ...list]);
-      setRestoring((m) => omit(m, job.id));
-    }, ANIM_MS);
+    commitAfterAnimation(job, "tailored", () =>
+      setRestoring((m) => omit(m, job.id)),
+    );
   }
+
+  // Skeleton only before the first load. Once we have data, a failed background
+  // poll keeps the last-good board rather than blanking it.
+  if (isPending) {
+    return <BoardSkeleton />;
+  }
+
+  if (isError && !data) {
+    return (
+      <section className="jh-section">
+        <div className="jh-error">
+          <span>Couldn&apos;t load jobs.</span>
+          <button
+            type="button"
+            className="jh-btn jh-btn--ghost"
+            onClick={() => void refetch()}
+          >
+            Retry
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  const active = data?.active ?? [];
+  const old = data?.old ?? [];
 
   return (
     <>
@@ -81,8 +121,8 @@ export function JobsBoard({
               <JobCard
                 key={job.id}
                 job={job}
-                pending={!!marking[job.id]}
-                dismissing={marking[job.id] ?? null}
+                pending={!!dismissing[job.id]}
+                dismissing={dismissing[job.id] ?? null}
                 onApply={() => handleMark(job, "applied")}
                 onSkip={() => handleMark(job, "rejected")}
               />
@@ -114,6 +154,34 @@ export function JobsBoard({
             ))}
           </div>
         )}
+      </section>
+    </>
+  );
+}
+
+function BoardSkeleton() {
+  return (
+    <>
+      <section className="jh-section">
+        <div className="jh-section-head">
+          <h2 className="jh-h2">Jobs</h2>
+          <p className="jh-section-sub">loading today&apos;s batch…</p>
+        </div>
+        <div className="jh-grid">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="jh-skel" />
+          ))}
+        </div>
+      </section>
+      <section className="jh-section">
+        <div className="jh-section-head">
+          <h2 className="jh-h2 jh-h2--muted">Old jobs</h2>
+        </div>
+        <div className="jh-oldlist">
+          {[0, 1].map((i) => (
+            <div key={i} className="jh-skel jh-skel--old" />
+          ))}
+        </div>
       </section>
     </>
   );

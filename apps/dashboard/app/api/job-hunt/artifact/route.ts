@@ -1,20 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@hub/core/db";
 import { supabase } from "@hub/core/supabase";
-import { env } from "@hub/core/env";
 import { STORAGE_BUCKET } from "@hub/agent-jobhunt";
-import { safeStrEqual } from "@/lib/safe-equal";
+import { requireHubAuth } from "@/lib/api-auth";
 import { KIND_TO_COLUMN, KIND_TO_FILENAME, type Kind } from "./kinds";
 
 const SIGNED_URL_TTL_SECONDS = 60;
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  // The proxy matcher only covers /agents/*, NOT /api/*, so this route must
-  // check the auth cookie itself.
-  const token = request.cookies.get("hub_token")?.value;
-  if (!(await safeStrEqual(token, env.HUB_ACCESS_TOKEN))) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const unauthorized = await requireHubAuth(request);
+  if (unauthorized) return unauthorized;
 
   const jobId = request.nextUrl.searchParams.get("jobId");
   const kind = request.nextUrl.searchParams.get("kind") as Kind | null;

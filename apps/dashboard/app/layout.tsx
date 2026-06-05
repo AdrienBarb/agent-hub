@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { Viewport } from "next";
+import { Providers } from "./providers";
 
 export const metadata = {
   title: "Agent Hub",
@@ -24,7 +25,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           minHeight: "100vh",
         }}
       >
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

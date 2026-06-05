@@ -1,14 +1,7 @@
 import { Fraunces, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
-import { db } from "@hub/core/db";
-import { Prisma } from "@hub/core/prisma";
 import { manifest } from "@hub/agent-jobhunt";
 import { RunNowButton } from "./_components/RunNowButton";
 import { JobsBoard } from "./_components/JobsBoard";
-import type { JobView } from "./_components/types";
-
-// Dynamic: the page reads uncached job rows that change as the agent runs and
-// as the user marks jobs — never statically cache it.
-export const dynamic = "force-dynamic";
 
 // Distinctive type pairing (deliberately not Inter/system): a high-contrast
 // display serif, a warm grotesque body, and a mono for numerals/labels. All
@@ -17,71 +10,10 @@ const display = Fraunces({ subsets: ["latin"], display: "swap", variable: "--fon
 const body = Hanken_Grotesk({ subsets: ["latin"], display: "swap", variable: "--font-body" });
 const mono = JetBrains_Mono({ subsets: ["latin"], display: "swap", variable: "--font-mono" });
 
-const jobSelect = {
-  id: true,
-  url: true,
-  title: true,
-  company: true,
-  city: true,
-  board: true,
-  firstSeenAt: true,
-  fitScore: true,
-  fitReasoning: true,
-  status: true,
-  resumePdfStoragePath: true,
-  coverPdfStoragePath: true,
-  resumeStoragePath: true,
-  coverStoragePath: true,
-} as const;
-
-// Derived straight from the select so adding/removing a column can't leave this
-// shape stale (and j.fitScore is the real Prisma Decimal).
-type Row = Prisma.JobGetPayload<{ select: typeof jobSelect }>;
-
-function toView(j: Row): JobView {
-  return {
-    id: j.id,
-    title: j.title,
-    company: j.company,
-    city: j.city,
-    url: j.url,
-    board: j.board,
-    firstSeen: j.firstSeenAt.toISOString().slice(0, 10),
-    fitScore: j.fitScore == null ? null : j.fitScore.toNumber(),
-    fitReasoning: j.fitReasoning,
-    status: j.status,
-    resumeKind: j.resumePdfStoragePath
-      ? "resume-pdf"
-      : j.resumeStoragePath
-        ? "resume"
-        : null,
-    coverKind: j.coverPdfStoragePath
-      ? "cover-pdf"
-      : j.coverStoragePath
-        ? "cover"
-        : null,
-  };
-}
-
-export default async function JobHuntPage() {
-  const [activeRows, oldRows] = await Promise.all([
-    db.job.findMany({
-      where: { status: "tailored" },
-      orderBy: [{ fitScore: "desc" }, { firstSeenAt: "desc" }],
-      take: 60,
-      select: jobSelect,
-    }),
-    db.job.findMany({
-      where: { status: { in: ["applied", "rejected"] } },
-      orderBy: [{ tailoredAt: "desc" }, { firstSeenAt: "desc" }],
-      take: 60,
-      select: jobSelect,
-    }),
-  ]);
-
-  const active = activeRows.map(toView);
-  const old = oldRows.map(toView);
-
+// Thin server shell: just the fonts, manifest header, and styles. The jobs data
+// is fetched client-side by JobsBoard via TanStack Query, so this page is static
+// chrome around a self-loading board.
+export default function JobHuntPage() {
   return (
     <main
       className={`jh-root ${display.variable} ${body.variable} ${mono.variable}`}
@@ -100,7 +32,7 @@ export default async function JobHuntPage() {
         <RunNowButton />
       </header>
 
-      <JobsBoard active={active} old={old} />
+      <JobsBoard />
     </main>
   );
 }
@@ -162,6 +94,23 @@ const CSS = `
   margin: 0 0 0 auto; color: var(--muted-2); font-size: .76rem; font-family: var(--font-mono);
 }
 .jh-empty { color: var(--muted-2); font-size: .92rem; padding: 22px 0; }
+
+/* ---- loading / error ---- */
+.jh-skel {
+  height: 140px; border-radius: 16px; border: 1px solid var(--line);
+  background: var(--surface); position: relative; overflow: hidden;
+}
+.jh-skel--old { height: 62px; border-radius: 12px; }
+.jh-skel::after {
+  content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+  animation: jh-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes jh-shimmer { to { transform: translateX(100%); } }
+.jh-error {
+  display: flex; align-items: center; gap: 12px; padding: 22px 0;
+  color: var(--muted); font-size: .92rem;
+}
 
 /* ---- active list (one card per row) ---- */
 .jh-grid {
