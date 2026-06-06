@@ -17,7 +17,7 @@ Personal hub for autonomous AI agents. Each agent is a LangGraph workflow trigge
 | Agents | LangGraph — one compiled graph per agent |
 | Orchestration | Inngest (cron + manual events) |
 | LLM | Vercel AI SDK v5 + `@ai-sdk/anthropic` (Claude Opus/Sonnet, native structured outputs) |
-| DB / ORM | Supabase Postgres + Prisma 6 (`db:push` only — no migrations) |
+| DB / ORM | Supabase Postgres + Prisma 6 (**migrations** via `prisma migrate`) |
 | Storage | Supabase Storage (private buckets, short-TTL signed URLs) |
 | PDF render | Typst in a Vercel Sandbox |
 | Observability | Langfuse |
@@ -32,7 +32,7 @@ Personal hub for autonomous AI agents. Each agent is a LangGraph workflow trigge
 pnpm install
 cp .env.example .env.local        # fill in real values (see "Env vars" below)
 pnpm supabase:start               # local Supabase on Docker (ports 54421-54429)
-pnpm db:push                      # sync Prisma schema → local DB
+pnpm db:deploy                    # apply committed migrations → local DB
 pnpm storage:setup                # create the "job-hunt" Storage bucket (idempotent)
 ```
 
@@ -43,10 +43,11 @@ pnpm dev                          # Next.js dashboard → http://localhost:3001 
 pnpm inngest:dev                  # Inngest local dev server (separate terminal) → syncs against :3001
 pnpm supabase:studio              # Supabase Studio (Auth, Storage, SQL)
 pnpm db:studio                    # Prisma Studio (browse app tables)
-pnpm db:push                      # apply schema changes (prototyping)
-pnpm db:migrate                   # create + apply named migration (permanent)
+pnpm db:migrate                   # create + apply a new migration locally (prisma migrate dev)
+pnpm db:deploy                    # apply pending migrations, no new file (prisma migrate deploy)
+pnpm db:status                    # show local migration state (add :prod for production)
 pnpm typecheck                    # before claiming done
-pnpm build                        # uses SKIP_ENV_VALIDATION via apps/dashboard script
+pnpm build                        # production build (next build --webpack)
 ```
 
 **Two terminals required for local agent runs**: `pnpm dev` + `pnpm inngest:dev`. Without the second, Inngest events go nowhere.
@@ -116,6 +117,7 @@ The dashboard talks to its **own REST API routes** via **axios + TanStack Query*
 ## Gotchas
 
 - **`proxy.ts` not `middleware.ts`** (Next 16 convention). On **Next 16** `proxy.ts` exporting `proxy` is picked up as middleware: it registers as `/_middleware` on the **Node.js runtime** (the `edge` runtime is NOT supported for `proxy`) and gates `/agents/:path*`. Verify with the `ƒ Proxy (Middleware)` line in `next build` output + the `/agents/:path*` matcher in `.next/server/functions-config-manifest.json`. ⚠️ On the prior Next 15.5 the `proxy.ts` filename was silently ignored (legacy convention is `middleware.ts`), so the auth gate never ran — the Next 16 upgrade is what activated it.
+- **Vercel does NOT reliably ship a sibling workspace package's data files into a lambda via `outputFileTracingIncludes`.** With `rootDirectory=apps/dashboard`, files under `packages/agent-jobhunt/*` (outside the root dir, outside `node_modules`) are listed in the route's `.nft.json` locally yet end up **absent** in the deployed function → `ENOENT` at runtime. This crashed `/api/inngest` (it read `profile/me.md` via `readFileSync(import.meta.url + "../profile")` at module load). **Fix pattern: inline the data into the JS bundle instead of reading it from disk.** Both the profile and the render assets do this via committed generated modules — `src/profile.generated.ts` (`pnpm --filter @hub/agent-jobhunt profile:build`) and `src/render-assets.generated.ts` (`render-assets:build`, fonts/photo as base64) — each drift-guarded by a test under `test/`. `node_modules` files (e.g. the Prisma engine `.node`) DO trace fine — it's specifically sibling-package *source* that doesn't, so `/api/inngest` now traces nothing but the Prisma engine.
 - **`next build` uses `--webpack`, not the Next 16 default Turbopack.** Turbopack compiles fine but fails at page-data collection with `PageNotFoundError: Cannot find module for page: /auth` (server-actions page). `dev` still uses Turbopack (default). Retry dropping `--webpack` after a Next minor bump; if it builds, prefer Turbopack.
 - **Supabase local runs on 54421-54429** (not the default 54321 range) — other local Supabase projects on this machine use the defaults.
 - **Local Supabase has no pooler** — `DATABASE_URL` and `DIRECT_URL` both point to `:54422`. In Vercel production, `DATABASE_URL` becomes `:6543?pgbouncer=true&connection_limit=1`.
@@ -133,10 +135,11 @@ The dashboard talks to its **own REST API routes** via **axios + TanStack Query*
 - **Supabase Storage bucket `job-hunt` must exist before the agent runs**. `pnpm storage:setup` creates it idempotently. Per-job artifacts live at `${runId}/${jobId}/{resume.yaml,cover.md,summary.md,diff.md,resume.pdf,cover.pdf}`.
 - **Render (iter 5) compiles Typst → PDF in a WARM Vercel Sandbox, folded into the tailor sub-graph** (`ats-check → revise? → render → persist`). The single backend is `@vercel/sandbox` (v2) — there is no local-CLI or WASM path; even local dev provisions a remote microVM, so it needs `VERCEL_TOKEN`/`VERCEL_TEAM_ID`/`VERCEL_PROJECT_ID` (passed explicitly to `Sandbox.create({token,teamId,projectId})` — the SDK only auto-reads `VERCEL_OIDC_TOKEN`). The sandbox is a **module-level singleton** (memoized promise in `render/sandbox.ts`) reused across the run's parallel tailor branches; Typst (musl static binary) + fonts + templates are installed/written once; `disposeRenderSandbox()` is called by the parent `finalize` node (and as a safety net in `inngest.ts`'s catch). A failed creation resets the memo so a later call retries. Smoke-test before the graph with `scripts/rerun-render.ts`.
 - **The render node is BEST-EFFORT and never throws.** It runs before `persist`, so a Typst/sandbox failure must not lose the text artifacts — it logs, records `renderDetails.ats.ok=false`, returns null PDF paths, and `persist` still writes `status=tailored` (no PDF). render uploads the two PDFs itself (lean checkpoints); `persist` only records the paths + ATS result. "Has PDF" is gated on `resumePdfStoragePath != null` (no new `JobStatus`).
-- **Typst templates were ported with two deltas:** font is a fallback list `("Arial", "Liberation Sans")` + bundled Liberation Sans TTFs passed via `--font-path` (Arial absent on Linux); and `@preview/cmarker` was dropped from `cover.typ` (needs network at compile) — the cover body is rendered as blank-line-separated paragraphs. Assets live in `packages/agent-jobhunt/render-assets/` (loaded via `import.meta.url` like `profile.ts`; needs `outputFileTracingIncludes` before Vercel deploy). Typst requires the entry template inside `--root`, so root is `/vercel/sandbox` and templates sit under it; per-job data uses absolute-under-root paths and the render node overrides `profile.photo` to the per-job path.
+- **Typst templates were ported with two deltas:** font is a fallback list `("Arial", "Liberation Sans")` + bundled Liberation Sans TTFs passed via `--font-path` (Arial absent on Linux); and `@preview/cmarker` was dropped from `cover.typ` (needs network at compile) — the cover body is rendered as blank-line-separated paragraphs. Assets live in `packages/agent-jobhunt/render-assets/` (edit these), but are **inlined into the bundle** via `src/render-assets.generated.ts` (regenerate with `pnpm --filter @hub/agent-jobhunt render-assets:build`) — they are NOT read from disk at runtime and need no `outputFileTracingIncludes` (see the sibling-package tracing gotcha above). Typst requires the entry template inside `--root`, so root is `/vercel/sandbox` and templates sit under it; per-job data uses absolute-under-root paths and the render node overrides `profile.photo` to the per-job path.
 - **ATS check is now `unpdf` in-process (record-only), replacing the legacy `pdftotext`.** `checkAts` = ≥500 chars + Experience/Skills/Education present. It NEVER gates a revise (matches iter-4 single-pass + legacy "exit 2 = warn, don't halt"); the result lands in `Job.renderDetails.ats`. `AtsResult` is a `type` alias (not interface) so it stays assignable to Prisma `InputJsonValue`.
 - **The dashboard PDF download route (`app/api/job-hunt/artifact/route.ts`) self-checks `hub_token`.** `proxy.ts`'s matcher only covers `/agents/*`, NOT `/api/*`, so any API route must re-check the cookie itself. It maps `?kind` → a Job column server-side (never trusts a raw path) and 302-redirects to a fresh 60s `createSignedUrl` (the bucket is private).
-- **The DB has no Prisma migrations history — always use `db:push` (Prisma CLI), never `prisma migrate`, never raw `ALTER TABLE`.** Apply schema changes with `pnpm --filter @hub/core exec dotenv -e ../../.env.local -- prisma db push` (add `--accept-data-loss` for drops). Every `db:push` warns it will drop the LangGraph `checkpoint_*` tables (`checkpoints`, `checkpoint_blobs`, `checkpoint_writes`, `checkpoint_migrations`) because they're owned by `PostgresSaver.setup()`, not the Prisma schema — this is expected. They're auto-recreated **empty** on the next agent run via `setupCheckpointer()`, so `--accept-data-loss` only costs past-run resume state (fine for local dev), never functionality.
+- **The DB is managed by Prisma Migrations** (`packages/core/prisma/migrations/`, baseline `0_init`). Edit `schema.prisma`, then create a migration locally with `pnpm db:migrate` (`prisma migrate dev` — applies it + regenerates the client). It is applied to **production automatically by the Vercel build**: `apps/dashboard/vercel.json` runs `prisma migrate deploy` (gated on `VERCEL_ENV=production`) before `next build`. Check drift with `pnpm db:status` / `pnpm db:status:prod`. **Never** hand-edit an already-applied migration's SQL, and **never** run raw `ALTER TABLE` or `prisma db push` against a migrated DB — both desync the migrations history. (Pre-production this project used `db:push` with no history; that was retired when we deployed — `0_init` is the baseline, baselined in prod via `migrate resolve --applied`.)
+- **The LangGraph checkpointer lives in its own `langgraph` Postgres schema** (`packages/agent-jobhunt/src/checkpointer.ts` → `PostgresSaver.fromConnString(url, { schema: "langgraph" })`). Prisma owns `public`, so it never sees the `checkpoint_*` tables as drift — which is exactly what lets `prisma migrate dev`/`deploy` work cleanly. `setup()` runs `CREATE SCHEMA IF NOT EXISTS "langgraph"` itself on the first agent run.
 
 ---
 

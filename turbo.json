@@ -1,9 +1,32 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [".env.local", ".env"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": [
+        "SKIP_ENV_VALIDATION",
+        "DATABASE_URL",
+        "DIRECT_URL",
+        "SUPABASE_URL",
+        "SUPABASE_ANON_KEY",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "ANTHROPIC_API_KEY",
+        "FIRECRAWL_API_KEY",
+        "HUB_ACCESS_TOKEN",
+        "INNGEST_EVENT_KEY",
+        "INNGEST_SIGNING_KEY",
+        "LANGFUSE_PUBLIC_KEY",
+        "LANGFUSE_SECRET_KEY",
+        "LANGFUSE_BASE_URL",
+        "JOBHUNT_MAX_JOBS",
+        "JOBHUNT_FIT_THRESHOLD",
+        "VERCEL_TOKEN",
+        "VERCEL_TEAM_ID",
+        "VERCEL_PROJECT_ID",
+        "RENDER_TYPST_VERSION"
+      ]
     },
     "dev": {
       "cache": false,

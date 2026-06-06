@@ -24,11 +24,12 @@ const nextConfig: NextConfig = {
   // next to every Prisma-using route's bundle (binaryTargets in schema.prisma
   // generates the rhel-openssl-3.0.x engine the Vercel runtime needs).
   outputFileTracingIncludes: {
-    // /api/inngest runs the agent graph → also needs the profile data + render
-    // assets that profile.ts / render/assets.ts read at import time.
+    // /api/inngest runs the agent graph. Both the candidate profile and the
+    // render assets are now inlined into the bundle (src/profile.generated.ts,
+    // src/render-assets.generated.ts), so no sibling-package files need tracing
+    // here — only the Prisma query engine (a node_modules binary, which DOES
+    // trace reliably).
     "/api/inngest": [
-      "../../packages/agent-jobhunt/render-assets/**",
-      "../../packages/agent-jobhunt/profile/**",
       "../../node_modules/.pnpm/@prisma+client*/node_modules/.prisma/client/*.node",
     ],
     "/api/job-hunt/jobs": [

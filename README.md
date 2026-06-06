@@ -31,7 +31,7 @@ State persists in Supabase (Prisma); runs are observed via Langfuse.
 | Agents | LangGraph (one graph per agent) |
 | Orchestration | Inngest (cron + manual events) |
 | LLM | Vercel AI SDK v5 + `@ai-sdk/anthropic` (Claude) |
-| DB / ORM | Supabase Postgres + Prisma 6 (`db:push` only) |
+| DB / ORM | Supabase Postgres + Prisma 6 (migrations via `prisma migrate`) |
 | Storage | Supabase Storage (private buckets, signed URLs) |
 | PDF render | Typst in a Vercel Sandbox |
 | Observability | Langfuse · Validation: Zod · Tests: Vitest |
@@ -48,7 +48,7 @@ sign-in form). See **Dashboard data fetching** in [`CLAUDE.md`](./CLAUDE.md) for
 pnpm install
 cp .env.example .env.local        # fill in Anthropic / Inngest / Langfuse keys
 pnpm supabase:start               # start local Supabase (Docker)
-pnpm db:push                      # sync Prisma schema to local DB
+pnpm db:deploy                    # apply committed migrations to the local DB
 ```
 
 Local Supabase runs on ports **54421-54429** (custom range to avoid collisions with other local projects).
@@ -80,14 +80,16 @@ Local Supabase runs on ports **54421-54429** (custom range to avoid collisions w
 
 ### Database (Prisma)
 
-> **This project uses `db:push` only — there is no migrations history.** Don't run `db:migrate` / `db:deploy`; apply every schema change with `db:push`. (See the gotcha in [`CLAUDE.md`](./CLAUDE.md).)
+> **This project uses Prisma Migrations** (`packages/core/prisma/migrations/`). Edit `schema.prisma`, then create a migration with `pnpm db:migrate`. Production applies them automatically during the Vercel build (`prisma migrate deploy`). Don't run `prisma db push` against a migrated DB. (See the gotcha in [`CLAUDE.md`](./CLAUDE.md).)
 
 | Command | What it does | When to use |
 |---|---|---|
-| `pnpm db:push` | Push `schema.prisma` to the DB (no migration file) | **How we apply schema changes** — edit, push, repeat |
+| `pnpm db:migrate` | Create + apply a new migration (`prisma migrate dev`) | **How we apply schema changes** — edit, migrate |
+| `pnpm db:deploy` | Apply pending migrations, no new file (`prisma migrate deploy`) | Sync a DB to committed migrations (CI/prod/fresh local) |
+| `pnpm db:status` | Show migration state (`:prod` for production) | Check for drift before/after deploying |
 | `pnpm db:generate` | Regenerate the Prisma Client | After editing `schema.prisma` (also runs on `pnpm install`) |
 | `pnpm db:studio` | Open Prisma Studio (http://localhost:5555) | Browse/edit table data |
-| `pnpm db:wipe` | `prisma db push --force-reset` | Wipe and rebuild the local DB from scratch |
+| `pnpm db:reset` | `prisma migrate reset` (re-applies all migrations) | Wipe and rebuild the local DB from scratch |
 
 ### Two studios, different purposes
 
@@ -99,7 +101,7 @@ Local Supabase runs on ports **54421-54429** (custom range to avoid collisions w
 ## Where things live
 
 - **`.env.local`** at the repo root — single source of truth for env vars. Loaded into Next.js and Prisma via `dotenv-cli`.
-- **Prisma schema** — `packages/core/prisma/schema.prisma` (applied via `db:push`; no `migrations/` dir)
+- **Prisma schema** — `packages/core/prisma/schema.prisma` (applied via migrations in `packages/core/prisma/migrations/`)
 - **Supabase config** — `supabase/config.toml`
 - **Generated Prisma client** — `packages/core/node_modules/.prisma/client`
 

@@ -14,7 +14,9 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "echo 'no lint configured' && exit 0",
-    "clean": "rm -rf node_modules .turbo"
+    "clean": "rm -rf node_modules .turbo",
+    "profile:build": "tsx scripts/gen-profile-data.ts",
+    "render-assets:build": "tsx scripts/gen-render-assets.ts"
   },
   "dependencies": {
     "@hub/core": "workspace:*",

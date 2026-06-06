@@ -1,22 +1,16 @@
 import "server-only";
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
 import { parse as yamlParse } from "yaml";
 import { ResumeMasterSchema, type ResumeMaster } from "./tailor/schemas";
+import { PROFILE_ME_MD, PROFILE_RESUME_YAML } from "./profile.generated";
 
-const PROFILE_DIR = join(
-  dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "profile",
-);
-
-export const PROFILE_ME_MD = readFileSync(join(PROFILE_DIR, "me.md"), "utf8");
-
-export const PROFILE_RESUME_YAML = readFileSync(
-  join(PROFILE_DIR, "resume-master.yaml"),
-  "utf8",
-);
+// The profile is INLINED into the bundle (src/profile.generated.ts), not read
+// from disk at runtime. Serverless functions on Vercel don't reliably ship a
+// sibling workspace package's data files (packages/agent-jobhunt/profile/*)
+// into the lambda via outputFileTracingIncludes — it crashed /api/inngest with
+// ENOENT at import. A bundled import resolves identically under webpack,
+// turbopack, vitest and tsx. Regenerate after editing profile/me.md or
+// profile/resume-master.yaml: `pnpm --filter @hub/agent-jobhunt profile:build`.
+export { PROFILE_ME_MD, PROFILE_RESUME_YAML };
 
 export const PROFILE_RESUME_MASTER: ResumeMaster = ResumeMasterSchema.parse(
   yamlParse(PROFILE_RESUME_YAML),

@@ -1,33 +1,24 @@
 import "server-only";
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
+import {
+  RESUME_TEMPLATE,
+  COVER_TEMPLATE,
+  PHOTO_PNG_BASE64,
+  FONTS_BASE64,
+} from "../render-assets.generated";
 
-// Bundled render assets live at the package root (sibling of profile/), read at
-// module load via import.meta.url — same pattern as profile.ts. On Vercel these
-// need outputFileTracingIncludes; dev resolves fine from source.
-const RENDER_ASSETS_DIR = join(
-  dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "render-assets",
-);
-
-const FONT_FILES = [
-  "LiberationSans-Regular.ttf",
-  "LiberationSans-Bold.ttf",
-  "LiberationSans-Italic.ttf",
-  "LiberationSans-BoldItalic.ttf",
-] as const;
-
+// Render assets are INLINED into the bundle (src/render-assets.generated.ts),
+// not read from disk at runtime. Serverless functions on Vercel don't reliably
+// ship a sibling workspace package's data files (render-assets/*) into the
+// lambda via outputFileTracingIncludes — it crashed /api/inngest with ENOENT at
+// import (same root cause as the profile). Bundled imports resolve identically
+// under webpack, turbopack, vitest and tsx. Regenerate after editing
+// render-assets/: `pnpm --filter @hub/agent-jobhunt render-assets:build`.
 export const renderAssets = {
-  resumeTemplate: readFileSync(
-    join(RENDER_ASSETS_DIR, "templates", "resume.typ"),
-  ),
-  coverTemplate: readFileSync(join(RENDER_ASSETS_DIR, "templates", "cover.typ")),
-  photo: readFileSync(join(RENDER_ASSETS_DIR, "photo.png")),
-  fonts: FONT_FILES.map((name) => ({
+  resumeTemplate: Buffer.from(RESUME_TEMPLATE, "utf8"),
+  coverTemplate: Buffer.from(COVER_TEMPLATE, "utf8"),
+  photo: Buffer.from(PHOTO_PNG_BASE64, "base64"),
+  fonts: Object.entries(FONTS_BASE64).map(([name, base64]) => ({
     name,
-    bytes: readFileSync(join(RENDER_ASSETS_DIR, "fonts", name)),
+    bytes: Buffer.from(base64, "base64"),
   })),
 };
