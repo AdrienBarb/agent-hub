@@ -44,6 +44,26 @@ const envSchema = z.object({
   BROWSERBASE_API_KEY: z.string().min(1).optional(),
   BROWSERBASE_PROJECT_ID: z.string().min(1).optional(),
   BROWSERBASE_PROXY: z.string().optional(),
+
+  // Slack notifications are optional: when SLACK_BOT_TOKEN or SLACK_CHANNEL is
+  // unset the notify helpers no-op (same contract as Langfuse). A bot token
+  // (xoxb-…) with chat:write to the target channel; SLACK_CHANNEL is a channel
+  // id (Cxxxx) or name (#job-hunt) the bot is a member of.
+  SLACK_BOT_TOKEN: z.string().min(1).optional(),
+  SLACK_CHANNEL: z.string().min(1).optional(),
+
+  // Public origin of the deployed dashboard (e.g. https://hub.example.com), used
+  // to build the "Open board" deep-link in Slack messages. Optional: the link is
+  // omitted when unset. No trailing slash.
+  HUB_BASE_URL: z.string().url().optional(),
+
+  // Debug toggle (default ON): include a "scraped this run" listing in the
+  // job-hunt digest AND relax the send gate so a run that scraped anything still
+  // notifies. Set to "false" to revert to "notify only on opportunities/warnings".
+  JOBHUNT_NOTIFY_SCRAPED_LIST: z
+    .string()
+    .default("true")
+    .transform((v) => v !== "false"),
 });
 
 export type Env = z.infer<typeof envSchema>;

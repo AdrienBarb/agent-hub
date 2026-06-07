@@ -14,7 +14,8 @@
     "./langfuse": "./src/langfuse.ts",
     "./supabase": "./src/supabase.ts",
     "./prisma": "./src/prisma.ts",
-    "./redact": "./src/redact.ts"
+    "./redact": "./src/redact.ts",
+    "./slack": "./src/slack.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -36,6 +37,7 @@
     "@langfuse/otel": "^5.4.1",
     "@opentelemetry/sdk-node": "^0.207.0",
     "@prisma/client": "^6.0.0",
+    "@slack/web-api": "^7.16.0",
     "@supabase/supabase-js": "^2.105.0",
     "ai": "^5.0.0",
     "inngest": "^3.30.0",

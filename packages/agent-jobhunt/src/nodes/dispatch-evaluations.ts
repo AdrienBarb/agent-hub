@@ -3,6 +3,7 @@ import { Send } from "@langchain/langgraph";
 import { db } from "@hub/core/db";
 import { evaluatorSubgraph } from "../evaluator/graph";
 import type { JobHuntStateType } from "../state";
+import { makeWarning } from "../warnings";
 
 type EvaluatePayload = { jobId: string; rawMarkdown: string };
 
@@ -73,6 +74,11 @@ export async function evaluateOneNode(
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`[evaluate-one] ${jobId} failed: ${message}`);
-    return { evaluations: [] };
+    // Closes the worst gap: a crashed eval was indistinguishable from "no
+    // content" — the job silently stayed `new` and never tailored.
+    return {
+      evaluations: [],
+      warnings: [makeWarning("eval_failed", "evaluate-one", { detail: jobId })],
+    };
   }
 }

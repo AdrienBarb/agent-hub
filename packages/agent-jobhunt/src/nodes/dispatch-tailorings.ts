@@ -5,6 +5,7 @@ import { JobStatus, type Prisma } from "@hub/core/prisma";
 import { tailorSubgraph } from "../tailor/graph";
 import { disposeRenderSandbox } from "../render";
 import type { JobHuntStateType } from "../state";
+import { makeWarning } from "../warnings";
 
 type TailorPayload = {
   runId: string;
@@ -20,12 +21,29 @@ export async function postEvalFanInNode(
 }
 
 // Terminal fan-in after tailor-one (or the skip path when nothing was
-// tailored). Tears down the warm render sandbox once per run.
+// tailored). Tears down the warm render sandbox once per run and recovers any
+// render failures into the warnings channel.
 export async function finalizeNode(
-  _state: JobHuntStateType,
+  state: JobHuntStateType,
 ): Promise<Partial<JobHuntStateType>> {
   await disposeRenderSandbox();
-  return {};
+
+  // Render runs in the tailor SUBGRAPH and is best-effort (never throws), so a
+  // failed PDF render can't bubble a warning through state. Recover it here by
+  // counting THIS run's tailored jobs (from state.tailorings, not a runId query —
+  // runId is re-stamped on re-listing) that ended up without a resume PDF.
+  const tailoredJobIds = Object.values(state.tailorings)
+    .filter((t) => t.status === JobStatus.tailored)
+    .map((t) => t.jobId);
+  if (tailoredJobIds.length === 0) return {};
+
+  const renderFailed = await db.job.count({
+    where: { id: { in: tailoredJobIds }, resumePdfStoragePath: null },
+  });
+  if (renderFailed === 0) return {};
+  return {
+    warnings: [makeWarning("render_failed", "render", { count: renderFailed })],
+  };
 }
 
 export async function dispatchTailoringsEdge(
@@ -92,6 +110,7 @@ export async function tailorOneNode(
     console.error(`[tailor-one] ${jobId} failed: ${message}`);
     return {
       tailorings: { [jobId]: { jobId, status: "failed" } },
+      warnings: [makeWarning("tailor_failed", "tailor-one", { detail: jobId })],
     };
   }
 }

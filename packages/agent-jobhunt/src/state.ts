@@ -2,6 +2,7 @@ import "server-only";
 import { Annotation } from "@langchain/langgraph";
 import { JobStatus } from "@hub/core/prisma";
 import type { ParsedJob } from "./boards/types";
+import { keyOfWarning, type RunWarning } from "./warnings";
 
 export interface ScrapedListing {
   board: string;
@@ -67,6 +68,14 @@ export const JobHuntState = Annotation.Root({
   tailorings: Annotation<Record<string, TailoringResult>>({
     reducer: (a, b) => ({ ...a, ...b }),
     default: () => ({}),
+  }),
+
+  // Structured SOFT-failure sink. Keyed (NOT [...a,...b]) for the same reason as
+  // the arrays above: evaluate-one/tailor-one fan out via Send() under the
+  // PostgresSaver checkpointer, so a replayed branch must overwrite, not append.
+  warnings: Annotation<RunWarning[]>({
+    reducer: keyedArrayReducer(keyOfWarning),
+    default: () => [],
   }),
 });
 

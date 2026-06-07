@@ -4,6 +4,7 @@ import { db } from "@hub/core/db";
 import { env } from "@hub/core/env";
 import type { JobHuntStateType } from "../state";
 import { fetchLinkedinJd, disposeLinkedinSession } from "../boards/linkedin";
+import { summarizeScrapeErrors, makeWarning, type RunWarning } from "../warnings";
 
 const CONCURRENCY = 5;
 const FIRECRAWL_TIMEOUT_MS = 60_000;
@@ -12,6 +13,8 @@ const OUTAGE_MIN_SAMPLE = 3;
 const firecrawl = new Firecrawl({ apiKey: env.FIRECRAWL_API_KEY });
 
 type ScrapeOutcome = "ok" | "fetch-error" | "db-error";
+
+type FirecrawlResult = { board: string; outcome: ScrapeOutcome; error?: unknown };
 
 type JobRow = { id: string; url: string; board: string; slug: string };
 
@@ -27,7 +30,7 @@ async function writeRawMarkdown(id: string, md: string): Promise<ScrapeOutcome> 
 }
 
 /** Firecrawl boards: fetch the JD page at job.url (unchanged behaviour). */
-async function scrapeFirecrawlOne(job: JobRow): Promise<ScrapeOutcome> {
+async function scrapeFirecrawlOne(job: JobRow): Promise<FirecrawlResult> {
   let md: string;
   try {
     const res = await firecrawl.scrape(job.url, {
@@ -40,11 +43,11 @@ async function scrapeFirecrawlOne(job: JobRow): Promise<ScrapeOutcome> {
   } catch (err) {
     const message = err instanceof Error ? err.message : "unknown error";
     console.error(`[deep-scrape] ${job.id} fetch failed: ${message}`);
-    return "fetch-error";
+    return { board: job.board, outcome: "fetch-error", error: err };
   }
   const outcome = await writeRawMarkdown(job.id, md);
   if (outcome === "ok") console.log(`[deep-scrape] ${job.id}: ${md.length} chars`);
-  return outcome;
+  return { board: job.board, outcome };
 }
 
 /**
@@ -79,11 +82,25 @@ export async function deepScrapeNode(
 
   try {
     let firecrawlSucceeded = 0;
+    const fetchErrorsByBoard = new Map<string, unknown[]>();
+    const dbErrorsByBoard = new Map<string, number>();
     for (let i = 0; i < firecrawlJobs.length; i += CONCURRENCY) {
       const chunk = firecrawlJobs.slice(i, i + CONCURRENCY);
       const results = await Promise.allSettled(chunk.map(scrapeFirecrawlOne));
       for (const r of results) {
-        if (r.status === "fulfilled" && r.value === "ok") firecrawlSucceeded++;
+        if (r.status !== "fulfilled") continue;
+        const { board, outcome, error } = r.value;
+        if (outcome === "ok") {
+          firecrawlSucceeded++;
+        } else if (outcome === "db-error") {
+          // Scrape succeeded but the DB write failed — a different root cause
+          // than a page-fetch fault, so it gets its own warning kind.
+          dbErrorsByBoard.set(board, (dbErrorsByBoard.get(board) ?? 0) + 1);
+        } else {
+          const arr = fetchErrorsByBoard.get(board) ?? [];
+          arr.push(error);
+          fetchErrorsByBoard.set(board, arr);
+        }
       }
     }
 
@@ -106,7 +123,20 @@ export async function deepScrapeNode(
     console.log(
       `[deep-scrape] succeeded=${succeeded} (firecrawl=${firecrawlSucceeded}/${firecrawlJobs.length}, linkedin=${linkedinSucceeded}/${linkedinJobs.length})`,
     );
-    return { deepScrapedCount: succeeded };
+    // LinkedIn JD misses (null) are normal soft misses (too-short / 404), not
+    // warned. A Browserbase quota error would already have surfaced in the
+    // listing scrape (shared session), so only Firecrawl JD errors are batched.
+    // "jd" detail keeps these distinct from the listing phase's same-kind
+    // (402/429) warnings in the keyed reducer.
+    const warnings: RunWarning[] = [
+      ...[...fetchErrorsByBoard.entries()].flatMap(([board, errs]) =>
+        summarizeScrapeErrors(board, errs, "deepscrape_failed", "jd"),
+      ),
+      ...[...dbErrorsByBoard.entries()].map(([board, count]) =>
+        makeWarning("db_write_failed", board, { count }),
+      ),
+    ];
+    return { deepScrapedCount: succeeded, warnings };
   } finally {
     // Happy-path teardown: nothing downstream needs the Browserbase session, so
     // free the free-tier browser-hour ASAP. Idempotent — inngest's catch also

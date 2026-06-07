@@ -28,6 +28,8 @@ const SECRET_ENV_KEYS = [
   // (wss://connect.browserbase.com?apiKey=…); a connectOverCDP error can echo it.
   "BROWSERBASE_API_KEY",
   "BROWSERBASE_PROJECT_ID",
+  // Slack bot token (xoxb-…) — a @slack/web-api error body can echo the token.
+  "SLACK_BOT_TOKEN",
 ] as const;
 
 export function redactConnString(input: string): string {

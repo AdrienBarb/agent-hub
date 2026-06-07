@@ -3,6 +3,7 @@ import type { ScrapedListing } from "../../state";
 import type { BoardConfig } from "../../config";
 import { fetchHtml, linkedinConfigured } from "./browserbase";
 import { extractJdText } from "./parse";
+import { httpStatusOf, makeWarning, type RunWarning } from "../../warnings";
 
 // LinkedIn returns 25 cards per guest-search page; `start` paginates by 25.
 const PAGE_SIZE = 25;
@@ -31,24 +32,31 @@ function detailUrl(slug: string): string {
  * configured it logs and returns []; a failed page is logged and skipped. The
  * caller (scrapeNode) keeps these out of the Firecrawl outage guard, so a
  * LinkedIn outage never aborts the run.
+ *
+ * Because every page error is swallowed here (the shared Browserbase session
+ * means a quota/credit error hits the FIRST page and recurs), this is the only
+ * place that can surface a structured warning for it — returned alongside the
+ * listings rather than thrown. Unconfigured/no-searches are intentional skips,
+ * not warnings.
  */
 export async function scrapeLinkedinListings(
   boardId: string,
   cfg: BoardConfig,
-): Promise<ScrapedListing[]> {
+): Promise<{ listings: ScrapedListing[]; warnings: RunWarning[] }> {
   if (!linkedinConfigured()) {
     console.warn(
       "[scrape] linkedin: BROWSERBASE_API_KEY/PROJECT_ID unset — skipping board",
     );
-    return [];
+    return { listings: [], warnings: [] };
   }
   const lk = cfg.linkedin;
   if (!lk || lk.searches.length === 0) {
     console.warn("[scrape] linkedin: no searches configured — skipping board");
-    return [];
+    return { listings: [], warnings: [] };
   }
 
   const listings: ScrapedListing[] = [];
+  const errors: unknown[] = [];
   for (const search of lk.searches) {
     for (let page = 0; page < lk.maxPages; page++) {
       const url = searchUrl(search.keywords, search.geoId, lk.fTPR, page * PAGE_SIZE);
@@ -63,10 +71,24 @@ export async function scrapeLinkedinListings(
       } catch (err) {
         const message = err instanceof Error ? err.message : "unknown error";
         console.error(`[scrape] linkedin ${url} failed: ${message}`);
+        errors.push(err);
       }
     }
   }
-  return listings;
+
+  const warnings: RunWarning[] = [];
+  if (errors.length > 0) {
+    const quota = errors.some((e) => {
+      const s = httpStatusOf(e);
+      return s === 429 || s === 402;
+    });
+    warnings.push(
+      makeWarning(quota ? "browserbase_quota" : "linkedin_skipped", boardId, {
+        count: errors.length,
+      }),
+    );
+  }
+  return { listings, warnings };
 }
 
 /**

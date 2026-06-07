@@ -7,3 +7,9 @@ export type { ModelKey } from "./llm";
 export { inngest } from "./inngest";
 export { setupLangfuse, flushLangfuse, shutdownLangfuse } from "./langfuse";
 export { redactConnString } from "./redact";
+export {
+  postSlackMessage,
+  postSlackThreadReply,
+  isSlackConfigured,
+} from "./slack";
+export type { SlackMessage } from "./slack";
