@@ -9,7 +9,11 @@ export async function extractNode(
   state: EvaluatorStateType,
 ): Promise<Partial<EvaluatorStateType>> {
   const result = await generateObject({
-    model: anthropic(MODELS.evaluator),
+    // Haiku (MODELS.extractor): extraction is mechanical and runs once per scraped
+    // job (the highest-volume LLM call), so it uses the cheapest tier. No profile
+    // is prepended (extraction must stay unbiased) and no cacheControl (EXTRACT_SYSTEM
+    // is below every cache minimum), so the model swap is cache-neutral.
+    model: anthropic(MODELS.extractor),
     schema: RequirementsSchema,
     allowSystemInMessages: true,
     // Anthropic-native structured outputs — see tailor/run-step.ts + CLAUDE.md.

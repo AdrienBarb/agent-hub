@@ -185,6 +185,18 @@ export const CoverDraftSchema = z.object({
     ),
 });
 
+// Minimal patch emitted by the (rare) summary-only LLM revise: only the one prose
+// field an ATS `summary_too_short` can't be fixed deterministically. Keeping the
+// output to a single string instead of re-emitting the whole ResumeDraft is the
+// point — it removes the full-resume Opus output cost from the revise loop.
+export const ResumeSummaryPatchSchema = z.object({
+  summary: z
+    .string()
+    .describe(
+      "Rewritten resume summary, ~3 sentences and at least 50 characters, in the plan's outputLanguage. Re-emphasize what the master already proves; no fabrication, no em-dashes, no AI vocabulary.",
+    ),
+});
+
 export const AtsCheckResultSchema = z.object({
   ok: z.boolean(),
   issues: z.array(
@@ -200,4 +212,5 @@ export type ResumeYaml = z.infer<typeof ResumeYamlSchema>;
 export type ResumeMaster = z.infer<typeof ResumeMasterSchema>;
 export type ResumeDraft = z.infer<typeof ResumeDraftSchema>;
 export type CoverDraft = z.infer<typeof CoverDraftSchema>;
+export type ResumeSummaryPatch = z.infer<typeof ResumeSummaryPatchSchema>;
 export type AtsCheckResult = z.infer<typeof AtsCheckResultSchema>;

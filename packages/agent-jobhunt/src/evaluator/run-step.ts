@@ -17,8 +17,6 @@ export async function runEvaluatorStep<T extends z.ZodTypeAny>({
   userContent,
   schema,
 }: RunStepArgs<T>): Promise<z.infer<T>> {
-  const system = `${PROFILE_COMBINED}\n\n---\n\nINSTRUCTIONS\n\n${systemInstructions}`;
-
   const result = await generateObject({
     model: anthropic(MODELS.evaluator),
     schema,
@@ -35,12 +33,25 @@ export async function runEvaluatorStep<T extends z.ZodTypeAny>({
       anthropic: { structuredOutputMode: "outputFormat" },
     },
     messages: [
+      // Cache-breakpoint split: the shared candidate profile (~3243 tok, above
+      // Sonnet's 2048-token cache minimum) is its OWN system block carrying the
+      // cacheControl breakpoint, so it is written ONCE and read at ~0.1x across
+      // every evaluator node (compare/score/critique) and every job — instead of
+      // being re-written inside each node's per-step prefix. The per-step
+      // instructions follow in a second, uncached block.
+      // ⚠️ Do NOT replicate this split in tailor/run-step.ts: that path runs on
+      // Opus (4096-token cache minimum), so a profile-only breakpoint of ~3243 tok
+      // sits BELOW the minimum and would SILENTLY cache nothing.
       {
         role: "system",
-        content: system,
+        content: PROFILE_COMBINED,
         providerOptions: {
           anthropic: { cacheControl: { type: "ephemeral" } },
         },
+      },
+      {
+        role: "system",
+        content: `---\n\nINSTRUCTIONS\n\n${systemInstructions}`,
       },
       { role: "user", content: userContent },
     ],

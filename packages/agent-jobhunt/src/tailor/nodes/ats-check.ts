@@ -2,8 +2,10 @@ import "server-only";
 import type { AtsCheckResult, ResumeDraft } from "../schemas";
 import type { TailorStateType } from "../state";
 
-const MIN_SUMMARY_CHARS = 50;
-const MAX_BULLETS_PER_ROLE = 3;
+// Exported so the deterministic repair in revise.ts enforces the SAME thresholds
+// it is validated against here (single source of truth for the ats-check loop).
+export const MIN_SUMMARY_CHARS = 50;
+export const MAX_BULLETS_PER_ROLE = 3;
 
 export function runAtsValidation(
   resume: ResumeDraft | undefined,

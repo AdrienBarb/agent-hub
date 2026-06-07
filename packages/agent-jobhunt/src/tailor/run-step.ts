@@ -39,6 +39,13 @@ export async function runTailorStep<T extends z.ZodTypeAny>({
         anthropic: { structuredOutputMode: "outputFormat" },
       },
       messages: [
+        // Profile + per-step instructions stay in ONE cached system block on
+        // purpose. The evaluator (Sonnet, 2048-token cache minimum) splits the
+        // profile into its own breakpoint to share it across nodes — but that
+        // split must NOT be copied here: PROFILE_COMBINED alone (~3243 tok) is
+        // BELOW Opus's 4096-token cache minimum, so a profile-only breakpoint
+        // would silently cache nothing (cache_creation_input_tokens=0, no error).
+        // Keeping profile+instructions together clears 4096, so this block caches.
         {
           role: "system",
           content: system,
