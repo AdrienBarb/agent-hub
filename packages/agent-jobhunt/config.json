@@ -35,6 +35,18 @@
         "waitFor": 12000,
         "onlyMainContent": false
       }
+    },
+    "linkedin": {
+      "source": "linkedin",
+      "linkedin": {
+        "searches": [
+          { "keywords": "full stack developer", "geoId": "106693272" },
+          { "keywords": "frontend developer", "geoId": "106693272" },
+          { "keywords": "software engineer", "geoId": "106693272" }
+        ],
+        "fTPR": "r86400",
+        "maxPages": 2
+      }
     }
   }
 }

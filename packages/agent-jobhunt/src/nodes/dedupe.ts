@@ -49,6 +49,7 @@ function normalizeCompany(raw: string | null | undefined): string {
     .normalize("NFD")
     .replace(/\p{M}/gu, "") // strip diacritics (combining marks)
     .toLowerCase()
+    .replace(/\([^)]*\)/g, " ") // drop parenthetical annotations, e.g. "Acme (Switzerland)"
     .replace(/\bswitzerland\b/g, "")
     .replace(/\b(gmbh|ag|sa|sarl|ltd|llc|inc)\b/g, "") // legal suffixes (input already de-accented)
     .replace(/[^a-z0-9]+/g, " ") // punctuation → space

@@ -19,19 +19,23 @@
     "render-assets:build": "tsx scripts/gen-render-assets.ts"
   },
   "dependencies": {
+    "@browserbasehq/sdk": "^2.12.0",
     "@hub/core": "workspace:*",
     "@langchain/langgraph": "^1.3.3",
     "@langchain/langgraph-checkpoint-postgres": "^1.0.2",
     "@mendable/firecrawl-js": "^4.25.0",
     "@vercel/sandbox": "^2.1.0",
     "ai": "^5.0.0",
+    "html-to-text": "^10.0.0",
     "inngest": "^3.30.0",
+    "playwright-core": "^1.60.0",
     "server-only": "^0.0.1",
     "unpdf": "^1.6.2",
     "yaml": "^2.9.0",
     "zod": "^3.24.0"
   },
   "devDependencies": {
+    "@types/html-to-text": "^9.0.4",
     "@types/node": "^22.10.0",
     "tsx": "^4.22.4",
     "typescript": "^5.7.2"

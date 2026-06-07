@@ -3,6 +3,7 @@ import Firecrawl from "@mendable/firecrawl-js";
 import { db } from "@hub/core/db";
 import { env } from "@hub/core/env";
 import type { JobHuntStateType } from "../state";
+import { fetchLinkedinJd, disposeLinkedinSession } from "../boards/linkedin";
 
 const CONCURRENCY = 5;
 const FIRECRAWL_TIMEOUT_MS = 60_000;
@@ -12,7 +13,21 @@ const firecrawl = new Firecrawl({ apiKey: env.FIRECRAWL_API_KEY });
 
 type ScrapeOutcome = "ok" | "fetch-error" | "db-error";
 
-async function scrapeOne(job: { id: string; url: string }): Promise<ScrapeOutcome> {
+type JobRow = { id: string; url: string; board: string; slug: string };
+
+async function writeRawMarkdown(id: string, md: string): Promise<ScrapeOutcome> {
+  try {
+    await db.job.update({ where: { id }, data: { rawMarkdown: md } });
+    return "ok";
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "unknown error";
+    console.error(`[deep-scrape] ${id} scrape ok but DB update failed: ${message}`);
+    return "db-error";
+  }
+}
+
+/** Firecrawl boards: fetch the JD page at job.url (unchanged behaviour). */
+async function scrapeFirecrawlOne(job: JobRow): Promise<ScrapeOutcome> {
   let md: string;
   try {
     const res = await firecrawl.scrape(job.url, {
@@ -27,50 +42,75 @@ async function scrapeOne(job: { id: string; url: string }): Promise<ScrapeOutcom
     console.error(`[deep-scrape] ${job.id} fetch failed: ${message}`);
     return "fetch-error";
   }
+  const outcome = await writeRawMarkdown(job.id, md);
+  if (outcome === "ok") console.log(`[deep-scrape] ${job.id}: ${md.length} chars`);
+  return outcome;
+}
 
-  try {
-    await db.job.update({ where: { id: job.id }, data: { rawMarkdown: md } });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "unknown error";
-    console.error(`[deep-scrape] ${job.id} scrape ok but DB update failed: ${message}`);
-    return "db-error";
-  }
-
-  console.log(`[deep-scrape] ${job.id}: ${md.length} chars`);
-  return "ok";
+/**
+ * LinkedIn rows: fetch the JD from the guest DETAIL endpoint via Browserbase
+ * (NOT Firecrawl — job.url is the human apply link, which is login-gated). A
+ * null result (miss/too-short) leaves rawMarkdown null, identical to a Firecrawl
+ * miss: the row is simply excluded from evaluation.
+ */
+async function scrapeLinkedinOne(job: JobRow): Promise<ScrapeOutcome> {
+  const jd = await fetchLinkedinJd(job.slug);
+  if (jd === null) return "fetch-error";
+  const outcome = await writeRawMarkdown(job.id, jd);
+  if (outcome === "ok") console.log(`[deep-scrape] ${job.id} (linkedin): ${jd.length} chars`);
+  return outcome;
 }
 
 export async function deepScrapeNode(
   state: JobHuntStateType,
 ): Promise<Partial<JobHuntStateType>> {
-  const jobs = await db.job.findMany({
+  const jobs = (await db.job.findMany({
     where: { runId: state.runId, rawMarkdown: null },
-    select: { id: true, url: true },
-  });
+    select: { id: true, url: true, board: true, slug: true },
+  })) as JobRow[];
 
   if (jobs.length === 0) {
     console.log("[deep-scrape] no jobs need JD scrape");
     return { deepScrapedCount: 0 };
   }
 
-  let succeeded = 0;
+  const linkedinJobs = jobs.filter((j) => j.board === "linkedin");
+  const firecrawlJobs = jobs.filter((j) => j.board !== "linkedin");
 
-  for (let i = 0; i < jobs.length; i += CONCURRENCY) {
-    const chunk = jobs.slice(i, i + CONCURRENCY);
-    const results = await Promise.allSettled(chunk.map(scrapeOne));
-    for (const r of results) {
-      if (r.status === "fulfilled" && r.value === "ok") succeeded++;
+  try {
+    let firecrawlSucceeded = 0;
+    for (let i = 0; i < firecrawlJobs.length; i += CONCURRENCY) {
+      const chunk = firecrawlJobs.slice(i, i + CONCURRENCY);
+      const results = await Promise.allSettled(chunk.map(scrapeFirecrawlOne));
+      for (const r of results) {
+        if (r.status === "fulfilled" && r.value === "ok") firecrawlSucceeded++;
+      }
     }
-  }
 
-  if (jobs.length >= OUTAGE_MIN_SAMPLE && succeeded === 0) {
-    throw new Error(
-      `deep-scrape: 0/${jobs.length} JD scrapes succeeded — treating as outage`,
+    // LinkedIn JDs share one Browserbase session — fetch sequentially to keep
+    // the free-tier session lean and avoid concurrent-tab flakiness.
+    let linkedinSucceeded = 0;
+    for (const job of linkedinJobs) {
+      if ((await scrapeLinkedinOne(job)) === "ok") linkedinSucceeded++;
+    }
+
+    // Outage guard counts ONLY Firecrawl rows — a LinkedIn outage is fail-soft
+    // and must not abort a run whose Firecrawl boards are healthy.
+    if (firecrawlJobs.length >= OUTAGE_MIN_SAMPLE && firecrawlSucceeded === 0) {
+      throw new Error(
+        `deep-scrape: 0/${firecrawlJobs.length} Firecrawl JD scrapes succeeded — treating as outage`,
+      );
+    }
+
+    const succeeded = firecrawlSucceeded + linkedinSucceeded;
+    console.log(
+      `[deep-scrape] succeeded=${succeeded} (firecrawl=${firecrawlSucceeded}/${firecrawlJobs.length}, linkedin=${linkedinSucceeded}/${linkedinJobs.length})`,
     );
+    return { deepScrapedCount: succeeded };
+  } finally {
+    // Happy-path teardown: nothing downstream needs the Browserbase session, so
+    // free the free-tier browser-hour ASAP. Idempotent — inngest's catch also
+    // calls it as a crash safety-net.
+    await disposeLinkedinSession();
   }
-
-  console.log(
-    `[deep-scrape] succeeded=${succeeded} failed=${jobs.length - succeeded} attempted=${jobs.length}`,
-  );
-  return { deepScrapedCount: succeeded };
 }

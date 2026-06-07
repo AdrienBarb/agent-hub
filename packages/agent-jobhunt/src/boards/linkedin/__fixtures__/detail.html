@@ -1,0 +1,1405 @@
+<html><head><style>
+  /* Container styles */
+  .bb-custom-select-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+
+  /* Opener button styles */
+  .bb-custom-select-opener {
+    display: none;
+  }
+
+  /* Disabled state styles */
+  .bb-custom-select-container.bb-is-disabled .bb-custom-select-opener {
+    background-color: #e9ecef;
+    border-color: #505050;
+    color: #6c757d;
+    cursor: not-allowed;
+  }
+
+  /* Add not-allowed cursor to the entire container when disabled */
+  .bb-custom-select-container.bb-is-disabled {
+    cursor: not-allowed;
+  }
+
+  /* Also ensure the select element shows not-allowed cursor when disabled */
+  .bb-custom-select-container.bb-is-disabled select {
+    cursor: not-allowed;
+  }
+
+  .bb-custom-select-container.bb-is-disabled .bb-custom-select-opener::after {
+    border-top-color: #6c757d;
+  }
+
+  /* Add dropdown arrow */
+  .bb-custom-select-opener::after {
+    content: '';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #666;
+  }
+
+  /* Rotate arrow when open */
+  .bb-custom-select-opener.bb-is-open::after {
+    transform: translateY(-50%) rotate(180deg);
+  }
+
+  /* Keep native select visible */
+  .bb-customSelect select {
+    position: relative;
+    width: 100%;
+  }
+
+  /* Dropdown panel */
+  .bb-custom-select-panel {
+    display: none;  /* Hide by default */
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 999999; /* Should always be on top of other elements */
+    margin-top: 4px;
+    width: max-content; /* Allow panel to grow based on content */
+    min-width: 100%;   /* But ensure it's at least as wide as the opener */
+    background-color: #fff;
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  /* Show panel when container has bb-is-open class */
+  .bb-custom-select-container.bb-is-open .bb-custom-select-panel {
+    display: block;
+  }
+
+  /* Option styles */
+  .bb-custom-select-option {
+    padding: 6px 12px;
+    line-height: 1.5;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .bb-custom-select-option:hover,
+  .bb-custom-select-option.bb-has-focus {
+    background-color: #f0f9fa;
+  }
+
+  .bb-custom-select-option.bb-is-selected {
+    background-color: #e9ecef;
+  }
+</style></head><body><section class="top-card-layout container-lined overflow-hidden babybear:rounded-[0px]">
+        
+      
+
+      <div class="top-card-layout__card relative p-2 papabear:p-details-container-padding">
+            
+        
+      <a href="https://ch.linkedin.com/company/protonprivacy?trk=public_jobs_topcard_logo" target="_self" data-tracking-control-name="public_jobs_topcard_logo" data-tracking-will-navigate="">
+        
+          
+      <img class="artdeco-entity-image artdeco-entity-image--square-5
+          " data-delayed-url="https://media.licdn.com/dms/image/v2/C4D0BAQHeOvrQIOmNzg/company-logo_100_100/company-logo_100_100/0/1653481522290/protonprivacy_logo?e=2147483647&amp;v=beta&amp;t=5lpxJ4H9pggBukJ0TV5mWFOgl4Tqds5xtTjma2GIlWY" data-ghost-classes="artdeco-entity-image--ghost" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/aajlclc14rr2scznz5qm2rj9u" alt="Proton">
+  
+        
+      </a>
+  
+      
+
+          <div class="top-card-layout__entity-info-container flex flex-wrap papabear:flex-nowrap">
+            <div class="top-card-layout__entity-info flex-grow flex-shrink-0 basis-0 babybear:flex-none babybear:w-full babybear:flex-none babybear:w-full">
+                  
+          <a href="https://ch.linkedin.com/jobs/view/frontend-engineer-inbox-web-at-proton-4406371988?trk=public_jobs_topcard-title" data-tracking-control-name="public_jobs_topcard-title" class="topcard__link" data-tracking-will-navigate="">
+            <h2 class="top-card-layout__title font-sans text-lg papabear:text-xl font-bold leading-open text-color-text mb-0 topcard__title">Frontend Engineer (Inbox Web)</h2>
+          </a>
+      
+<!---->
+<!---->
+                <h4 class="top-card-layout__second-subline font-sans text-sm leading-open text-color-text-low-emphasis mt-0.5">
+                  
+        <div class="topcard__flavor-row">
+          <span class="topcard__flavor">
+              <a class="topcard__org-name-link topcard__flavor--black-link" data-tracking-control-name="public_jobs_topcard-org-name" data-tracking-will-navigate="" href="https://ch.linkedin.com/company/protonprivacy?trk=public_jobs_topcard-org-name" rel="noopener" target="_blank">
+                Proton
+              </a>
+          </span>
+            <span class="topcard__flavor topcard__flavor--bullet">
+              Geneva, Geneva, Switzerland
+            </span>
+        </div>
+        <div class="topcard__flavor-row">
+          
+        <span class="posted-time-ago__text posted-time-ago__text--new topcard__flavor--metadata">
+          
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+      17 hours ago
+  
+        </span>
+  
+          
+    
+    
+    
+
+        <figure class="num-applicants__figure topcard__flavor--metadata topcard__flavor--bullet">
+          <span class="num-applicants__icon num-applicants__icon--notify-pebble lazy-load"></span>
+          <figcaption class="num-applicants__caption">
+            Over 200 applicants
+          </figcaption>
+        </figure>
+  
+        </div>
+          
+    
+
+    
+      
+    
+
+    
+      <a href="https://www.linkedin.com/login?session_redirect=https%3A%2F%2Fwww%2Elinkedin%2Ecom%2Fsearch%2Fresults%2Fpeople%2F%3FfacetCurrentCompany%3D5241679&amp;emailAddress=&amp;fromSignIn=&amp;trk=public_jobs_see-who-was-hired_people-search-link_face-pile-cta" target="_self" data-tracking-control-name="full-link" data-tracking-will-navigate="" class="face-pile flex !no-underline see-who-was-hired">
+        
+      <div class="face-pile__images-container self-start flex-shrink-0 mr-1 leading-[1]">
+          
+      <img class="inline-block relative hue-web-entity__image
+          rounded-[50%]
+          w-4 h-4
+           face-pile__image border-1 border-solid border-color-transparent -ml-2 first:ml-0" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/f59g007xgl5h0it32h5hhxjdy" data-ghost-classes="bg-color-entity-ghost-background" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/9c8pery4andzj6ohjkjp54ma2" alt="">
+      
+          
+      <img class="inline-block relative hue-web-entity__image
+          rounded-[50%]
+          w-4 h-4
+           face-pile__image border-1 border-solid border-color-transparent -ml-2 first:ml-0" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/397yg3cgl0og467qsytafbsj" data-ghost-classes="bg-color-entity-ghost-background" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/9c8pery4andzj6ohjkjp54ma2" alt="">
+      
+          
+      <img class="inline-block relative hue-web-entity__image
+          rounded-[50%]
+          w-4 h-4
+           face-pile__image border-1 border-solid border-color-transparent -ml-2 first:ml-0" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/3akw2yuev7ctin9topahifmhg" data-ghost-classes="bg-color-entity-ghost-background" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/9c8pery4andzj6ohjkjp54ma2" alt="">
+      
+      </div>
+        <div class="face-pile__text-container self-center">
+          <p class="face-pile__text font-sans text-sm
+              link-styled hover:underline">
+            See who Proton has hired for this role
+          </p>
+<!---->        </div>
+          
+      </a>
+  
+  
+  
+  
+<!---->      
+                </h4>
+
+              <div class="top-card-layout__cta-container flex flex-wrap mt-0.5 papabear:mt-0 ml-[-12px]">
+                    
+          
+    
+    
+    
+
+        <button class="sign-up-modal__outlet top-card-layout__cta mt-2 ml-1.5 h-auto babybear:flex-auto top-card-layout__cta--primary btn-md btn-primary" data-tracking-client-ingraph="" data-tracking-control-name="public_jobs_contextual-sign-in-modal_ssr-ui-lib-outlet-button" data-modal="job-details-topcard-apply-modal">
+            Apply
+            <icon data-svg-class-name="apply-button__offsite-apply-icon-svg" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/23svd9ojlfrax9l62f8xc1zi6"></icon>
+        </button>
+        
+    
+    
+    
+    
+    
+    
+    
+    
+
+    <div class="contextual-sign-in-modal" data-impression-id="public_jobs_apply-link-offsite_contextual-sign-in-modal">
+<!---->
+        
+
+    
+    <div class="">
+<!---->
+      <div id="job-details-topcard-apply-modal" class="modal modal--contextual-sign-in modal--contextual-sign-in-v2 modal--contextual-sign-in-v2--stacked" data-outlet="job-details-topcard-apply-modal">
+<!---->        <div class="modal__overlay flex items-center bg-color-background-scrim justify-center fixed bottom-0 left-0 right-0 top-0 opacity-0 invisible pointer-events-none z-[1000] transition-[opacity] ease-[cubic-bezier(0.25,0.1,0.25,1.0)] duration-[0.17s]
+            py-4
+            " aria-hidden="true">
+          <section aria-modal="true" role="dialog" aria-labelledby="job-details-topcard-apply-modal-modal-header" tabindex="-1" class="max-h-full modal__wrapper overflow-auto p-0 bg-color-surface max-w-[1128px] min-h-[160px] relative scale-[0.25] shadow-sm shadow-color-border-faint transition-[transform] ease-[cubic-bezier(0.25,0.1,0.25,1.0)] duration-[0.33s] focus:outline-0
+              
+              w-[1128px] mamabear:w-[744px] babybear:w-[360px]
+              
+              rounded-md">
+              
+              <button class="modal__dismiss btn-tertiary h-[40px] w-[40px] p-0 rounded-full indent-0
+                  contextual-sign-in-modal__modal-dismiss absolute right-0 m-[20px] cursor-pointer" aria-label="Dismiss" data-tracking-control-name="public_jobs_apply-link-offsite_contextual-sign-in-modal_modal_dismiss">
+                <icon class="contextual-sign-in-modal__modal-dismiss-icon" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/gs508lg3t2o81tq7pmcgn6m2"></icon>
+              </button>
+          
+            <div class="modal__main w-full">
+              
+              <div class="flex overflow-hidden babybear:contextual-sign-in-modal__layout--stacked contextual-sign-in-modal__layout--stacked">
+                <div class="contextual-sign-in-modal__left-content">
+                    
+                    
+      <img class="inline-block relative hue-web-entity__image
+          
+          w-8 h-8
+           contextual-sign-in-modal__img mx-auto" data-delayed-url="https://media.licdn.com/dms/image/v2/C4D0BAQHeOvrQIOmNzg/company-logo_100_100/company-logo_100_100/0/1653481522290/protonprivacy_logo?e=2147483647&amp;v=beta&amp;t=5lpxJ4H9pggBukJ0TV5mWFOgl4Tqds5xtTjma2GIlWY" data-ghost-classes="bg-color-entity-ghost-background" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/cs8pjfgyw96g44ln9r7tct85f" alt="">
+      
+                  <h2 class="contextual-sign-in-modal__context-screen-title font-sans text-lg text-color-text mt-2 mb-1 text-center" id="job-details-topcard-apply-modal-modal-header">
+                    Join or sign in to find your next job
+                  </h2>
+                    <div class="contextual-sign-in-modal__divider left-right-divider"></div>
+                    <p class="contextual-sign-in-modal__subtitle mt-1 mb-2 babybear:mx-0 text-center font-sans text-xs text-color-text-low-emphasis">
+<!---->                      <span>Join to apply for the <strong>Frontend Engineer (Inbox Web)</strong> role at <strong>Proton</strong></span>
+                    </p>
+                </div>
+                <div class="contextual-sign-in-modal__right-content">
+                    <div class="contextual-sign-in-modal__google-sign-in-primary w-full">
+                      
+    
+
+    <div class="google-auth-button">
+<!---->      <div class="google-auth-button__placeholder mx-auto
+          " data-theme="filled_blue" data-logo-alignment="center" data-locale="en_US" role="button" aria-label="Continue with google"></div>
+<!---->    </div>
+  
+                    </div>
+
+                  
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    <code id="i18n_sign_in_form_show_text" style="display: none"><!--"Show"--></code>
+    <code id="i18n_sign_in_form_show_label" style="display: none"><!--"Show your LinkedIn password"--></code>
+    <code id="i18n_sign_in_form_hide_text" style="display: none"><!--"Hide"--></code>
+    <code id="i18n_sign_in_form_hide_label" style="display: none"><!--"Hide your LinkedIn password"--></code>
+
+    
+    <code id="i18n_username_error_empty" style="display: none"><!--"Please enter an email address or phone number"--></code>
+    
+    <code id="i18n_username_error_too_long" style="display: none"><!--"Email or phone number must be between 3 to 128 characters"--></code>
+    <code id="i18n_username_error_too_short" style="display: none"><!--"Email or phone number must be between 3 to 128 characters"--></code>
+
+    
+    <code id="i18n_password_error_empty" style="display: none"><!--"Please enter a password"--></code>
+    
+    <code id="i18n_password_error_too_short" style="display: none"><!--"The password you provided must have at least 6 characters"--></code>
+    
+    <code id="i18n_password_error_too_long" style="display: none"><!--"The password you provided must have at most 400 characters"--></code>
+
+<!---->    <form data-id="sign-in-form" action="https://www.linkedin.com/uas/login-submit" method="post" novalidate="" class="contextual-sign-in-modal__sign-in-form mb-1 hidden">
+      <input name="loginCsrfParam" value="7953eca6-6451-40d2-8b69-5329cd961c58" type="hidden">
+
+      <div class="flex flex-col">
+        
+    <div class="mt-1.5" data-js-module-id="guest-input">
+      <div class="flex flex-col">
+        <label class="input-label mb-1" for="csm-v2_session_key">
+          Email or phone
+        </label>
+        <div class="text-input flex">
+          <input class="text-color-text font-sans text-md outline-0 bg-color-transparent w-full" autocomplete="username" id="csm-v2_session_key" name="session_key" required="" data-tracking-control-name="csm-v2_sign-in-session-key" data-tracking-client-ingraph="" type="text">
+          
+        </div>
+      </div>
+
+      <p class="input-helper mt-1.5" for="csm-v2_session_key" role="alert" data-js-module-id="guest-input__message"></p>
+    </div>
+  
+
+        
+    <div class="mt-1.5" data-js-module-id="guest-input">
+      <div class="flex flex-col">
+        <label class="input-label mb-1" for="csm-v2_session_password">
+          Password
+        </label>
+        <div class="text-input flex">
+          <input class="text-color-text font-sans text-md outline-0 bg-color-transparent w-full" autocomplete="current-password" id="csm-v2_session_password" name="session_password" required="" data-tracking-control-name="csm-v2_sign-in-password" data-tracking-client-ingraph="" type="password">
+          
+            <button aria-live="assertive" aria-relevant="text" data-id="sign-in-form__password-visibility-toggle" class="font-sans text-md font-bold text-color-action z-10 ml-[12px] hover:cursor-pointer" aria-label="Show your LinkedIn password" data-tracking-control-name="csm-v2_sign-in-password-visibility-toggle-btn" type="button">Show</button>
+          
+        </div>
+      </div>
+
+      <p class="input-helper mt-1.5" for="csm-v2_session_password" role="alert" data-js-module-id="guest-input__message"></p>
+    </div>
+  
+
+        <input name="session_redirect" value="https://ch.linkedin.com/jobs/view/frontend-engineer-inbox-web-at-proton-4406371988" type="hidden">
+
+<!---->      </div>
+
+      <div data-id="sign-in-form__footer" class="flex justify-between
+          sign-in-form__footer--full-width">
+        <a data-id="sign-in-form__forgot-password" class="font-sans text-md font-bold link leading-regular
+            sign-in-form__forgot-password--full-width" href="https://www.linkedin.com/uas/request-password-reset?trk=csm-v2_forgot_password" data-tracking-control-name="csm-v2_forgot_password" data-tracking-will-navigate="">Forgot password?</a>
+
+<!---->
+        <input name="trk" value="csm-v2_sign-in-submit" type="hidden">
+        <button class="btn-md btn-primary flex-shrink-0 cursor-pointer
+            sign-in-form__submit-btn--full-width" data-id="sign-in-form__submit-btn" data-tracking-control-name="csm-v2_sign-in-submit-btn" data-tracking-client-ingraph="" data-tracking-litms="" type="submit">
+          Sign in
+        </button>
+      </div>
+<!---->    </form>
+<!----><!---->  
+
+                    <button class="contextual-sign-in-modal__sign-in-with-email-cta my-2 btn-sm btn-secondary min-h-[40px] w-full flex align-center justify-center" data-tracking-control-name="sign-in-with-email-cta">
+                      <icon class="inline-block align-middle h-[24px] w-[24px] mr-0.5" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/9w7euj0n5gnk6np2akf853sm3"></icon>
+                      <span class="self-center">Sign in with Email</span>
+                    </button>
+
+                  <div class="contextual-sign-in-modal__divider left-right-divider">
+                    <p class="contextual-sign-in-modal__divider-text font-sans text-sm text-color-text px-2">
+                      or
+                    </p>
+                  </div>
+
+                    <div class="contextual-sign-in-modal__google-sign-in-secondary contextual-sign-in-modal__google-sign-in-secondary--hidden">
+                      
+    
+
+    <div class="google-auth-button">
+<!---->      <div class="google-auth-button__placeholder mx-auto
+          google-auth-button__placeholder--black-border" data-theme="outline" data-logo-alignment="center" data-locale="en_US" role="button" aria-label="Continue with google"></div>
+<!---->    </div>
+  
+                    </div>
+
+                    <p class="contextual-sign-in-modal__join-now m-auto font-sans text-md text-center text-color-text my-2">
+                      New to LinkedIn? <a href="https://www.linkedin.com/signup/cold-join?source=jobs_registration&amp;session_redirect=https%3A%2F%2Fch.linkedin.com%2Fjobs%2Fview%2Ffrontend-engineer-inbox-web-at-proton-4406371988&amp;trk=public_jobs_apply-link-offsite_contextual-sign-in-modal_join-link" data-tracking-control-name="public_jobs_apply-link-offsite_contextual-sign-in-modal_join-link" data-tracking-will-navigate="true" class="contextual-sign-in-modal__join-link">Join now</a>
+                    </p>
+
+                  
+    
+    
+    
+    <p class="linkedin-tc__text text-color-text-low-emphasis text-xs pb-2 contextual-sign-in-modal__terms-and-conditions m-auto w-full text-center" data-impression-id="linkedin-tc__button-skip-tc-text">
+      By clicking Continue to join or sign in, you agree to LinkedIn’s <a href="/legal/user-agreement?trk=linkedin-tc_auth-button_user-agreement" target="_blank" data-tracking-control-name="linkedin-tc_auth-button_user-agreement" data-tracking-will-navigate="true">User Agreement</a>, <a href="/legal/privacy-policy?trk=linkedin-tc_auth-button_privacy-policy" target="_blank" data-tracking-control-name="linkedin-tc_auth-button_privacy-policy" data-tracking-will-navigate="true">Privacy Policy</a>, and <a href="/legal/cookie-policy?trk=linkedin-tc_auth-button_cookie-policy" target="_blank" data-tracking-control-name="linkedin-tc_auth-button_cookie-policy" data-tracking-will-navigate="true">Cookie Policy</a>.
+    </p>
+  
+                </div>
+              </div>
+          
+            </div>
+
+<!---->          </section>
+        </div>
+      </div>
+    </div>
+  
+<!----><!---->    </div>
+  
+  
+      
+
+                    
+            <a class="top-card-layout__cta mt-2 ml-1.5 h-auto babybear:flex-auto top-card-layout__cta--secondary btn-md btn-secondary" href="https://www.linkedin.com/login?emailAddress=&amp;fromSignIn=&amp;session_redirect=https%3A%2F%2Fch.linkedin.com%2Fjobs%2Fview%2Ffrontend-engineer-inbox-web-at-proton-4406371988&amp;trk=public_jobs" data-impression-id="public_jobs_topcard-save-job" data-tracking-control-name="public_jobs_topcard-save-job" data-tracking-will-navigate="" data-test-redirect-save-to-login="">
+                Save
+            </a>
+      
+              </div>
+            </div>
+
+<!---->          </div>
+
+          
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+      <div class="ellipsis-menu absolute right-0 top-0 top-card-layout__ellipsis-menu mr-1 papabear:mt-0.5 papabear:mr-2">
+        
+
+    
+
+    <div class="collapsible-dropdown flex items-center relative hyphens-auto">
+          
+            <button class="ellipsis-menu__trigger
+                collapsible-dropdown__button btn-md btn-tertiary cursor-pointer
+                !py-[6px] !px-1 flex items-center rounded-[50%]
+                
+                " aria-expanded="false" aria-label="Open menu" data-tracking-control-name="public_jobs_ellipsis-menu-trigger" tabindex="0">
+              <icon class="ellipsis-menu__trigger-icon m-0 p-0 centered-icon" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/671xosfpvk4c0kqtyl87hashi"></icon>
+            </button>
+          
+
+        <ul class="collapsible-dropdown__list hidden container-raised absolute w-auto overflow-y-auto flex-col items-stretch z-[9999] bottom-auto top-[100%]" role="menu" tabindex="-1">
+          
+              
+
+                <li class="ellipsis-menu__item border-t-1 border-solid border-color-border-low-emphasis first-of-type:border-none flex" role="presentation">
+                  
+
+    
+    
+
+    
+
+    
+
+    <a href="/uas/login?fromSignIn=true&amp;session_redirect=https%3A%2F%2Fch.linkedin.com%2Fjobs%2Fview%2Ffrontend-engineer-inbox-web-at-proton-4406371988&amp;trk=public_jobs_ellipsis-menu-semaphore-sign-in-redirect&amp;guestReportContentType=JOB&amp;_f=guest-reporting" data-tracking-control-name="public_jobs_ellipsis-menu-semaphore-sign-in-redirect" data-tracking-will-navigate="" data-item-type="semaphore" data-semaphore-content-type="JOB" data-semaphore-content-urn="urn:li:jobPosting:4406371988" data-semaphore-tracking-prefix="public_jobs_ellipsis-menu-semaphore" data-is-logged-in="false" data-modal="semaphore__toggle" class="semaphore__toggle visited:text-color-text-secondary ellipsis-menu__semaphore ellipsis-menu__item-button flex items-center w-full p-1 cursor-pointer font-sans text-sm font-bold link-styled focus:link-styled link:no-underline active:bg-color-background-container-tint focus:bg-color-background-container-tint hover:bg-color-background-container-tint outline-offset-[-2px]" role="menuitem">
+<!---->        
+                      <icon class="ellipsis-menu__item-icon text-color-text h-[24px] w-[24px] mr-1" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/iq0x9q37wj214o129ai1yjut">
+                      </icon>
+                      Report this job
+                    
+    </a>
+
+<!---->  
+                </li>
+<!---->          
+        </ul>
+
+<!---->    </div>
+  
+
+      </div>
+  
+
+          <div class="top-card-layout__footer mt-2">
+            
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        <section class="job-assessment pt-2">
+            <icon data-delayed-url="https://static.licdn.com/aero-v1/sc/h/95tg5w0vm5p3y4v21sgp2bkh5"></icon>
+            <h3 class="text-lg font-bold py-1">Use AI to assess how you fit</h3>
+            <p class="text-body-small">Get AI-powered advice on this job and more exclusive features.</p>
+            <div class="flex flex-wrap space-x-1">
+                <button data-modal="public_jobs_ai_button_contextual_sign_in_info_modal" class="container-lined rounded-[100px] p-2 mt-2 cursor-pointer" aria-label="AI powered advice">
+                    <icon class="block w-2 h-2 text-premium-color-inbug" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/1qowy8kvnj5rb38q87xcf1oll"></icon>
+                </button>
+                <button data-modal="public_jobs_ai_button_fit_contextual_sign_in_info_modal" class="flex p-[11px] px-[12px] items-center gap-1 mt-2 cursor-pointer assessment__ai-button-container">
+                    <icon class="block w-2 h-2 text-premium-color-inbug" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/1qowy8kvnj5rb38q87xcf1oll"></icon>
+                    <span>Am I a good fit for this job?</span>
+                </button>
+                <button data-modal="public_jobs_ai_button_resume_contextual_sign_in_info_modal" class="flex p-[11px] px-[12px] items-center gap-1 mt-2 cursor-pointer assessment__ai-button-container">
+                    <icon class="block w-2 h-2 text-premium-color-inbug" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/1qowy8kvnj5rb38q87xcf1oll"></icon>
+                    <span>Tailor my resume</span>
+                </button>
+            </div>
+            
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    <div class="contextual-sign-in-modal" data-impression-id="public_jobs_ai_button_cta_contextual-sign-in-modal">
+<!---->
+        
+
+    
+    <div class="">
+<!---->
+      <div id="public_jobs_ai_button_contextual_sign_in_info_modal" class="modal modal--contextual-sign-in modal--contextual-sign-in-v2 modal--contextual-sign-in-v2--stacked" data-outlet="public_jobs_ai_button_contextual_sign_in_info_modal">
+<!---->        <div class="modal__overlay flex items-center bg-color-background-scrim justify-center fixed bottom-0 left-0 right-0 top-0 opacity-0 invisible pointer-events-none z-[1000] transition-[opacity] ease-[cubic-bezier(0.25,0.1,0.25,1.0)] duration-[0.17s]
+            py-4
+            " aria-hidden="true">
+          <section aria-modal="true" role="dialog" aria-labelledby="public_jobs_ai_button_contextual_sign_in_info_modal-modal-header" tabindex="-1" class="max-h-full modal__wrapper overflow-auto p-0 bg-color-surface max-w-[1128px] min-h-[160px] relative scale-[0.25] shadow-sm shadow-color-border-faint transition-[transform] ease-[cubic-bezier(0.25,0.1,0.25,1.0)] duration-[0.33s] focus:outline-0
+              
+              w-[1128px] mamabear:w-[744px] babybear:w-[360px]
+              
+              rounded-md">
+              
+              <button class="modal__dismiss btn-tertiary h-[40px] w-[40px] p-0 rounded-full indent-0
+                  contextual-sign-in-modal__modal-dismiss absolute right-0 m-[20px] cursor-pointer" aria-label="Dismiss" data-tracking-control-name="public_jobs_ai_button_cta_contextual-sign-in-modal_modal_dismiss">
+                <icon class="contextual-sign-in-modal__modal-dismiss-icon" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/gs508lg3t2o81tq7pmcgn6m2"></icon>
+              </button>
+          
+            <div class="modal__main w-full">
+              
+              <div class="flex overflow-hidden babybear:contextual-sign-in-modal__layout--stacked contextual-sign-in-modal__layout--stacked">
+                <div class="contextual-sign-in-modal__left-content">
+                    
+                    
+      <img class="inline-block relative hue-web-entity__image
+          
+          w-8 h-8
+           contextual-sign-in-modal__img mx-auto" data-delayed-url="https://media.licdn.com/dms/image/v2/C4D0BAQHeOvrQIOmNzg/company-logo_100_100/company-logo_100_100/0/1653481522290/protonprivacy_logo?e=2147483647&amp;v=beta&amp;t=5lpxJ4H9pggBukJ0TV5mWFOgl4Tqds5xtTjma2GIlWY" data-ghost-classes="bg-color-entity-ghost-background" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/cs8pjfgyw96g44ln9r7tct85f" alt="">
+      
+                  <h2 class="contextual-sign-in-modal__context-screen-title font-sans text-lg text-color-text mt-2 mb-1 text-center" id="public_jobs_ai_button_contextual_sign_in_info_modal-modal-header">
+                    Sign in to access AI-powered advices
+                  </h2>
+<!---->                </div>
+                <div class="contextual-sign-in-modal__right-content">
+                    <div class="contextual-sign-in-modal__google-sign-in-primary w-full">
+                      
+    
+
+    <div class="google-auth-button">
+<!---->      <div class="google-auth-button__placeholder mx-auto
+          " data-theme="filled_blue" data-logo-alignment="center" data-locale="en_US" role="button" aria-label="Continue with google"></div>
+<!---->    </div>
+  
+                    </div>
+
+                  
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    <code id="i18n_sign_in_form_show_text" style="display: none"><!--"Show"--></code>
+    <code id="i18n_sign_in_form_show_label" style="display: none"><!--"Show your LinkedIn password"--></code>
+    <code id="i18n_sign_in_form_hide_text" style="display: none"><!--"Hide"--></code>
+    <code id="i18n_sign_in_form_hide_label" style="display: none"><!--"Hide your LinkedIn password"--></code>
+
+    
+    <code id="i18n_username_error_empty" style="display: none"><!--"Please enter an email address or phone number"--></code>
+    
+    <code id="i18n_username_error_too_long" style="display: none"><!--"Email or phone number must be between 3 to 128 characters"--></code>
+    <code id="i18n_username_error_too_short" style="display: none"><!--"Email or phone number must be between 3 to 128 characters"--></code>
+
+    
+    <code id="i18n_password_error_empty" style="display: none"><!--"Please enter a password"--></code>
+    
+    <code id="i18n_password_error_too_short" style="display: none"><!--"The password you provided must have at least 6 characters"--></code>
+    
+    <code id="i18n_password_error_too_long" style="display: none"><!--"The password you provided must have at most 400 characters"--></code>
+
+<!---->    <form data-id="sign-in-form" action="https://www.linkedin.com/uas/login-submit" method="post" novalidate="" class="contextual-sign-in-modal__sign-in-form mb-1 hidden">
+      <input name="loginCsrfParam" value="7953eca6-6451-40d2-8b69-5329cd961c58" type="hidden">
+
+      <div class="flex flex-col">
+        
+    <div class="mt-1.5" data-js-module-id="guest-input">
+      <div class="flex flex-col">
+        <label class="input-label mb-1" for="csm-v2_session_key">
+          Email or phone
+        </label>
+        <div class="text-input flex">
+          <input class="text-color-text font-sans text-md outline-0 bg-color-transparent w-full" autocomplete="username" id="csm-v2_session_key" name="session_key" required="" data-tracking-control-name="csm-v2_sign-in-session-key" data-tracking-client-ingraph="" type="text">
+          
+        </div>
+      </div>
+
+      <p class="input-helper mt-1.5" for="csm-v2_session_key" role="alert" data-js-module-id="guest-input__message"></p>
+    </div>
+  
+
+        
+    <div class="mt-1.5" data-js-module-id="guest-input">
+      <div class="flex flex-col">
+        <label class="input-label mb-1" for="csm-v2_session_password">
+          Password
+        </label>
+        <div class="text-input flex">
+          <input class="text-color-text font-sans text-md outline-0 bg-color-transparent w-full" autocomplete="current-password" id="csm-v2_session_password" name="session_password" required="" data-tracking-control-name="csm-v2_sign-in-password" data-tracking-client-ingraph="" type="password">
+          
+            <button aria-live="assertive" aria-relevant="text" data-id="sign-in-form__password-visibility-toggle" class="font-sans text-md font-bold text-color-action z-10 ml-[12px] hover:cursor-pointer" aria-label="Show your LinkedIn password" data-tracking-control-name="csm-v2_sign-in-password-visibility-toggle-btn" type="button">Show</button>
+          
+        </div>
+      </div>
+
+      <p class="input-helper mt-1.5" for="csm-v2_session_password" role="alert" data-js-module-id="guest-input__message"></p>
+    </div>
+  
+
+        <input name="session_redirect" type="hidden">
+
+<!---->      </div>
+
+      <div data-id="sign-in-form__footer" class="flex justify-between
+          sign-in-form__footer--full-width">
+        <a data-id="sign-in-form__forgot-password" class="font-sans text-md font-bold link leading-regular
+            sign-in-form__forgot-password--full-width" href="https://www.linkedin.com/uas/request-password-reset?trk=csm-v2_forgot_password" data-tracking-control-name="csm-v2_forgot_password" data-tracking-will-navigate="">Forgot password?</a>
+
+<!---->
+        <input name="trk" value="csm-v2_sign-in-submit" type="hidden">
+        <button class="btn-md btn-primary flex-shrink-0 cursor-pointer
+            sign-in-form__submit-btn--full-width" data-id="sign-in-form__submit-btn" data-tracking-control-name="csm-v2_sign-in-submit-btn" data-tracking-client-ingraph="" data-tracking-litms="" type="submit">
+          Sign in
+        </button>
+      </div>
+<!---->    </form>
+<!----><!---->  
+
+                    <button class="contextual-sign-in-modal__sign-in-with-email-cta my-2 btn-sm btn-secondary min-h-[40px] w-full flex align-center justify-center" data-tracking-control-name="sign-in-with-email-cta">
+                      <icon class="inline-block align-middle h-[24px] w-[24px] mr-0.5" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/9w7euj0n5gnk6np2akf853sm3"></icon>
+                      <span class="self-center">Sign in with Email</span>
+                    </button>
+
+                  <div class="contextual-sign-in-modal__divider left-right-divider">
+                    <p class="contextual-sign-in-modal__divider-text font-sans text-sm text-color-text px-2">
+                      or
+                    </p>
+                  </div>
+
+                    <div class="contextual-sign-in-modal__google-sign-in-secondary contextual-sign-in-modal__google-sign-in-secondary--hidden">
+                      
+    
+
+    <div class="google-auth-button">
+<!---->      <div class="google-auth-button__placeholder mx-auto
+          google-auth-button__placeholder--black-border" data-theme="outline" data-logo-alignment="center" data-locale="en_US" role="button" aria-label="Continue with google"></div>
+<!---->    </div>
+  
+                    </div>
+
+                    <p class="contextual-sign-in-modal__join-now m-auto font-sans text-md text-center text-color-text my-2">
+                      New to LinkedIn? <a href="https://www.linkedin.com/signup/cold-join?source=jobs_registration&amp;trk=public_jobs_ai_button_cta_contextual-sign-in-modal_join-link" data-tracking-control-name="public_jobs_ai_button_cta_contextual-sign-in-modal_join-link" data-tracking-will-navigate="true" class="contextual-sign-in-modal__join-link">Join now</a>
+                    </p>
+
+                  
+    
+    
+    
+    <p class="linkedin-tc__text text-color-text-low-emphasis text-xs pb-2 contextual-sign-in-modal__terms-and-conditions m-auto w-full text-center" data-impression-id="linkedin-tc__button-skip-tc-text">
+      By clicking Continue to join or sign in, you agree to LinkedIn’s <a href="/legal/user-agreement?trk=linkedin-tc_auth-button_user-agreement" target="_blank" data-tracking-control-name="linkedin-tc_auth-button_user-agreement" data-tracking-will-navigate="true">User Agreement</a>, <a href="/legal/privacy-policy?trk=linkedin-tc_auth-button_privacy-policy" target="_blank" data-tracking-control-name="linkedin-tc_auth-button_privacy-policy" data-tracking-will-navigate="true">Privacy Policy</a>, and <a href="/legal/cookie-policy?trk=linkedin-tc_auth-button_cookie-policy" target="_blank" data-tracking-control-name="linkedin-tc_auth-button_cookie-policy" data-tracking-will-navigate="true">Cookie Policy</a>.
+    </p>
+  
+                </div>
+              </div>
+          
+            </div>
+
+<!---->          </section>
+        </div>
+      </div>
+    </div>
+  
+<!----><!---->    </div>
+  
+
+            
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    <div class="contextual-sign-in-modal" data-impression-id="public_jobs_ai_button_cta_contextual-sign-in-modal">
+<!---->
+        
+
+    
+    <div class="">
+<!---->
+      <div id="public_jobs_ai_button_fit_contextual_sign_in_info_modal" class="modal modal--contextual-sign-in modal--contextual-sign-in-v2 modal--contextual-sign-in-v2--stacked" data-outlet="public_jobs_ai_button_fit_contextual_sign_in_info_modal">
+<!---->        <div class="modal__overlay flex items-center bg-color-background-scrim justify-center fixed bottom-0 left-0 right-0 top-0 opacity-0 invisible pointer-events-none z-[1000] transition-[opacity] ease-[cubic-bezier(0.25,0.1,0.25,1.0)] duration-[0.17s]
+            py-4
+            " aria-hidden="true">
+          <section aria-modal="true" role="dialog" aria-labelledby="public_jobs_ai_button_fit_contextual_sign_in_info_modal-modal-header" tabindex="-1" class="max-h-full modal__wrapper overflow-auto p-0 bg-color-surface max-w-[1128px] min-h-[160px] relative scale-[0.25] shadow-sm shadow-color-border-faint transition-[transform] ease-[cubic-bezier(0.25,0.1,0.25,1.0)] duration-[0.33s] focus:outline-0
+              
+              w-[1128px] mamabear:w-[744px] babybear:w-[360px]
+              
+              rounded-md">
+              
+              <button class="modal__dismiss btn-tertiary h-[40px] w-[40px] p-0 rounded-full indent-0
+                  contextual-sign-in-modal__modal-dismiss absolute right-0 m-[20px] cursor-pointer" aria-label="Dismiss" data-tracking-control-name="public_jobs_ai_button_cta_contextual-sign-in-modal_modal_dismiss">
+                <icon class="contextual-sign-in-modal__modal-dismiss-icon" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/gs508lg3t2o81tq7pmcgn6m2"></icon>
+              </button>
+          
+            <div class="modal__main w-full">
+              
+              <div class="flex overflow-hidden babybear:contextual-sign-in-modal__layout--stacked contextual-sign-in-modal__layout--stacked">
+                <div class="contextual-sign-in-modal__left-content">
+                    
+                    
+      <img class="inline-block relative hue-web-entity__image
+          
+          w-8 h-8
+           contextual-sign-in-modal__img mx-auto" data-delayed-url="https://media.licdn.com/dms/image/v2/C4D0BAQHeOvrQIOmNzg/company-logo_100_100/company-logo_100_100/0/1653481522290/protonprivacy_logo?e=2147483647&amp;v=beta&amp;t=5lpxJ4H9pggBukJ0TV5mWFOgl4Tqds5xtTjma2GIlWY" data-ghost-classes="bg-color-entity-ghost-background" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/cs8pjfgyw96g44ln9r7tct85f" alt="">
+      
+                  <h2 class="contextual-sign-in-modal__context-screen-title font-sans text-lg text-color-text mt-2 mb-1 text-center" id="public_jobs_ai_button_fit_contextual_sign_in_info_modal-modal-header">
+                    Sign in to evaluate your skills
+                  </h2>
+<!---->                </div>
+                <div class="contextual-sign-in-modal__right-content">
+                    <div class="contextual-sign-in-modal__google-sign-in-primary w-full">
+                      
+    
+
+    <div class="google-auth-button">
+<!---->      <div class="google-auth-button__placeholder mx-auto
+          " data-theme="filled_blue" data-logo-alignment="center" data-locale="en_US" role="button" aria-label="Continue with google"></div>
+<!---->    </div>
+  
+                    </div>
+
+                  
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    <code id="i18n_sign_in_form_show_text" style="display: none"><!--"Show"--></code>
+    <code id="i18n_sign_in_form_show_label" style="display: none"><!--"Show your LinkedIn password"--></code>
+    <code id="i18n_sign_in_form_hide_text" style="display: none"><!--"Hide"--></code>
+    <code id="i18n_sign_in_form_hide_label" style="display: none"><!--"Hide your LinkedIn password"--></code>
+
+    
+    <code id="i18n_username_error_empty" style="display: none"><!--"Please enter an email address or phone number"--></code>
+    
+    <code id="i18n_username_error_too_long" style="display: none"><!--"Email or phone number must be between 3 to 128 characters"--></code>
+    <code id="i18n_username_error_too_short" style="display: none"><!--"Email or phone number must be between 3 to 128 characters"--></code>
+
+    
+    <code id="i18n_password_error_empty" style="display: none"><!--"Please enter a password"--></code>
+    
+    <code id="i18n_password_error_too_short" style="display: none"><!--"The password you provided must have at least 6 characters"--></code>
+    
+    <code id="i18n_password_error_too_long" style="display: none"><!--"The password you provided must have at most 400 characters"--></code>
+
+<!---->    <form data-id="sign-in-form" action="https://www.linkedin.com/uas/login-submit" method="post" novalidate="" class="contextual-sign-in-modal__sign-in-form mb-1 hidden">
+      <input name="loginCsrfParam" value="7953eca6-6451-40d2-8b69-5329cd961c58" type="hidden">
+
+      <div class="flex flex-col">
+        
+    <div class="mt-1.5" data-js-module-id="guest-input">
+      <div class="flex flex-col">
+        <label class="input-label mb-1" for="csm-v2_session_key">
+          Email or phone
+        </label>
+        <div class="text-input flex">
+          <input class="text-color-text font-sans text-md outline-0 bg-color-transparent w-full" autocomplete="username" id="csm-v2_session_key" name="session_key" required="" data-tracking-control-name="csm-v2_sign-in-session-key" data-tracking-client-ingraph="" type="text">
+          
+        </div>
+      </div>
+
+      <p class="input-helper mt-1.5" for="csm-v2_session_key" role="alert" data-js-module-id="guest-input__message"></p>
+    </div>
+  
+
+        
+    <div class="mt-1.5" data-js-module-id="guest-input">
+      <div class="flex flex-col">
+        <label class="input-label mb-1" for="csm-v2_session_password">
+          Password
+        </label>
+        <div class="text-input flex">
+          <input class="text-color-text font-sans text-md outline-0 bg-color-transparent w-full" autocomplete="current-password" id="csm-v2_session_password" name="session_password" required="" data-tracking-control-name="csm-v2_sign-in-password" data-tracking-client-ingraph="" type="password">
+          
+            <button aria-live="assertive" aria-relevant="text" data-id="sign-in-form__password-visibility-toggle" class="font-sans text-md font-bold text-color-action z-10 ml-[12px] hover:cursor-pointer" aria-label="Show your LinkedIn password" data-tracking-control-name="csm-v2_sign-in-password-visibility-toggle-btn" type="button">Show</button>
+          
+        </div>
+      </div>
+
+      <p class="input-helper mt-1.5" for="csm-v2_session_password" role="alert" data-js-module-id="guest-input__message"></p>
+    </div>
+  
+
+        <input name="session_redirect" type="hidden">
+
+<!---->      </div>
+
+      <div data-id="sign-in-form__footer" class="flex justify-between
+          sign-in-form__footer--full-width">
+        <a data-id="sign-in-form__forgot-password" class="font-sans text-md font-bold link leading-regular
+            sign-in-form__forgot-password--full-width" href="https://www.linkedin.com/uas/request-password-reset?trk=csm-v2_forgot_password" data-tracking-control-name="csm-v2_forgot_password" data-tracking-will-navigate="">Forgot password?</a>
+
+<!---->
+        <input name="trk" value="csm-v2_sign-in-submit" type="hidden">
+        <button class="btn-md btn-primary flex-shrink-0 cursor-pointer
+            sign-in-form__submit-btn--full-width" data-id="sign-in-form__submit-btn" data-tracking-control-name="csm-v2_sign-in-submit-btn" data-tracking-client-ingraph="" data-tracking-litms="" type="submit">
+          Sign in
+        </button>
+      </div>
+<!---->    </form>
+<!----><!---->  
+
+                    <button class="contextual-sign-in-modal__sign-in-with-email-cta my-2 btn-sm btn-secondary min-h-[40px] w-full flex align-center justify-center" data-tracking-control-name="sign-in-with-email-cta">
+                      <icon class="inline-block align-middle h-[24px] w-[24px] mr-0.5" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/9w7euj0n5gnk6np2akf853sm3"></icon>
+                      <span class="self-center">Sign in with Email</span>
+                    </button>
+
+                  <div class="contextual-sign-in-modal__divider left-right-divider">
+                    <p class="contextual-sign-in-modal__divider-text font-sans text-sm text-color-text px-2">
+                      or
+                    </p>
+                  </div>
+
+                    <div class="contextual-sign-in-modal__google-sign-in-secondary contextual-sign-in-modal__google-sign-in-secondary--hidden">
+                      
+    
+
+    <div class="google-auth-button">
+<!---->      <div class="google-auth-button__placeholder mx-auto
+          google-auth-button__placeholder--black-border" data-theme="outline" data-logo-alignment="center" data-locale="en_US" role="button" aria-label="Continue with google"></div>
+<!---->    </div>
+  
+                    </div>
+
+                    <p class="contextual-sign-in-modal__join-now m-auto font-sans text-md text-center text-color-text my-2">
+                      New to LinkedIn? <a href="https://www.linkedin.com/signup/cold-join?source=jobs_registration&amp;trk=public_jobs_ai_button_cta_contextual-sign-in-modal_join-link" data-tracking-control-name="public_jobs_ai_button_cta_contextual-sign-in-modal_join-link" data-tracking-will-navigate="true" class="contextual-sign-in-modal__join-link">Join now</a>
+                    </p>
+
+                  
+    
+    
+    
+    <p class="linkedin-tc__text text-color-text-low-emphasis text-xs pb-2 contextual-sign-in-modal__terms-and-conditions m-auto w-full text-center" data-impression-id="linkedin-tc__button-skip-tc-text">
+      By clicking Continue to join or sign in, you agree to LinkedIn’s <a href="/legal/user-agreement?trk=linkedin-tc_auth-button_user-agreement" target="_blank" data-tracking-control-name="linkedin-tc_auth-button_user-agreement" data-tracking-will-navigate="true">User Agreement</a>, <a href="/legal/privacy-policy?trk=linkedin-tc_auth-button_privacy-policy" target="_blank" data-tracking-control-name="linkedin-tc_auth-button_privacy-policy" data-tracking-will-navigate="true">Privacy Policy</a>, and <a href="/legal/cookie-policy?trk=linkedin-tc_auth-button_cookie-policy" target="_blank" data-tracking-control-name="linkedin-tc_auth-button_cookie-policy" data-tracking-will-navigate="true">Cookie Policy</a>.
+    </p>
+  
+                </div>
+              </div>
+          
+            </div>
+
+<!---->          </section>
+        </div>
+      </div>
+    </div>
+  
+<!----><!---->    </div>
+  
+
+            
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    <div class="contextual-sign-in-modal" data-impression-id="public_jobs_ai_button_cta_contextual-sign-in-modal">
+<!---->
+        
+
+    
+    <div class="">
+<!---->
+      <div id="public_jobs_ai_button_resume_contextual_sign_in_info_modal" class="modal modal--contextual-sign-in modal--contextual-sign-in-v2 modal--contextual-sign-in-v2--stacked" data-outlet="public_jobs_ai_button_resume_contextual_sign_in_info_modal">
+<!---->        <div class="modal__overlay flex items-center bg-color-background-scrim justify-center fixed bottom-0 left-0 right-0 top-0 opacity-0 invisible pointer-events-none z-[1000] transition-[opacity] ease-[cubic-bezier(0.25,0.1,0.25,1.0)] duration-[0.17s]
+            py-4
+            " aria-hidden="true">
+          <section aria-modal="true" role="dialog" aria-labelledby="public_jobs_ai_button_resume_contextual_sign_in_info_modal-modal-header" tabindex="-1" class="max-h-full modal__wrapper overflow-auto p-0 bg-color-surface max-w-[1128px] min-h-[160px] relative scale-[0.25] shadow-sm shadow-color-border-faint transition-[transform] ease-[cubic-bezier(0.25,0.1,0.25,1.0)] duration-[0.33s] focus:outline-0
+              
+              w-[1128px] mamabear:w-[744px] babybear:w-[360px]
+              
+              rounded-md">
+              
+              <button class="modal__dismiss btn-tertiary h-[40px] w-[40px] p-0 rounded-full indent-0
+                  contextual-sign-in-modal__modal-dismiss absolute right-0 m-[20px] cursor-pointer" aria-label="Dismiss" data-tracking-control-name="public_jobs_ai_button_cta_contextual-sign-in-modal_modal_dismiss">
+                <icon class="contextual-sign-in-modal__modal-dismiss-icon" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/gs508lg3t2o81tq7pmcgn6m2"></icon>
+              </button>
+          
+            <div class="modal__main w-full">
+              
+              <div class="flex overflow-hidden babybear:contextual-sign-in-modal__layout--stacked contextual-sign-in-modal__layout--stacked">
+                <div class="contextual-sign-in-modal__left-content">
+                    
+                    
+      <img class="inline-block relative hue-web-entity__image
+          
+          w-8 h-8
+           contextual-sign-in-modal__img mx-auto" data-delayed-url="https://media.licdn.com/dms/image/v2/C4D0BAQHeOvrQIOmNzg/company-logo_100_100/company-logo_100_100/0/1653481522290/protonprivacy_logo?e=2147483647&amp;v=beta&amp;t=5lpxJ4H9pggBukJ0TV5mWFOgl4Tqds5xtTjma2GIlWY" data-ghost-classes="bg-color-entity-ghost-background" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/cs8pjfgyw96g44ln9r7tct85f" alt="">
+      
+                  <h2 class="contextual-sign-in-modal__context-screen-title font-sans text-lg text-color-text mt-2 mb-1 text-center" id="public_jobs_ai_button_resume_contextual_sign_in_info_modal-modal-header">
+                    Sign in to tailor your resume
+                  </h2>
+<!---->                </div>
+                <div class="contextual-sign-in-modal__right-content">
+                    <div class="contextual-sign-in-modal__google-sign-in-primary w-full">
+                      
+    
+
+    <div class="google-auth-button">
+<!---->      <div class="google-auth-button__placeholder mx-auto
+          " data-theme="filled_blue" data-logo-alignment="center" data-locale="en_US" role="button" aria-label="Continue with google"></div>
+<!---->    </div>
+  
+                    </div>
+
+                  
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    <code id="i18n_sign_in_form_show_text" style="display: none"><!--"Show"--></code>
+    <code id="i18n_sign_in_form_show_label" style="display: none"><!--"Show your LinkedIn password"--></code>
+    <code id="i18n_sign_in_form_hide_text" style="display: none"><!--"Hide"--></code>
+    <code id="i18n_sign_in_form_hide_label" style="display: none"><!--"Hide your LinkedIn password"--></code>
+
+    
+    <code id="i18n_username_error_empty" style="display: none"><!--"Please enter an email address or phone number"--></code>
+    
+    <code id="i18n_username_error_too_long" style="display: none"><!--"Email or phone number must be between 3 to 128 characters"--></code>
+    <code id="i18n_username_error_too_short" style="display: none"><!--"Email or phone number must be between 3 to 128 characters"--></code>
+
+    
+    <code id="i18n_password_error_empty" style="display: none"><!--"Please enter a password"--></code>
+    
+    <code id="i18n_password_error_too_short" style="display: none"><!--"The password you provided must have at least 6 characters"--></code>
+    
+    <code id="i18n_password_error_too_long" style="display: none"><!--"The password you provided must have at most 400 characters"--></code>
+
+<!---->    <form data-id="sign-in-form" action="https://www.linkedin.com/uas/login-submit" method="post" novalidate="" class="contextual-sign-in-modal__sign-in-form mb-1 hidden">
+      <input name="loginCsrfParam" value="7953eca6-6451-40d2-8b69-5329cd961c58" type="hidden">
+
+      <div class="flex flex-col">
+        
+    <div class="mt-1.5" data-js-module-id="guest-input">
+      <div class="flex flex-col">
+        <label class="input-label mb-1" for="csm-v2_session_key">
+          Email or phone
+        </label>
+        <div class="text-input flex">
+          <input class="text-color-text font-sans text-md outline-0 bg-color-transparent w-full" autocomplete="username" id="csm-v2_session_key" name="session_key" required="" data-tracking-control-name="csm-v2_sign-in-session-key" data-tracking-client-ingraph="" type="text">
+          
+        </div>
+      </div>
+
+      <p class="input-helper mt-1.5" for="csm-v2_session_key" role="alert" data-js-module-id="guest-input__message"></p>
+    </div>
+  
+
+        
+    <div class="mt-1.5" data-js-module-id="guest-input">
+      <div class="flex flex-col">
+        <label class="input-label mb-1" for="csm-v2_session_password">
+          Password
+        </label>
+        <div class="text-input flex">
+          <input class="text-color-text font-sans text-md outline-0 bg-color-transparent w-full" autocomplete="current-password" id="csm-v2_session_password" name="session_password" required="" data-tracking-control-name="csm-v2_sign-in-password" data-tracking-client-ingraph="" type="password">
+          
+            <button aria-live="assertive" aria-relevant="text" data-id="sign-in-form__password-visibility-toggle" class="font-sans text-md font-bold text-color-action z-10 ml-[12px] hover:cursor-pointer" aria-label="Show your LinkedIn password" data-tracking-control-name="csm-v2_sign-in-password-visibility-toggle-btn" type="button">Show</button>
+          
+        </div>
+      </div>
+
+      <p class="input-helper mt-1.5" for="csm-v2_session_password" role="alert" data-js-module-id="guest-input__message"></p>
+    </div>
+  
+
+        <input name="session_redirect" type="hidden">
+
+<!---->      </div>
+
+      <div data-id="sign-in-form__footer" class="flex justify-between
+          sign-in-form__footer--full-width">
+        <a data-id="sign-in-form__forgot-password" class="font-sans text-md font-bold link leading-regular
+            sign-in-form__forgot-password--full-width" href="https://www.linkedin.com/uas/request-password-reset?trk=csm-v2_forgot_password" data-tracking-control-name="csm-v2_forgot_password" data-tracking-will-navigate="">Forgot password?</a>
+
+<!---->
+        <input name="trk" value="csm-v2_sign-in-submit" type="hidden">
+        <button class="btn-md btn-primary flex-shrink-0 cursor-pointer
+            sign-in-form__submit-btn--full-width" data-id="sign-in-form__submit-btn" data-tracking-control-name="csm-v2_sign-in-submit-btn" data-tracking-client-ingraph="" data-tracking-litms="" type="submit">
+          Sign in
+        </button>
+      </div>
+<!---->    </form>
+<!----><!---->  
+
+                    <button class="contextual-sign-in-modal__sign-in-with-email-cta my-2 btn-sm btn-secondary min-h-[40px] w-full flex align-center justify-center" data-tracking-control-name="sign-in-with-email-cta">
+                      <icon class="inline-block align-middle h-[24px] w-[24px] mr-0.5" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/9w7euj0n5gnk6np2akf853sm3"></icon>
+                      <span class="self-center">Sign in with Email</span>
+                    </button>
+
+                  <div class="contextual-sign-in-modal__divider left-right-divider">
+                    <p class="contextual-sign-in-modal__divider-text font-sans text-sm text-color-text px-2">
+                      or
+                    </p>
+                  </div>
+
+                    <div class="contextual-sign-in-modal__google-sign-in-secondary contextual-sign-in-modal__google-sign-in-secondary--hidden">
+                      
+    
+
+    <div class="google-auth-button">
+<!---->      <div class="google-auth-button__placeholder mx-auto
+          google-auth-button__placeholder--black-border" data-theme="outline" data-logo-alignment="center" data-locale="en_US" role="button" aria-label="Continue with google"></div>
+<!---->    </div>
+  
+                    </div>
+
+                    <p class="contextual-sign-in-modal__join-now m-auto font-sans text-md text-center text-color-text my-2">
+                      New to LinkedIn? <a href="https://www.linkedin.com/signup/cold-join?source=jobs_registration&amp;trk=public_jobs_ai_button_cta_contextual-sign-in-modal_join-link" data-tracking-control-name="public_jobs_ai_button_cta_contextual-sign-in-modal_join-link" data-tracking-will-navigate="true" class="contextual-sign-in-modal__join-link">Join now</a>
+                    </p>
+
+                  
+    
+    
+    
+    <p class="linkedin-tc__text text-color-text-low-emphasis text-xs pb-2 contextual-sign-in-modal__terms-and-conditions m-auto w-full text-center" data-impression-id="linkedin-tc__button-skip-tc-text">
+      By clicking Continue to join or sign in, you agree to LinkedIn’s <a href="/legal/user-agreement?trk=linkedin-tc_auth-button_user-agreement" target="_blank" data-tracking-control-name="linkedin-tc_auth-button_user-agreement" data-tracking-will-navigate="true">User Agreement</a>, <a href="/legal/privacy-policy?trk=linkedin-tc_auth-button_privacy-policy" target="_blank" data-tracking-control-name="linkedin-tc_auth-button_privacy-policy" data-tracking-will-navigate="true">Privacy Policy</a>, and <a href="/legal/cookie-policy?trk=linkedin-tc_auth-button_cookie-policy" target="_blank" data-tracking-control-name="linkedin-tc_auth-button_cookie-policy" data-tracking-will-navigate="true">Cookie Policy</a>.
+    </p>
+  
+                </div>
+              </div>
+          
+            </div>
+
+<!---->          </section>
+        </div>
+      </div>
+    </div>
+  
+<!----><!---->    </div>
+  
+
+        </section>
+    
+      
+          </div>
+      </div>
+    </section>
+  
+  
+
+    <div class="decorated-job-posting__details">
+<!---->
+      
+    
+    
+    
+    
+    
+
+    
+    <section class="core-section-container
+        my-3 description">
+<!---->
+<!---->
+<!---->
+      <div class="core-section-container__content break-words">
+        
+      
+    
+    
+
+      <div class="message-the-recruiter">
+        <p>Direct message the job poster from Proton</p>
+        
+    
+    
+    
+
+    
+    
+    
+      <div class="base-card relative w-full hover:no-underline focus:no-underline
+        base-card--link
+         base-main-card flex flex-wrap py-1.5 pr-2 babybear:pr-0
+        
+        base-main-card--link
+        ">
+        
+
+        <a class="base-card__full-link absolute top-0 right-0 bottom-0 left-0 p-0 z-[2] outline-offset-[4px]" href="https://es.linkedin.com/in/desousadaniel12" data-tracking-control-name="public_jobs" data-tracking-will-navigate="">
+          
+          <span class="sr-only">
+              
+          
+        Daniel de Sousa
+
+<!---->      
+      
+          </span>
+        </a>
+
+      
+          
+      <img class="inline-block relative hue-web-entity__image
+          rounded-[50%]
+          w-6 h-6
+          bg-color-entity-ghost-background" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/9c8pery4andzj6ohjkjp54ma2" data-ghost-classes="bg-color-entity-ghost-background" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/9c8pery4andzj6ohjkjp54ma2" alt="Click here to view Daniel de Sousa’s profile">
+      
+
+        <div class="base-main-card__info self-center ml-1 flex-1 relative break-words papabear:min-w-0 mamabear:min-w-0 babybear:w-full
+            ">
+<!---->          <h3 class="base-main-card__title line-clamp-1 font-sans text-md font-bold text-color-text overflow-hidden
+              
+              
+              base-main-card__title--link">
+            
+        Daniel de Sousa
+
+<!---->      
+          </h3>
+          
+
+            <h4 class="base-main-card__subtitle body-text text-color-text overflow-hidden
+                ">
+              
+          Global Talent Acquisition &amp; HR Partner
+      
+            </h4>
+
+<!---->
+<!----><!---->        </div>
+
+          <div class="base-main-card__ctas z-[3] self-center ml-3 babybear:ml-1 babybear:self-start">
+            
+        
+            <a aria-label="Message Daniel de Sousa" class="message-the-recruiter__cta" href="https://www.linkedin.com/login?emailAddress=&amp;fromSignIn=&amp;session_redirect=https%3A%2F%2Fes.linkedin.com%2Fin%2Fdesousadaniel12&amp;trk=public_jobs_message-the-recruiter-cta" data-tracking-control-name="public_jobs_message-the-recruiter-cta" data-tracking-will-navigate="">
+              <icon class="message-the-recruiter__cta-icon" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/em62t8ujch4hqqc45owxy6auu" data-tracking-will-navigate=""></icon>
+            </a>
+          
+      
+          </div>
+      
+    
+      </div>
+  
+  
+  
+  
+      </div>
+  
+
+      <div class="description__text description__text--rich">
+        
+    
+    
+    
+
+    <section class="show-more-less-html" data-max-lines="5">
+        <div class="show-more-less-html__markup show-more-less-html__markup--clamp-after-5
+            relative overflow-hidden">
+          <strong>Join Proton and build a better internet where privacy is the default<br><br></strong>At Proton, we believe that privacy is a fundamental human right and the cornerstone of democracy. Since our inception in 2014, founded by a team of scientists from CERN, we have dedicated ourselves to providing free and open-source technology to millions worldwide, ensuring access to privacy, security, and freedom online.<br><br>Our journey began with Proton Mail, the largest secure email service globally, and has since expanded to include Proton VPN, Proton Calendar, Proton Drive, and Proton Pass. These tools empower individuals and organizations to take control of their personal data, break away from Big Tech’s invasive practices, and defeat censorship. Our work impacts hundreds of millions of lives, from activists on the front lines defending freedom to leaders in governments protecting sensitive information. In some cases, Proton’s services have even been instrumental in saving lives by enabling secure and private communications in high-risk situations.<br><br>Proton today supports over 100 million user accounts with a growing team of over 500 people from over 50 different countries, from the world's top companies and universities. We value intelligence, learning potential, and ambition in our hiring process. Adaptability is key as we navigate uncharted territories and redefine how business is conducted online. We believe smaller teams of exceptional talent will always prevail over larger teams with lower talent density. Proton has become profitable and reached scale without relying upon VC funding, largely due to superior talent that allows us to do things faster, more creatively, and more efficiently.<br><br>We have a global mindset and big ambitions but remain a start-up at heart. We value empowerment and flexibility and keep our structure flat to keep moving fast and avoid unnecessary politics. Tired of blending into the crowd? Join us and do work you can truly be proud of. Check our <strong>social media pages</strong> to learn more about us: Twitter, Reddit, Instagram.<br><br><strong><strong>The Team:<br><br></strong></strong>As a Frontend Engineer on the Inbox team, you will play a crucial role in developing Proton's most vital services, including Mail and Calendar. We expect you to be customer-centric, continuously learning, passionate about technology and usability. You are an adept at turning technical complexities into seamless user experiences. Effective teamwork, collaboration with Product, Design, APIs, and your team, and data-driven decision-making are essential aspects of this role.<br><br><strong><strong>Key responsibilities:<br><br><br></strong></strong><ul><li>Take end-to-end ownership of mobile application development projects: you'll be comfortable with scoping projects, walking back from deadlines and being able to discern the important from the superfluous</li><li>Foster a culture of innovation by exploring new technologies, methodologies and approaches to web development – we tackle complex engineering challenges with creativity and ingenuity</li><li>Design for scalability, considering factors such as data caching, network bandwidth and server load</li><li>Implement solutions to monitor and alert the team regarding the state of Inbox web clients</li><li>Prioritize customer satisfaction by maintaining a customer-centric mindset throughout the development process, continuously seeking feedback and iterating to improve the user experience<br><br><br></li></ul><strong><strong>Tech Stack and Tools:<br><br></strong></strong>Javascript, TypeScript, React, Symfony, Rust<br><br><br><ul><li>Every Proton clients codebase are open source, Check it out here.</li><li>Encryption brings unique challenges to front-end development. A trivial search functionality becomes much more interesting to implement when the email body is fully encrypted.<br><br><br></li></ul><strong><strong>What you will do<br><br><br></strong></strong><ul><li>Develop new features: Developing, deploying and supporting high-quality user experiences, including feature development and implementation.</li><li>Drive adoption and user retention: you will contribute to the user onboarding and delivering a delightful experience to retain</li><li>Collaboration: Work closely with backend, product owners, designers, QA, and other engineers to take initiatives from ideation to completion.</li><li>Code review and optimization: Conduct code reviews and provide constructive feedback to ensure code quality, maintainability, and performance optimization.</li><li>Testing: Develop and implement comprehensive testing strategies, on all test layers to ensure reliability and future ease of development.<br><br><br></li></ul><strong><strong>Job requirements<br><br></strong></strong>While we prefer candidates who cover the entire skillset, don't hesitate to apply if you're not an exact match, as we're willing to help you grow in certain areas.<br><br><br><ul><li>Extensive experience of professional software development using JavaScript or TypeScript.</li><li>Experience with React or 2+ similar frameworks, developing performant and reusable components.</li><li>Experience contributing to an API codebase, bonus points if in PHP</li><li>Experience writing tests at scale</li><li>Familiarity with other best practices for ensuring code quality, including CI/CD.<br><br><br></li></ul><strong><strong>Nice to have: <br><br><br></strong></strong><ul><li>Experience with monitoring and observability tools</li><li>Experience working in a distributed team</li><li>Awareness of common security issues in client-side development, such as those in the OWASP top ten, and how to mitigate them</li><li>Familiarity with UX, accessibility, internationalization, and localization concerns and solutions<br><br><br></li></ul>Even if you don’t meet all the requirements listed above, but feel you could still be a great fit, please still apply.<br><br><strong><strong>What We Offer<br><br><br></strong></strong><ul><li>Office First: Collaboration is easier and more effective in person, which is why we have offices in Geneva, Zurich, Prague, Barcelona, Paris, London, Vilnius, Skopje, and Taipei. You can also enjoy working from home up to 30% of the time, while enjoying great company during our three core days in the office. </li><li>Technology: We provide all the devices and software you need to excel in your role, ensuring you have the best tools at your disposal to achieve your goals.</li><li>Food: Lunch and snacks are provided by Proton every day at our offices.</li><li>Transport: We will always support our employees with transport costs through subsidizing public transport, bike allowances, or parking spaces based on your office location.</li><li>Stock Options: At Proton, we are all owners of the company and you get stock options when you join us.</li><li>Flexible Working: You can define your own working hours as long as it works with team meetings.</li><li>Learning and Development: We are committed to your professional growth. Proton offers various learning opportunities, including training programs, conferences and events, and continual learning.</li><li>Employee Benefits: Comprehensive health insurance plans, competitive retirement savings options, generous vacation and leave policies, and wellness programs.</li><li>Work that Matters: Proton is a community-first organization, started with the support of a crowdfunding campaign and built with community input. To this day, Proton’s only source of revenue is user subscriptions. Over 100 million people trust and support Proton, and we put our users and community first in everything we do. Read more about our impact here.<br><br><br></li></ul><strong><strong>Check our social media to learn more about Proton: <br><br></strong></strong><strong><strong>LinkedIn</strong></strong><strong><strong> ,</strong></strong><strong><strong>Reddit</strong></strong><strong><strong> ,</strong></strong><strong><strong>X</strong></strong><strong><strong>, </strong></strong><strong><strong>YouTube<br><br></strong></strong><strong><strong>Our Commitment to Diversity and Inclusion<br><br></strong></strong>At Proton, we believe diversity drives innovation and strengthens our mission to provide privacy as a default for all. We are committed to fostering an inclusive environment where all individuals, regardless of race, ethnicity, gender, age, sexual orientation, physical ability, or socio-economic background, feel valued and empowered. We strive to create equal opportunities, promote open dialogue, and support continuous learning to ensure every voice is heard and respected.<br><br>If you need any extra support or reasonable adjustments during the hiring process, please let your talent partner know.<br><br><strong><strong>Candidate Privacy Notice<br><br></strong></strong>When you apply for a position, refer a candidate, or are considered for a role at Proton Technologies AG (Proton, we, us, or our), your information is stored in Greenhouse, in accordance with their Service Privacy Policy. This information is used to evaluate your suitability for the posted position. We also retain this information for consideration for future roles that you may apply for or that we believe may align with your background and skills.<br><br>If we no longer have a legitimate business need to process your information, we will either delete or anonymize it. Should you have any inquiries about how we use or manage your information, or if you wish to access, correct, or delete your data, please contact our privacy team at careers@proton.ch.<br><br><em><em>Proton does not accept unsolicited resumes from any sources other than directly from candidates. We will not pay a fee for any placement resulting from an unsolicited offer, even if the candidate is subsequently hired by Proton.<br><br></em></em><em><em>To learn more about our privacy policy, please visit </em></em><em><em>our privacy policy page</em></em><em><em>.<br><br></em></em>
+        </div>
+
+        
+
+    
+    
+    
+
+    <button class="show-more-less-html__button show-more-less-button
+        show-more-less-html__button--more
+        ml-0.5" data-tracking-control-name="public_jobs_show-more-html-btn" aria-label="Show more" aria-expanded="false">
+<!---->
+        
+            Show more
+          
+
+          <icon class="show-more-less-html__button-icon show-more-less-button-icon" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/cyolgscd0imw2ldqppkrb84vo"></icon>
+    </button>
+  
+
+        
+
+    
+    
+    
+
+    <button class="show-more-less-html__button show-more-less-button
+        show-more-less-html__button--less
+        ml-0.5" data-tracking-control-name="public_jobs_show-less-html-btn" aria-label="Show less" aria-expanded="true">
+<!---->
+        
+            Show less
+          
+
+          <icon class="show-more-less-html__button-icon show-more-less-button-icon" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/4chtt12k98xwnba1nimld2oyg"></icon>
+    </button>
+  
+<!---->    </section>
+  
+      </div>
+
+      <ul class="description__job-criteria-list">
+        <li class="description__job-criteria-item">
+          <h3 class="description__job-criteria-subheader">
+            Seniority level
+          </h3>
+          <span class="description__job-criteria-text description__job-criteria-text--criteria">
+            Associate
+          </span>
+        </li>
+        <li class="description__job-criteria-item">
+          <h3 class="description__job-criteria-subheader">
+            Employment type
+          </h3>
+          <span class="description__job-criteria-text description__job-criteria-text--criteria">
+            Full-time
+          </span>
+        </li>
+          <li class="description__job-criteria-item">
+            <h3 class="description__job-criteria-subheader">
+              Job function
+            </h3>
+            <span class="description__job-criteria-text description__job-criteria-text--criteria">
+              Engineering and Information Technology
+            </span>
+          </li>
+          <li class="description__job-criteria-item">
+            <h3 class="description__job-criteria-subheader">
+              Industries
+            </h3>
+            <span class="description__job-criteria-text description__job-criteria-text--criteria">
+            Technology, Information and Internet
+            </span>
+          </li>
+      </ul>
+    
+      </div>
+    </section>
+  
+  
+
+        
+    
+
+    
+
+      
+    <section class="core-section-container
+        my-3 find-a-referral">
+<!---->
+<!---->
+<!---->
+      <div class="core-section-container__content break-words">
+        
+        
+      
+    
+
+    
+      <div class="face-pile flex !no-underline">
+        
+      <div class="face-pile__images-container self-start flex-shrink-0 mr-1 leading-[1]">
+          
+      <img class="inline-block relative hue-web-entity__image
+          rounded-[50%]
+          w-4 h-4
+           face-pile__image border-1 border-solid border-color-transparent -ml-2 first:ml-0" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/bzm35e3651eojcpnxxuyvpjpo" data-ghost-classes="bg-color-entity-ghost-background" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/9c8pery4andzj6ohjkjp54ma2" alt="">
+      
+          
+      <img class="inline-block relative hue-web-entity__image
+          rounded-[50%]
+          w-4 h-4
+           face-pile__image border-1 border-solid border-color-transparent -ml-2 first:ml-0" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/224mq0thanhnrp5hhso7l1k9p" data-ghost-classes="bg-color-entity-ghost-background" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/9c8pery4andzj6ohjkjp54ma2" alt="">
+      
+          
+      <img class="inline-block relative hue-web-entity__image
+          rounded-[50%]
+          w-4 h-4
+           face-pile__image border-1 border-solid border-color-transparent -ml-2 first:ml-0" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/31zq62dby0m9b2ti4h5267rjk" data-ghost-classes="bg-color-entity-ghost-background" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/9c8pery4andzj6ohjkjp54ma2" alt="">
+      
+      </div>
+        
+          
+            <div class="find-a-referral__cta-container">
+              <p>Referrals increase your chances of interviewing at Proton by 2x</p>
+              <a class="find-a-referral__cta" href="https://www.linkedin.com/login?session_redirect=https%3A%2F%2Fwww%2Elinkedin%2Ecom%2Fsearch%2Fresults%2Fpeople%2F%3FfacetCurrentCompany%3D5241679&amp;emailAddress=&amp;fromSignIn=&amp;trk=public_jobs_find-a-referral-cta" data-impression-id="public_jobs_find-a-referral-cta" data-tracking-control-name="public_jobs_find-a-referral-cta" data-tracking-will-navigate="">
+                See who you know
+              </a>
+            </div>
+          
+        
+    
+      </div>
+  
+  
+  
+      
+      </div>
+    </section>
+  
+  
+
+<!---->    </div>
+
+<!---->
+<!---->
+    <code id="decoratedJobPostingId" style="display: none"><!--"4406371988"--></code>
+      <code id="referenceId" style="display: none"><!--"+FaBCdZMR2+Sz1TdQlPOzA=="--></code>
+    <code id="joinUrlWithRedirect" style="display: none"><!--"https://www.linkedin.com/signup/cold-join?source=jobs_registration&session_redirect=https%3A%2F%2Fch.linkedin.com%2Fjobs%2Fview%2Ffrontend-engineer-inbox-web-at-proton-4406371988"--></code>
+  
+  </body></html>

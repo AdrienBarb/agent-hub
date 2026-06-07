@@ -1,0 +1,1266 @@
+<!DOCTYPE html><html><head><style>
+  /* Container styles */
+  .bb-custom-select-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+
+  /* Opener button styles */
+  .bb-custom-select-opener {
+    display: none;
+  }
+
+  /* Disabled state styles */
+  .bb-custom-select-container.bb-is-disabled .bb-custom-select-opener {
+    background-color: #e9ecef;
+    border-color: #505050;
+    color: #6c757d;
+    cursor: not-allowed;
+  }
+
+  /* Add not-allowed cursor to the entire container when disabled */
+  .bb-custom-select-container.bb-is-disabled {
+    cursor: not-allowed;
+  }
+
+  /* Also ensure the select element shows not-allowed cursor when disabled */
+  .bb-custom-select-container.bb-is-disabled select {
+    cursor: not-allowed;
+  }
+
+  .bb-custom-select-container.bb-is-disabled .bb-custom-select-opener::after {
+    border-top-color: #6c757d;
+  }
+
+  /* Add dropdown arrow */
+  .bb-custom-select-opener::after {
+    content: '';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #666;
+  }
+
+  /* Rotate arrow when open */
+  .bb-custom-select-opener.bb-is-open::after {
+    transform: translateY(-50%) rotate(180deg);
+  }
+
+  /* Keep native select visible */
+  .bb-customSelect select {
+    position: relative;
+    width: 100%;
+  }
+
+  /* Dropdown panel */
+  .bb-custom-select-panel {
+    display: none;  /* Hide by default */
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 999999; /* Should always be on top of other elements */
+    margin-top: 4px;
+    width: max-content; /* Allow panel to grow based on content */
+    min-width: 100%;   /* But ensure it's at least as wide as the opener */
+    background-color: #fff;
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  /* Show panel when container has bb-is-open class */
+  .bb-custom-select-container.bb-is-open .bb-custom-select-panel {
+    display: block;
+  }
+
+  /* Option styles */
+  .bb-custom-select-option {
+    padding: 6px 12px;
+    line-height: 1.5;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .bb-custom-select-option:hover,
+  .bb-custom-select-option.bb-has-focus {
+    background-color: #f0f9fa;
+  }
+
+  .bb-custom-select-option.bb-is-selected {
+    background-color: #e9ecef;
+  }
+</style></head><body><li>
+        
+    
+
+    
+    
+    
+      <div class="base-card relative w-full hover:no-underline focus:no-underline
+        base-card--link
+         base-search-card base-search-card--link job-search-card" data-entity-urn="urn:li:jobPosting:4406371988" data-impression-id="jobs-search-result-0" data-reference-id="ZtNNeNLTDUfY5509Qze4Cg==" data-tracking-id="CmetI6hCw6NDHBGH61gBgA==" data-column="1" data-row="1">
+        
+
+        <a class="base-card__full-link absolute top-0 right-0 bottom-0 left-0 p-0 z-[2] outline-offset-[4px]" href="https://ch.linkedin.com/jobs/view/frontend-engineer-inbox-web-at-proton-4406371988?position=1&amp;pageNum=0&amp;refId=ZtNNeNLTDUfY5509Qze4Cg%3D%3D&amp;trackingId=CmetI6hCw6NDHBGH61gBgA%3D%3D" data-tracking-control-name="public_jobs_jserp-result_search-card" data-tracking-client-ingraph="" data-tracking-will-navigate="">
+          
+          <span class="sr-only">
+              
+        
+        Frontend Engineer (Inbox Web)
+      
+      
+          </span>
+        </a>
+
+      
+        
+    <div class="search-entity-media">
+        
+      <img class="artdeco-entity-image artdeco-entity-image--square-4
+          " data-delayed-url="https://media.licdn.com/dms/image/v2/C4D0BAQHeOvrQIOmNzg/company-logo_100_100/company-logo_100_100/0/1653481522290/protonprivacy_logo?e=2147483647&amp;v=beta&amp;t=5lpxJ4H9pggBukJ0TV5mWFOgl4Tqds5xtTjma2GIlWY" data-ghost-classes="artdeco-entity-image--ghost" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/6puxblwmhnodu6fjircz4dn4h" alt="">
+  
+    </div>
+  
+
+        <div class="base-search-card__info">
+          <h3 class="base-search-card__title">
+            
+        Frontend Engineer (Inbox Web)
+      
+          </h3>
+
+            <h4 class="base-search-card__subtitle">
+              
+          <a class="hidden-nested-link" data-tracking-client-ingraph="" data-tracking-control-name="public_jobs_jserp-result_job-search-card-subtitle" data-tracking-will-navigate="" href="https://ch.linkedin.com/company/protonprivacy?trk=public_jobs_jserp-result_job-search-card-subtitle">
+            Proton
+          </a>
+      
+            </h4>
+
+<!---->
+            <div class="base-search-card__metadata">
+              
+          <span class="job-search-card__location">
+            Geneva, Geneva, Switzerland
+          </span>
+
+        
+    
+    
+    
+    
+
+      <div class="job-posting-benefits text-sm">
+        <icon class="job-posting-benefits__icon" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/3p1v0uhy7uq0cm5zdvzp4eo18" data-svg-class-name="job-posting-benefits__icon-svg"></icon>
+        <span class="job-posting-benefits__text">
+          Actively Hiring
+<!---->        </span>
+      </div>
+  
+
+          <time class="job-search-card__listdate--new" datetime="2026-06-05">
+            
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+      17 hours ago
+  
+          </time>
+
+<!---->      
+            </div>
+        </div>
+<!---->      
+    
+      </div>
+  
+  
+  
+  
+      </li>
+      <li>
+        
+    
+
+    
+    
+    
+      <div class="base-card relative w-full hover:no-underline focus:no-underline
+        base-card--link
+         base-search-card base-search-card--link job-search-card" data-entity-urn="urn:li:jobPosting:4421133924" data-impression-id="jobs-search-result-1" data-reference-id="ZtNNeNLTDUfY5509Qze4Cg==" data-tracking-id="iIa4pjXH2XBKmQJ6JSZxew==" data-column="1" data-row="2">
+        
+
+        <a class="base-card__full-link absolute top-0 right-0 bottom-0 left-0 p-0 z-[2] outline-offset-[4px]" href="https://ch.linkedin.com/jobs/view/full-stack-web-developer-sy-epc-ccs-2026-155-grae-at-cern-4421133924?position=2&amp;pageNum=0&amp;refId=ZtNNeNLTDUfY5509Qze4Cg%3D%3D&amp;trackingId=iIa4pjXH2XBKmQJ6JSZxew%3D%3D" data-tracking-control-name="public_jobs_jserp-result_search-card" data-tracking-client-ingraph="" data-tracking-will-navigate="">
+          
+          <span class="sr-only">
+              
+        
+        Full-Stack Web Developer (SY-EPC-CCS-2026-155-GRAE)
+      
+      
+          </span>
+        </a>
+
+      
+        
+    <div class="search-entity-media">
+        
+      <img class="artdeco-entity-image artdeco-entity-image--square-4
+          " data-delayed-url="https://media.licdn.com/dms/image/v2/C4D0BAQE8CRUNb8zskg/company-logo_100_100/company-logo_100_100/0/1637229503590/cern_logo?e=2147483647&amp;v=beta&amp;t=cQTSuFpbRaZrRlQVoRqXIFMps7Yse_cAFClYW1KjxYU" data-ghost-classes="artdeco-entity-image--ghost" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/6puxblwmhnodu6fjircz4dn4h" alt="">
+  
+    </div>
+  
+
+        <div class="base-search-card__info">
+          <h3 class="base-search-card__title">
+            
+        Full-Stack Web Developer (SY-EPC-CCS-2026-155-GRAE)
+      
+          </h3>
+
+            <h4 class="base-search-card__subtitle">
+              
+          <a class="hidden-nested-link" data-tracking-client-ingraph="" data-tracking-control-name="public_jobs_jserp-result_job-search-card-subtitle" data-tracking-will-navigate="" href="https://ch.linkedin.com/company/cern?trk=public_jobs_jserp-result_job-search-card-subtitle">
+            CERN
+          </a>
+      
+            </h4>
+
+<!---->
+            <div class="base-search-card__metadata">
+              
+          <span class="job-search-card__location">
+            Geneva, Geneva, Switzerland
+          </span>
+
+        
+    
+    
+    
+    
+
+      <div class="job-posting-benefits text-sm">
+        <icon class="job-posting-benefits__icon" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/8zmuwb93gzlb935fk4ao4z779" data-svg-class-name="job-posting-benefits__icon-svg"></icon>
+        <span class="job-posting-benefits__text">
+          Be an early applicant
+<!---->        </span>
+      </div>
+  
+
+          <time class="job-search-card__listdate--new" datetime="2026-06-05">
+            
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+      19 hours ago
+  
+          </time>
+
+<!---->      
+            </div>
+        </div>
+<!---->      
+    
+      </div>
+  
+  
+  
+  
+      </li>
+      <li>
+        
+    
+
+    
+    
+    
+      <div class="base-card relative w-full hover:no-underline focus:no-underline
+        base-card--link
+         base-search-card base-search-card--link job-search-card" data-entity-urn="urn:li:jobPosting:4421134611" data-impression-id="jobs-search-result-2" data-reference-id="ZtNNeNLTDUfY5509Qze4Cg==" data-tracking-id="aF3fCXZoH9KeCTkpv8xaqg==" data-column="1" data-row="3">
+        
+
+        <a class="base-card__full-link absolute top-0 right-0 bottom-0 left-0 p-0 z-[2] outline-offset-[4px]" href="https://ch.linkedin.com/jobs/view/java-software-engineer-80%25-100%25-bern-at-code-compass-%F0%9F%A7%AD-4421134611?position=3&amp;pageNum=0&amp;refId=ZtNNeNLTDUfY5509Qze4Cg%3D%3D&amp;trackingId=aF3fCXZoH9KeCTkpv8xaqg%3D%3D" data-tracking-control-name="public_jobs_jserp-result_search-card" data-tracking-client-ingraph="" data-tracking-will-navigate="">
+          
+          <span class="sr-only">
+              
+        
+        Java Software Engineer (80%-100%) - Bern
+      
+      
+          </span>
+        </a>
+
+      
+        
+    <div class="search-entity-media">
+        
+      <img class="artdeco-entity-image artdeco-entity-image--square-4
+          " data-delayed-url="https://media.licdn.com/dms/image/v2/D4E0BAQE9_jGk57gWWQ/company-logo_100_100/B4EZxxRIaOJ0Ac-/0/1771426842903/code_compass_logo?e=2147483647&amp;v=beta&amp;t=s_2ftkV4bPMjg6RbPvEcVLnBStA-imiPGk9MZn5-b50" data-ghost-classes="artdeco-entity-image--ghost" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/6puxblwmhnodu6fjircz4dn4h" alt="">
+  
+    </div>
+  
+
+        <div class="base-search-card__info">
+          <h3 class="base-search-card__title">
+            
+        Java Software Engineer (80%-100%) - Bern
+      
+          </h3>
+
+            <h4 class="base-search-card__subtitle">
+              
+          <a class="hidden-nested-link" data-tracking-client-ingraph="" data-tracking-control-name="public_jobs_jserp-result_job-search-card-subtitle" data-tracking-will-navigate="" href="https://ch.linkedin.com/company/code-compass?trk=public_jobs_jserp-result_job-search-card-subtitle">
+            Code Compass 🧭
+          </a>
+      
+            </h4>
+
+<!---->
+            <div class="base-search-card__metadata">
+              
+          <span class="job-search-card__location">
+            Bern, Berne, Switzerland
+          </span>
+
+        
+    
+    
+    
+    
+
+<!---->  
+
+          <time class="job-search-card__listdate--new" datetime="2026-06-05">
+            
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+      20 hours ago
+  
+          </time>
+
+<!---->      
+            </div>
+        </div>
+<!---->      
+    
+      </div>
+  
+  
+  
+  
+      </li>
+      <li>
+        
+    
+
+    
+    
+    
+      <div class="base-card relative w-full hover:no-underline focus:no-underline
+        base-card--link
+         base-search-card base-search-card--link job-search-card" data-entity-urn="urn:li:jobPosting:4421149011" data-impression-id="jobs-search-result-3" data-reference-id="ZtNNeNLTDUfY5509Qze4Cg==" data-tracking-id="BDWw4qNG9nM1k5vI+XZSBA==" data-column="1" data-row="4">
+        
+
+        <a class="base-card__full-link absolute top-0 right-0 bottom-0 left-0 p-0 z-[2] outline-offset-[4px]" href="https://ch.linkedin.com/jobs/view/remote-react-developer-%E2%80%93-mid-senior-contract-at-twine-4421149011?position=4&amp;pageNum=0&amp;refId=ZtNNeNLTDUfY5509Qze4Cg%3D%3D&amp;trackingId=BDWw4qNG9nM1k5vI%2BXZSBA%3D%3D" data-tracking-control-name="public_jobs_jserp-result_search-card" data-tracking-client-ingraph="" data-tracking-will-navigate="">
+          
+          <span class="sr-only">
+              
+        
+        Remote React Developer – Mid-Senior Contract
+      
+      
+          </span>
+        </a>
+
+      
+        
+    <div class="search-entity-media">
+        
+      <img class="artdeco-entity-image artdeco-entity-image--square-4
+          " data-delayed-url="https://media.licdn.com/dms/image/v2/D4E0BAQGSIW1c4J94tA/company-logo_100_100/B4EZrlHXpVHcAQ-/0/1764780506129/twine_net_logo?e=2147483647&amp;v=beta&amp;t=l4eka9bJAbZBwwbaE2cZayOUUQ-9hTFwCRD7xqeI7zk" data-ghost-classes="artdeco-entity-image--ghost" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/6puxblwmhnodu6fjircz4dn4h" alt="">
+  
+    </div>
+  
+
+        <div class="base-search-card__info">
+          <h3 class="base-search-card__title">
+            
+        Remote React Developer – Mid-Senior Contract
+      
+          </h3>
+
+            <h4 class="base-search-card__subtitle">
+              
+          <a class="hidden-nested-link" data-tracking-client-ingraph="" data-tracking-control-name="public_jobs_jserp-result_job-search-card-subtitle" data-tracking-will-navigate="" href="https://uk.linkedin.com/company/twine-net?trk=public_jobs_jserp-result_job-search-card-subtitle">
+            Twine
+          </a>
+      
+            </h4>
+
+<!---->
+            <div class="base-search-card__metadata">
+              
+          <span class="job-search-card__location">
+            Switzerland
+          </span>
+
+        
+    
+    
+    
+    
+
+<!---->  
+
+          <time class="job-search-card__listdate--new" datetime="2026-06-05">
+            
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+      21 hours ago
+  
+          </time>
+
+<!---->      
+            </div>
+        </div>
+<!---->      
+    
+      </div>
+  
+  
+  
+  
+      </li>
+      <li>
+        
+    
+
+    
+    
+    
+      <div class="base-card relative w-full hover:no-underline focus:no-underline
+        base-card--link
+         base-search-card base-search-card--link job-search-card" data-entity-urn="urn:li:jobPosting:4421164344" data-impression-id="jobs-search-result-4" data-reference-id="ZtNNeNLTDUfY5509Qze4Cg==" data-tracking-id="TikH97Do6IESlKccBOizyg==" data-column="1" data-row="5">
+        
+
+        <a class="base-card__full-link absolute top-0 right-0 bottom-0 left-0 p-0 z-[2] outline-offset-[4px]" href="https://ch.linkedin.com/jobs/view/d%C3%A9veloppeur-front-end-angular-h-f-at-redsen-4421164344?position=5&amp;pageNum=0&amp;refId=ZtNNeNLTDUfY5509Qze4Cg%3D%3D&amp;trackingId=TikH97Do6IESlKccBOizyg%3D%3D" data-tracking-control-name="public_jobs_jserp-result_search-card" data-tracking-client-ingraph="" data-tracking-will-navigate="">
+          
+          <span class="sr-only">
+              
+        
+        Développeur Front end Angular (H/F)
+      
+      
+          </span>
+        </a>
+
+      
+        
+    <div class="search-entity-media">
+        
+      <img class="artdeco-entity-image artdeco-entity-image--square-4
+          " data-delayed-url="https://media.licdn.com/dms/image/v2/C4E0BAQHmTl0fnDj_Hg/company-logo_100_100/company-logo_100_100/0/1656679611432/redsen_consulting_logo?e=2147483647&amp;v=beta&amp;t=Lk29PFD6tKDsTif_oW_-MDoYWsP5mS-Wx-mr7BbL02o" data-ghost-classes="artdeco-entity-image--ghost" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/6puxblwmhnodu6fjircz4dn4h" alt="">
+  
+    </div>
+  
+
+        <div class="base-search-card__info">
+          <h3 class="base-search-card__title">
+            
+        Développeur Front end Angular (H/F)
+      
+          </h3>
+
+            <h4 class="base-search-card__subtitle">
+              
+          <a class="hidden-nested-link" data-tracking-client-ingraph="" data-tracking-control-name="public_jobs_jserp-result_job-search-card-subtitle" data-tracking-will-navigate="" href="https://ch.linkedin.com/company/redsen?trk=public_jobs_jserp-result_job-search-card-subtitle">
+            Redsen
+          </a>
+      
+            </h4>
+
+<!---->
+            <div class="base-search-card__metadata">
+              
+          <span class="job-search-card__location">
+            Geneva, Geneva, Switzerland
+          </span>
+
+        
+    
+    
+    
+    
+
+      <div class="job-posting-benefits text-sm">
+        <icon class="job-posting-benefits__icon" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/8zmuwb93gzlb935fk4ao4z779" data-svg-class-name="job-posting-benefits__icon-svg"></icon>
+        <span class="job-posting-benefits__text">
+          Be an early applicant
+<!---->        </span>
+      </div>
+  
+
+          <time class="job-search-card__listdate--new" datetime="2026-06-05">
+            
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+      16 hours ago
+  
+          </time>
+
+<!---->      
+            </div>
+        </div>
+<!---->      
+    
+      </div>
+  
+  
+  
+  
+      </li>
+      <li>
+        
+    
+
+    
+    
+    
+      <div class="base-card relative w-full hover:no-underline focus:no-underline
+        base-card--link
+         base-search-card base-search-card--link job-search-card" data-entity-urn="urn:li:jobPosting:4377592944" data-impression-id="jobs-search-result-5" data-reference-id="ZtNNeNLTDUfY5509Qze4Cg==" data-tracking-id="vlSNJhU5BhfGLnhtq0RakQ==" data-column="1" data-row="6">
+        
+
+        <a class="base-card__full-link absolute top-0 right-0 bottom-0 left-0 p-0 z-[2] outline-offset-[4px]" href="https://ch.linkedin.com/jobs/view/backend-software-engineer-python-at-cradle-4377592944?position=6&amp;pageNum=0&amp;refId=ZtNNeNLTDUfY5509Qze4Cg%3D%3D&amp;trackingId=vlSNJhU5BhfGLnhtq0RakQ%3D%3D" data-tracking-control-name="public_jobs_jserp-result_search-card" data-tracking-client-ingraph="" data-tracking-will-navigate="">
+          
+          <span class="sr-only">
+              
+        
+        Backend Software Engineer, Python
+      
+      
+          </span>
+        </a>
+
+      
+        
+    <div class="search-entity-media">
+        
+      <img class="artdeco-entity-image artdeco-entity-image--square-4
+          " data-delayed-url="https://media.licdn.com/dms/image/v2/D4E0BAQFtsu0vfRWxfQ/company-logo_100_100/B4EZgylOESGwAQ-/0/1753195275282/cradlebio_logo?e=2147483647&amp;v=beta&amp;t=F_2Zyst07cR-387qXYiIxXflceCoEiBzqqARFlsiaos" data-ghost-classes="artdeco-entity-image--ghost" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/6puxblwmhnodu6fjircz4dn4h" alt="">
+  
+    </div>
+  
+
+        <div class="base-search-card__info">
+          <h3 class="base-search-card__title">
+            
+        Backend Software Engineer, Python
+      
+          </h3>
+
+            <h4 class="base-search-card__subtitle">
+              
+          <a class="hidden-nested-link" data-tracking-client-ingraph="" data-tracking-control-name="public_jobs_jserp-result_job-search-card-subtitle" data-tracking-will-navigate="" href="https://nl.linkedin.com/company/cradlebio?trk=public_jobs_jserp-result_job-search-card-subtitle">
+            Cradle
+          </a>
+      
+            </h4>
+
+<!---->
+            <div class="base-search-card__metadata">
+              
+          <span class="job-search-card__location">
+            Zurich, Zurich, Switzerland
+          </span>
+
+        
+    
+    
+    
+    
+
+<!---->  
+
+          <time class="job-search-card__listdate--new" datetime="2026-06-05">
+            
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+      23 hours ago
+  
+          </time>
+
+<!---->      
+            </div>
+        </div>
+<!---->      
+    
+      </div>
+  
+  
+  
+  
+      </li>
+      <li>
+        
+    
+
+    
+    
+    
+      <div class="base-card relative w-full hover:no-underline focus:no-underline
+        base-card--link
+         base-search-card base-search-card--link job-search-card" data-entity-urn="urn:li:jobPosting:4424561299" data-impression-id="jobs-search-result-6" data-reference-id="ZtNNeNLTDUfY5509Qze4Cg==" data-tracking-id="co/39DpZkRIJKdsOkPE9og==" data-column="1" data-row="7">
+        
+
+        <a class="base-card__full-link absolute top-0 right-0 bottom-0 left-0 p-0 z-[2] outline-offset-[4px]" href="https://ch.linkedin.com/jobs/view/staff-fullstack-engineer-avatars-at-jobgether-4424561299?position=7&amp;pageNum=0&amp;refId=ZtNNeNLTDUfY5509Qze4Cg%3D%3D&amp;trackingId=co%2F39DpZkRIJKdsOkPE9og%3D%3D" data-tracking-control-name="public_jobs_jserp-result_search-card" data-tracking-client-ingraph="" data-tracking-will-navigate="">
+          
+          <span class="sr-only">
+              
+        
+        Staff Fullstack Engineer, Avatars
+      
+      
+          </span>
+        </a>
+
+      
+        
+    <div class="search-entity-media">
+        
+      <img class="artdeco-entity-image artdeco-entity-image--square-4
+          " data-delayed-url="https://media.licdn.com/dms/image/v2/D4E0BAQHdx4NngvFyPA/company-logo_100_100/B4EZ5GHh6CHEAU-/0/1779292839822/jobgether_logo?e=2147483647&amp;v=beta&amp;t=86Xk6jTn5SYx8OIuRc_gwpv1rBQZ8l6-zCWNpsa3Iy0" data-ghost-classes="artdeco-entity-image--ghost" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/6puxblwmhnodu6fjircz4dn4h" alt="">
+  
+    </div>
+  
+
+        <div class="base-search-card__info">
+          <h3 class="base-search-card__title">
+            
+        Staff Fullstack Engineer, Avatars
+      
+          </h3>
+
+            <h4 class="base-search-card__subtitle">
+              
+          <a class="hidden-nested-link" data-tracking-client-ingraph="" data-tracking-control-name="public_jobs_jserp-result_job-search-card-subtitle" data-tracking-will-navigate="" href="https://be.linkedin.com/company/jobgether?trk=public_jobs_jserp-result_job-search-card-subtitle">
+            Jobgether
+          </a>
+      
+            </h4>
+
+<!---->
+            <div class="base-search-card__metadata">
+              
+          <span class="job-search-card__location">
+            Switzerland
+          </span>
+
+        
+    
+    
+    
+    
+
+      <div class="job-posting-benefits text-sm">
+        <icon class="job-posting-benefits__icon" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/8zmuwb93gzlb935fk4ao4z779" data-svg-class-name="job-posting-benefits__icon-svg"></icon>
+        <span class="job-posting-benefits__text">
+          Be an early applicant
+<!---->        </span>
+      </div>
+  
+
+          <time class="job-search-card__listdate--new" datetime="2026-06-05">
+            
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+      21 hours ago
+  
+          </time>
+
+<!---->      
+            </div>
+        </div>
+<!---->      
+    
+      </div>
+  
+  
+  
+  
+      </li>
+      <li>
+        
+    
+
+    
+    
+    
+      <div class="base-card relative w-full hover:no-underline focus:no-underline
+        base-card--link
+         base-search-card base-search-card--link job-search-card" data-entity-urn="urn:li:jobPosting:4412010038" data-impression-id="jobs-search-result-7" data-reference-id="ZtNNeNLTDUfY5509Qze4Cg==" data-tracking-id="C5I2JmRRAJO2jt9pfzXMAQ==" data-column="1" data-row="8">
+        
+
+        <a class="base-card__full-link absolute top-0 right-0 bottom-0 left-0 p-0 z-[2] outline-offset-[4px]" href="https://ch.linkedin.com/jobs/view/enterprise-software-backend-engineer-at-coopers-group-ag-4412010038?position=8&amp;pageNum=0&amp;refId=ZtNNeNLTDUfY5509Qze4Cg%3D%3D&amp;trackingId=C5I2JmRRAJO2jt9pfzXMAQ%3D%3D" data-tracking-control-name="public_jobs_jserp-result_search-card" data-tracking-client-ingraph="" data-tracking-will-navigate="">
+          
+          <span class="sr-only">
+              
+        
+        Enterprise Software Backend Engineer
+      
+      
+          </span>
+        </a>
+
+      
+        
+    <div class="search-entity-media">
+        
+      <img class="artdeco-entity-image artdeco-entity-image--square-4
+          " data-delayed-url="https://media.licdn.com/dms/image/v2/D4D0BAQElvws0xG7gfQ/company-logo_100_100/B4DZ6BpFqhJcAI-/0/1780291492814/coopers_group_logo?e=2147483647&amp;v=beta&amp;t=TuQsQ8OmTGGhXz_BAJIlUA089kc47PNIdARjV4z8kZo" data-ghost-classes="artdeco-entity-image--ghost" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/6puxblwmhnodu6fjircz4dn4h" alt="">
+  
+    </div>
+  
+
+        <div class="base-search-card__info">
+          <h3 class="base-search-card__title">
+            
+        Enterprise Software Backend Engineer
+      
+          </h3>
+
+            <h4 class="base-search-card__subtitle">
+              
+          <a class="hidden-nested-link" data-tracking-client-ingraph="" data-tracking-control-name="public_jobs_jserp-result_job-search-card-subtitle" data-tracking-will-navigate="" href="https://ch.linkedin.com/company/coopers-group?trk=public_jobs_jserp-result_job-search-card-subtitle">
+            Coopers Group AG
+          </a>
+      
+            </h4>
+
+<!---->
+            <div class="base-search-card__metadata">
+              
+          <span class="job-search-card__location">
+            Lucerne Metropolitan Area
+          </span>
+
+        
+    
+    
+    
+    
+
+      <div class="job-posting-benefits text-sm">
+        <icon class="job-posting-benefits__icon" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/3p1v0uhy7uq0cm5zdvzp4eo18" data-svg-class-name="job-posting-benefits__icon-svg"></icon>
+        <span class="job-posting-benefits__text">
+          Actively Hiring
+<!---->        </span>
+      </div>
+  
+
+          <time class="job-search-card__listdate--new" datetime="2026-06-05">
+            
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+      19 hours ago
+  
+          </time>
+
+<!---->      
+            </div>
+        </div>
+<!---->      
+    
+      </div>
+  
+  
+  
+  
+      </li>
+      <li>
+        
+    
+
+    
+    
+    
+      <div class="base-card relative w-full hover:no-underline focus:no-underline
+        base-card--link
+         base-search-card base-search-card--link job-search-card" data-entity-urn="urn:li:jobPosting:4421122899" data-impression-id="jobs-search-result-8" data-reference-id="ZtNNeNLTDUfY5509Qze4Cg==" data-tracking-id="5J1ATrBA/g+kb1WFfFj0PQ==" data-column="1" data-row="9">
+        
+
+        <a class="base-card__full-link absolute top-0 right-0 bottom-0 left-0 p-0 z-[2] outline-offset-[4px]" href="https://ch.linkedin.com/jobs/view/freelance-fullstack-developer-at-arhs-group-4421122899?position=9&amp;pageNum=0&amp;refId=ZtNNeNLTDUfY5509Qze4Cg%3D%3D&amp;trackingId=5J1ATrBA%2Fg%2Bkb1WFfFj0PQ%3D%3D" data-tracking-control-name="public_jobs_jserp-result_search-card" data-tracking-client-ingraph="" data-tracking-will-navigate="">
+          
+          <span class="sr-only">
+              
+        
+        Freelance Fullstack Developer
+      
+      
+          </span>
+        </a>
+
+      
+        
+    <div class="search-entity-media">
+        
+      <img class="artdeco-entity-image artdeco-entity-image--square-4
+          " data-delayed-url="https://media.licdn.com/dms/image/v2/D4E0BAQH69wawg9lagQ/company-logo_100_100/company-logo_100_100/0/1720424984422/arhs_group_logo?e=2147483647&amp;v=beta&amp;t=QkCZZRyaoRGHK3pjXF5C2BbL0iQzEzCuCMr7vmOt0qA" data-ghost-classes="artdeco-entity-image--ghost" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/6puxblwmhnodu6fjircz4dn4h" alt="">
+  
+    </div>
+  
+
+        <div class="base-search-card__info">
+          <h3 class="base-search-card__title">
+            
+        Freelance Fullstack Developer
+      
+          </h3>
+
+            <h4 class="base-search-card__subtitle">
+              
+          <a class="hidden-nested-link" data-tracking-client-ingraph="" data-tracking-control-name="public_jobs_jserp-result_job-search-card-subtitle" data-tracking-will-navigate="" href="https://lu.linkedin.com/company/arhs-group?trk=public_jobs_jserp-result_job-search-card-subtitle">
+            ARHS Group
+          </a>
+      
+            </h4>
+
+<!---->
+            <div class="base-search-card__metadata">
+              
+          <span class="job-search-card__location">
+            Geneva, Switzerland
+          </span>
+
+        
+    
+    
+    
+    
+
+<!---->  
+
+          <time class="job-search-card__listdate--new" datetime="2026-06-05">
+            
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+      22 hours ago
+  
+          </time>
+
+<!---->      
+            </div>
+        </div>
+<!---->      
+    
+      </div>
+  
+  
+  
+  
+      </li>
+      <li>
+        
+    
+
+    
+    
+    
+      <div class="base-card relative w-full hover:no-underline focus:no-underline
+        base-card--link
+         base-search-card base-search-card--link job-search-card" data-entity-urn="urn:li:jobPosting:4424547271" data-impression-id="jobs-search-result-9" data-reference-id="ZtNNeNLTDUfY5509Qze4Cg==" data-tracking-id="LGGBK/e5FLbMNmSQhk3bdQ==" data-column="1" data-row="10">
+        
+
+        <a class="base-card__full-link absolute top-0 right-0 bottom-0 left-0 p-0 z-[2] outline-offset-[4px]" href="https://ch.linkedin.com/jobs/view/full-stack-entwickler-m-w-d-at-all-about-designs-4424547271?position=10&amp;pageNum=0&amp;refId=ZtNNeNLTDUfY5509Qze4Cg%3D%3D&amp;trackingId=LGGBK%2Fe5FLbMNmSQhk3bdQ%3D%3D" data-tracking-control-name="public_jobs_jserp-result_search-card" data-tracking-client-ingraph="" data-tracking-will-navigate="">
+          
+          <span class="sr-only">
+              
+        
+        Full-Stack Entwickler (m/w/d)
+      
+      
+          </span>
+        </a>
+
+      
+        
+    <div class="search-entity-media">
+        
+      <img class="artdeco-entity-image artdeco-entity-image--square-4
+          " data-delayed-url="https://media.licdn.com/dms/image/v2/D4E0BAQEWGNSwGMEEGg/company-logo_100_100/B4EZnxanjdGUAQ-/0/1760691911292/allaboutdesigns_logo?e=2147483647&amp;v=beta&amp;t=bspM3YCfXYXdBU59C9ruAN6uZXaZE4hMPItyGelB2dY" data-ghost-classes="artdeco-entity-image--ghost" data-ghost-url="https://static.licdn.com/aero-v1/sc/h/6puxblwmhnodu6fjircz4dn4h" alt="">
+  
+    </div>
+  
+
+        <div class="base-search-card__info">
+          <h3 class="base-search-card__title">
+            
+        Full-Stack Entwickler (m/w/d)
+      
+          </h3>
+
+            <h4 class="base-search-card__subtitle">
+              
+          <a class="hidden-nested-link" data-tracking-client-ingraph="" data-tracking-control-name="public_jobs_jserp-result_job-search-card-subtitle" data-tracking-will-navigate="" href="https://de.linkedin.com/company/allaboutdesigns?trk=public_jobs_jserp-result_job-search-card-subtitle">
+            ALL-ABOUT Designs
+          </a>
+      
+            </h4>
+
+<!---->
+            <div class="base-search-card__metadata">
+              
+          <span class="job-search-card__location">
+            Full-Reuenthal, Aargau, Switzerland
+          </span>
+
+        
+    
+    
+    
+    
+
+      <div class="job-posting-benefits text-sm">
+        <icon class="job-posting-benefits__icon" data-delayed-url="https://static.licdn.com/aero-v1/sc/h/8zmuwb93gzlb935fk4ao4z779" data-svg-class-name="job-posting-benefits__icon-svg"></icon>
+        <span class="job-posting-benefits__text">
+          Be an early applicant
+<!---->        </span>
+      </div>
+  
+
+          <time class="job-search-card__listdate--new" datetime="2026-06-05">
+            
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+      22 hours ago
+  
+          </time>
+
+<!---->      
+            </div>
+        </div>
+<!---->      
+    
+      </div>
+  
+  
+  
+  
+      </li>
+  </body></html>

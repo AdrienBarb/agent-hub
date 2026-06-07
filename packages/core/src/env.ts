@@ -35,6 +35,15 @@ const envSchema = z.object({
   VERCEL_TEAM_ID: z.string().optional(),
   VERCEL_PROJECT_ID: z.string().optional(),
   RENDER_TYPST_VERSION: z.string().default("0.14.2"),
+
+  // Browserbase (job-hunt LinkedIn board). Optional: the LinkedIn board is the
+  // only Browserbase-sourced board and it fails SOFT — when the key/project are
+  // unset, scrapeLinkedinListings logs and returns [], so the other (Firecrawl)
+  // boards run normally. BROWSERBASE_PROXY="1" routes the session through a CH
+  // residential proxy (paid plan only); unset = the free-tier default IP.
+  BROWSERBASE_API_KEY: z.string().min(1).optional(),
+  BROWSERBASE_PROJECT_ID: z.string().min(1).optional(),
+  BROWSERBASE_PROXY: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

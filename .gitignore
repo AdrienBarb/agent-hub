@@ -17,5 +17,9 @@ tmp-render/
 # swissdevjobs adapter smoke-test output
 tmp-swissdevjobs/
 
+# LinkedIn / Browserbase smoke-test output
+tmp-browserbase/
+tmp-linkedin-board/
+
 # Claude Code runtime (local-only state, e.g. scheduled-task locks)
 .claude/

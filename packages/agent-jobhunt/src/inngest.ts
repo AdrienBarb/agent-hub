@@ -6,6 +6,7 @@ import { redactConnString } from "@hub/core/redact";
 import { jobHuntGraph } from "./graph";
 import { setupCheckpointer } from "./checkpointer";
 import { disposeRenderSandbox } from "./render";
+import { disposeLinkedinSession } from "./boards/linkedin";
 import { manifest } from "./manifest";
 
 export const jobHuntDailyRun = inngest.createFunction(
@@ -77,6 +78,10 @@ export const jobHuntDailyRun = inngest.createFunction(
       // Safety net: the finalize node disposes the warm sandbox on the happy
       // path; if the graph threw before reaching it, tear it down here too.
       await step.run("dispose-render-sandbox", () => disposeRenderSandbox());
+      // Likewise the LinkedIn Browserbase session — deep-scrape's finally closes
+      // it on the happy path; close it here too if the graph threw earlier. Both
+      // are idempotent, so calling either twice is safe.
+      await step.run("dispose-browserbase-session", () => disposeLinkedinSession());
       await step.run("fail-agent-run", async () => {
         await db.agentRun.update({
           where: { id: run.id },

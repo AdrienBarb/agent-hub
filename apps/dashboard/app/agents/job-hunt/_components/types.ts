@@ -47,6 +47,7 @@ const BOARD_LABELS: Record<string, string> = {
   jobs: "jobs.ch",
   jobsch: "jobs.ch",
   "jobs.ch": "jobs.ch",
+  linkedin: "LinkedIn",
 };
 
 export function boardLabel(board: string): string {

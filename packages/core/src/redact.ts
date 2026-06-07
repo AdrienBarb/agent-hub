@@ -24,6 +24,10 @@ const SECRET_ENV_KEYS = [
   "LANGFUSE_PUBLIC_KEY",
   "HUB_ACCESS_TOKEN",
   "VERCEL_TOKEN",
+  // Browserbase session connect URL embeds the API key as a query param
+  // (wss://connect.browserbase.com?apiKey=…); a connectOverCDP error can echo it.
+  "BROWSERBASE_API_KEY",
+  "BROWSERBASE_PROJECT_ID",
 ] as const;
 
 export function redactConnString(input: string): string {
