@@ -11,9 +11,9 @@ import type { JobHuntStateType } from "../state";
 // constraint never catches it. This node runs AFTER deep-scrape (full JD in
 // rawMarkdown) and BEFORE the eval/tailor fan-outs: it groups the run's jobs by
 // company, asks an LLM per pair whether they are the SAME posting, and marks the
-// losers status=duplicate. A duplicate falls out of dispatch-evaluations
-// (status:"new") and dispatch-tailorings (status:"evaluated") for free — no
-// dispatch changes needed.
+// losers status=duplicate. A duplicate falls out of the evaluate phase
+// (status:"new") and the tailor phase (status:"evaluated") for free — no
+// phase changes needed.
 //
 // Governing principle: a FALSE MERGE (fusing two distinct jobs) hides a real
 // opening and is the costly error; a surviving duplicate is the cheap, tolerated
@@ -105,12 +105,15 @@ type Adjudication = z.infer<typeof AdjudicationSchema>;
 // evaluator/run-step.ts) on purpose: that helper prepends the candidate's
 // PROFILE_COMBINED, but a same-vs-different posting comparison must NOT be biased
 // by who the candidate is. temperature:0 maximizes adjudication determinism.
-// Best-effort: any failure → { same:false } (leave the pair unmerged), never throws.
+// `maxRetries` honors Anthropic's retry-after; dedupe runs sequentially inside
+// the ingest step so it needs no concurrency cap. Best-effort: any failure →
+// { same:false } (leave the pair unmerged), never throws.
 async function adjudicateSamePair(a: DedupJob, b: DedupJob): Promise<Adjudication> {
   try {
     const result = await generateObject({
       model: anthropic(MODELS.evaluator),
       temperature: 0,
+      maxRetries: 6,
       schema: AdjudicationSchema,
       allowSystemInMessages: true,
       providerOptions: {

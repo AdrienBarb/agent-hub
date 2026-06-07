@@ -23,6 +23,10 @@ export async function runEvaluatorStep<T extends z.ZodTypeAny>({
     model: anthropic(MODELS.evaluator),
     schema,
     allowSystemInMessages: true,
+    // Honors Anthropic's retry-after on 429s (SDK-native exponential backoff).
+    // Cross-invocation concurrency is bounded by the evaluateJob function's
+    // account-scoped Inngest `concurrency` key, not an in-process limiter.
+    maxRetries: 6,
     // Anthropic-native structured outputs (see tailor/run-step.ts for the full
     // rationale). The evaluator schemas have no z.record/recursion, so native
     // grammar-constrained decoding applies cleanly and avoids the jsonTool

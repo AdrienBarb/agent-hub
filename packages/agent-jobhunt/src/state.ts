@@ -1,6 +1,5 @@
 import "server-only";
 import { Annotation } from "@langchain/langgraph";
-import { JobStatus } from "@hub/core/prisma";
 import type { ParsedJob } from "./boards/types";
 import { keyOfWarning, type RunWarning } from "./warnings";
 
@@ -10,23 +9,11 @@ export interface ScrapedListing {
   markdown: string;
 }
 
-export interface EvaluationResult {
-  jobId: string;
-  fitScore: number;
-  status: JobStatus;
-}
-
-export interface TailoringResult {
-  jobId: string;
-  status: JobStatus | "failed";
-}
-
 // Idempotent array reducer: merge by a stable key, last-write-wins, preserving
 // first-seen insertion order. Unlike `[...a, ...b]`, re-applying the SAME batch
-// (a fan-out branch replayed from a checkpoint) overwrites rather than appends,
-// so a resumed run can't double the array. Mirrors the keyed `tailorings`
-// reducer's intent while keeping the external value an array (no consumer
-// changes). See the CLAUDE.md gotcha on array reducers + the checkpointer.
+// (an ingest node replayed from a checkpoint) overwrites rather than appends, so
+// a resumed ingest run can't double the array. See the CLAUDE.md gotcha on array
+// reducers + the checkpointer.
 function keyedArrayReducer<T>(keyOf: (item: T) => string) {
   return (a: T[], b: T[]): T[] => {
     const merged = new Map<string, T>();
@@ -60,19 +47,10 @@ export const JobHuntState = Annotation.Root({
     default: () => 0,
   }),
 
-  evaluations: Annotation<EvaluationResult[]>({
-    reducer: keyedArrayReducer((e) => e.jobId),
-    default: () => [],
-  }),
-
-  tailorings: Annotation<Record<string, TailoringResult>>({
-    reducer: (a, b) => ({ ...a, ...b }),
-    default: () => ({}),
-  }),
-
   // Structured SOFT-failure sink. Keyed (NOT [...a,...b]) for the same reason as
-  // the arrays above: evaluate-one/tailor-one fan out via Send() under the
-  // PostgresSaver checkpointer, so a replayed branch must overwrite, not append.
+  // the arrays above: an ingest node replayed from the PostgresSaver checkpoint
+  // must overwrite its batch, not append. (Evaluate/tailor warnings are
+  // collected per-job by the Inngest orchestrator, not via this channel.)
   warnings: Annotation<RunWarning[]>({
     reducer: keyedArrayReducer(keyOfWarning),
     default: () => [],

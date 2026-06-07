@@ -24,6 +24,10 @@ export async function runTailorStep<T extends z.ZodTypeAny>({
       model: anthropic(MODELS.generator),
       schema,
       allowSystemInMessages: true,
+      // Honors Anthropic's retry-after on 429s; cross-invocation concurrency is
+      // bounded by the tailorJob function's account-scoped Inngest concurrency
+      // key, not an in-process limiter.
+      maxRetries: 6,
       // Anthropic-native structured outputs (grammar-constrained decoding) via
       // `output_config.format`. Without this the SDK defaults to "jsonTool",
       // which wraps the schema in a generic `json` tool that Opus fills

@@ -1,10 +1,15 @@
 import "server-only";
 import type { Renderer } from "./types";
-import { SandboxRenderer, disposeRenderSandbox } from "./sandbox";
+import {
+  SandboxRenderer,
+  disposeRenderSandbox,
+  acquireRenderSandbox,
+  releaseRenderSandbox,
+} from "./sandbox";
 
 export type { Renderer, RenderInput, RenderOutput } from "./types";
 export { type AtsResult, checkAts, extractPdfText } from "./ats";
-export { disposeRenderSandbox };
+export { disposeRenderSandbox, acquireRenderSandbox, releaseRenderSandbox };
 
 let renderer: Renderer | undefined;
 

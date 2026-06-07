@@ -24,6 +24,14 @@ let sandboxPromise: Promise<Sandbox> | undefined;
 // stops ALL of them — even an orphan from a retried/concurrent provision.
 const liveSandboxes = new Set<Sandbox>();
 
+// Lease counter for per-job fan-out (tailorJob). Each tailor invocation takes a
+// lease around its render and releases it when done. Under Fluid Compute a warm
+// process can serve several concurrent tailorJob invocations — they share ONE
+// warm sandbox via the memo above, and it's torn down only when the LAST lease
+// releases, so one job's release can't stop a sandbox a concurrent job is still
+// rendering into.
+let activeLeases = 0;
+
 async function run(
   sandbox: Sandbox,
   cmd: string,
@@ -171,6 +179,21 @@ export class SandboxRenderer implements Renderer {
       throw new Error(`[render] ${jobId}: typst produced no PDF`);
     }
     return { resumePdf, coverPdf };
+  }
+}
+
+/** Take a lease on the warm render sandbox for one unit of work (one tailor
+ * job). Does NOT create it — the renderer provisions lazily on first render.
+ * Pair every call with exactly one releaseRenderSandbox(). */
+export function acquireRenderSandbox(): void {
+  activeLeases++;
+}
+
+/** Release a lease; disposes the sandbox(es) once the last lease is released. */
+export async function releaseRenderSandbox(): Promise<void> {
+  activeLeases = Math.max(0, activeLeases - 1);
+  if (activeLeases === 0) {
+    await disposeRenderSandbox();
   }
 }
 

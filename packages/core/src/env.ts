@@ -27,6 +27,14 @@ const envSchema = z.object({
   JOBHUNT_MAX_JOBS: z.coerce.number().int().positive().optional(),
   JOBHUNT_FIT_THRESHOLD: z.coerce.number().int().min(1).max(10).default(6),
 
+  // Max concurrent evaluate/tailor child runs hitting Anthropic at once, enforced
+  // ACCOUNT-WIDE by the Inngest `concurrency` key (scope:"account", key:"anthropic")
+  // on evaluateJob/tailorJob — a cross-invocation cap, NOT an in-process limiter.
+  // Each child makes its subgraph's LLM calls sequentially, so this ≈ concurrent
+  // Anthropic calls. Keep at/under your Anthropic tier's headroom (Tier 1 Sonnet =
+  // 50 RPM / 8k OTPM is tight; Tier 2 = 1k RPM / 90k OTPM).
+  LLM_MAX_CONCURRENCY: z.coerce.number().int().positive().default(6),
+
   // Vercel Sandbox (job-hunt PDF render). Optional: absent locally until a
   // Vercel project + personal access token exist. The render node throws a
   // friendly error if VERCEL_TOKEN is unset at runtime. When deployed on

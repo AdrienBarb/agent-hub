@@ -20,7 +20,7 @@ PostgresSaver checkpointer + `Send()` fan-out + Anthropic-native structured outp
 
 ## Deferred from Phase A
 
-- [ ] **Lift the graph out of one `step.run`** — `inngest.ts` runs the whole graph (scrape + deep-scrape + N evaluators + N tailorings + Typst render) inside a single `step.run("invoke-graph")`. `maxDuration` is already raised to 800s (that was the actual deploy blocker, and it's fixed), but decomposing into per-phase Inngest steps would let each phase retry/resume independently instead of re-entering `.invoke()` from the checkpoint. Deferred because it's risky: it needs the graph's phases exposed out of `graph.ts` and touches the module-level render-sandbox singleton + the keyed-array reducer retry semantics. **L**
+- [x] **Lift the graph out of one `step.run`** — DONE via per-job fan-out. The orchestrator (`inngest.ts`) runs `ingest` as one `step.run`, then dispatches one `evaluateJob`/`tailorJob` child invocation per job via `Promise.all(step.invoke(...))`. Each job gets its own invocation (own `maxDuration` budget + own retries, resuming its subgraph from the checkpoint on retry); Anthropic concurrency is capped account-wide by an Inngest `concurrency` key; the render-sandbox singleton is lease-refcounted so co-located concurrent tailorings share it safely. Fixed the `FUNCTION_INVOCATION_TIMEOUT` (was dying at ~13 min/800s) and made per-job work scale horizontally.
 
 ---
 

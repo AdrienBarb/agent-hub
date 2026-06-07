@@ -6,42 +6,29 @@ import { parseNode } from "./nodes/parse";
 import { persistNode } from "./nodes/persist";
 import { deepScrapeNode } from "./nodes/deep-scrape";
 import { dedupeNode } from "./nodes/dedupe";
-import {
-  dispatchEvaluationsEdge,
-  evaluateOneNode,
-} from "./nodes/dispatch-evaluations";
-import {
-  dispatchTailoringsEdge,
-  finalizeNode,
-  postEvalFanInNode,
-  tailorOneNode,
-} from "./nodes/dispatch-tailorings";
 import { checkpointer } from "./checkpointer";
 
-export const jobHuntGraph = new StateGraph(JobHuntState)
+// Phase 1 of the daily run: scrape every board's listings, parse + persist Job
+// rows, deep-scrape each JD, then cross-board dedupe. Compiled as its OWN graph
+// so the Inngest function runs it in a dedicated step.run("ingest") — one Vercel
+// invocation with a fresh maxDuration budget.
+//
+// The evaluate + tailor phases are deliberately NOT in this graph: they are
+// DB-driven (they read Job rows by status, written here) and each job runs in
+// its OWN Inngest child invocation (evaluateJob/tailorJob in inngest.ts, fanned
+// out via step.invoke). Keeping the whole pipeline out of one step.run is what
+// avoids Vercel's 800s FUNCTION_INVOCATION_TIMEOUT and lets per-job work scale
+// horizontally.
+export const ingestGraph = new StateGraph(JobHuntState)
   .addNode("scrape", scrapeNode)
   .addNode("parse", parseNode)
   .addNode("persist", persistNode)
   .addNode("deep-scrape", deepScrapeNode)
   .addNode("dedupe", dedupeNode)
-  .addNode("evaluate-one", evaluateOneNode)
-  .addNode("post-eval", postEvalFanInNode)
-  .addNode("tailor-one", tailorOneNode)
-  .addNode("finalize", finalizeNode)
   .addEdge(START, "scrape")
   .addEdge("scrape", "parse")
   .addEdge("parse", "persist")
   .addEdge("persist", "deep-scrape")
   .addEdge("deep-scrape", "dedupe")
-  .addConditionalEdges("dedupe", dispatchEvaluationsEdge, [
-    "evaluate-one",
-    "post-eval",
-  ])
-  .addEdge("evaluate-one", "post-eval")
-  .addConditionalEdges("post-eval", dispatchTailoringsEdge, [
-    "tailor-one",
-    "finalize",
-  ])
-  .addEdge("tailor-one", "finalize")
-  .addEdge("finalize", END)
+  .addEdge("dedupe", END)
   .compile({ checkpointer });
