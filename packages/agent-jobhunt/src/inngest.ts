@@ -4,7 +4,9 @@ import { db } from "@hub/core/db";
 import { env } from "@hub/core/env";
 import { flushLangfuse } from "@hub/core/langfuse";
 import { redactConnString } from "@hub/core/redact";
-import { ingestGraph } from "./graph";
+import { collectGraph } from "./graph";
+import { deepScrapeNode } from "./nodes/deep-scrape";
+import { dedupeNode } from "./nodes/dedupe";
 import { evaluatorSubgraph } from "./evaluator/graph";
 import { tailorSubgraph } from "./tailor/graph";
 import { setupCheckpointer } from "./checkpointer";
@@ -155,17 +157,27 @@ export const jobHuntDailyRun = inngest.createFunction(
     });
 
     try {
-      // PHASE 1 — ingest (scrape → parse → persist → deep-scrape → dedupe) as ONE
-      // step = one Vercel invocation. The LinkedIn Browserbase session is created
-      // here, so it must be disposed in THIS invocation's process (deep-scrape
-      // closes it on the happy path; this finally is the safety net). The
-      // orchestrator's catch runs in a DIFFERENT invocation, so it can't see this
-      // process's session singleton.
-      const ingest = await step.run("ingest", async () => {
+      // PHASE 1 — ingest, SPLIT across three Inngest steps so no single Vercel
+      // invocation runs scrape + deep-scrape + dedupe back-to-back. That combined
+      // wall-clock — dozens of (formerly sequential) LinkedIn Browserbase JD
+      // fetches + ~100 (formerly sequential) dedupe LLM calls — crossed the 800s
+      // FUNCTION_INVOCATION_TIMEOUT ceiling on a big LinkedIn day: the invocation
+      // was killed mid-response (connection reset), the step never memoized,
+      // Inngest re-drove the orchestrator and re-ran the WHOLE ingest, compounding
+      // until the run died with its AgentRun stuck "running" (the transport reset
+      // never reached the catch below → fail-agent-run). Each step now gets its
+      // own invocation/budget/retries; the DB (Job rows by runId) is the
+      // inter-phase state, exactly like the evaluate/tailor fan-outs.
+
+      // 1a — collect: scrape → parse → persist (writes Job status="new"). The
+      // LinkedIn LISTING Browserbase session is created in this invocation, so it
+      // must be disposed HERE (the orchestrator's catch runs in a different
+      // invocation and can't see this process's session singleton).
+      const collect = await step.run("ingest-collect", async () => {
         try {
-          const final = await ingestGraph.invoke(
+          const final = await collectGraph.invoke(
             { runId: run.id },
-            { configurable: { thread_id: `${run.id}::ingest` } },
+            { configurable: { thread_id: `${run.id}::collect` } },
           );
           return {
             persistedCount: final.persistedCount ?? 0,
@@ -181,6 +193,25 @@ export const jobHuntDailyRun = inngest.createFunction(
           );
         }
       });
+
+      // 1b — deep-scrape every new JD (own 800s budget; LinkedIn fetches batched).
+      // deepScrapeNode reads jobs by runId from the DB and disposes its own
+      // (detail-fetch) Browserbase session in a finally. Idempotent on retry: it
+      // only fetches rows whose rawMarkdown is still null.
+      const deep = await step.run("ingest-deep-scrape", () =>
+        deepScrapeNode({ runId: run.id }),
+      );
+
+      // 1c — cross-board dedupe (own budget; pairs adjudicated with in-process
+      // concurrency). Best-effort node — never throws — and idempotent on retry
+      // (already-marked duplicates are excluded from its candidate query).
+      await step.run("ingest-dedupe", () => dedupeNode({ runId: run.id }));
+
+      const ingest = {
+        persistedCount: collect.persistedCount,
+        parsedCount: collect.parsedCount,
+        warnings: [...collect.warnings, ...deep.warnings],
+      };
 
       // PHASE 2 — evaluate: fan out one child run per scraped job. Each is its
       // own invocation with its own retries; Anthropic concurrency is capped

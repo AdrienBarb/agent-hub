@@ -4,7 +4,6 @@ import { z } from "zod";
 import { anthropic, MODELS } from "@hub/core/llm";
 import { db } from "@hub/core/db";
 import { JobStatus } from "@hub/core/prisma";
-import type { JobHuntStateType } from "../state";
 
 // Cross-board dedup. The same real-world job is cross-posted on multiple boards
 // (jobup, jobs.ch, …) under different board slugs, so the unique([board,slug])
@@ -21,6 +20,15 @@ import type { JobHuntStateType } from "../state";
 
 const MAX_GROUP = 12;
 const JD_CHARS = 2500;
+// Company groups are mutually independent (different employers), so they run
+// through a bounded worker pool instead of one-at-a-time. Each group's internal
+// anchor loop stays sequential (its `handled` set is order-dependent), so at most
+// DEDUPE_GROUP_CONCURRENCY adjudications hit Anthropic concurrently. dedupe runs
+// in the orchestrator's ingest-dedupe step — BEFORE the evaluate/tailor fan-out —
+// so it never overlaps those child runs, and the account-wide Anthropic cap
+// (which only gates the child fns) does not apply; this in-process cap is what
+// bounds it. Without it, ~100 sequential calls pushed ingest past 800s.
+const DEDUPE_GROUP_CONCURRENCY = 5;
 
 // Higher = better canonical. The most-advanced-status job in a confirmed group
 // becomes the canonical so already-processed work (e.g. a job tailored on a
@@ -147,14 +155,85 @@ async function adjudicateSamePair(a: DedupJob, b: DedupJob): Promise<Adjudicatio
   }
 }
 
-export async function dedupeNode(
-  state: JobHuntStateType,
-): Promise<Partial<JobHuntStateType>> {
+// Adjudicate ONE company group: anchor-based, precision-biased merge. Each anchor
+// (canonical) absorbs only jobs adjudicated SAME directly against it; a job marked
+// duplicate is added to `handled` and never re-pointed — so we never take the
+// transitive closure of a non-transitive relation (no chains, no over-merge).
+// INTERNALLY SEQUENTIAL: the `handled` short-circuit makes pair order matter, so a
+// group is never parallelized within itself. Returns its own counts so the caller
+// can sum across concurrently-run groups.
+async function adjudicateGroup(
+  group: DedupJob[],
+): Promise<{ pairs: number; dups: number }> {
+  // Sort so the best canonical is first: most-advanced status, then oldest
+  // (firstSeenAt asc), then id for determinism.
+  group.sort((a, b) => {
+    const rank = (STATUS_RANK[b.status] ?? 0) - (STATUS_RANK[a.status] ?? 0);
+    if (rank !== 0) return rank;
+    const t = a.firstSeenAt.getTime() - b.firstSeenAt.getTime();
+    if (t !== 0) return t;
+    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+  });
+
+  let pairs = 0;
+  let dups = 0;
+  const handled = new Set<string>();
+  for (let i = 0; i < group.length; i++) {
+    const anchor = group[i]!;
+    if (handled.has(anchor.id)) continue;
+    for (let j = i + 1; j < group.length; j++) {
+      const other = group[j]!;
+      if (handled.has(other.id)) continue;
+      pairs++;
+      const verdict = await adjudicateSamePair(anchor, other);
+      if (!verdict.same) continue;
+      try {
+        await db.job.update({
+          where: { id: other.id },
+          data: { status: JobStatus.duplicate, duplicateOfId: anchor.id },
+        });
+        handled.add(other.id);
+        dups++;
+        console.log(
+          `[dedupe] "${other.title}" (${other.id}) → duplicate of "${anchor.title}" (${anchor.id}) — ${verdict.reason}`,
+        );
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "unknown error";
+        console.error(`[dedupe] failed to mark ${other.id} duplicate: ${message}`);
+      }
+    }
+  }
+  return { pairs, dups };
+}
+
+// Run independent tasks through at most `limit` concurrent workers, keeping the
+// pool saturated. Company groups vary wildly in size (1 pair vs up to 66), so a
+// fixed-chunk barrier would idle workers behind one big group — a pull-based pool
+// doesn't.
+async function mapPool<T, R>(
+  items: T[],
+  limit: number,
+  fn: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let next = 0;
+  async function worker(): Promise<void> {
+    for (let i = next++; i < items.length; i = next++) {
+      results[i] = await fn(items[i]!);
+    }
+  }
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, () => worker()),
+  );
+  return results;
+}
+
+export async function dedupeNode(input: { runId: string }): Promise<void> {
   try {
     const candidates = (
       await db.job.findMany({
         where: {
-          runId: state.runId,
+          runId: input.runId,
           status: { not: JobStatus.duplicate },
           rawMarkdown: { not: null },
         },
@@ -181,10 +260,10 @@ export async function dedupeNode(
       else byCompany.set(key, [job]);
     }
 
-    let groupsConsidered = 0;
-    let pairsAdjudicated = 0;
-    let duplicatesMarked = 0;
-
+    // Only multi-job groups are worth adjudicating; over-MAX_GROUP groups are
+    // skipped to bound cost (logged). The eligible groups are mutually
+    // independent, so they adjudicate concurrently through the worker pool.
+    const groups: DedupJob[][] = [];
     for (const [key, group] of byCompany) {
       if (group.length < 2) continue;
       if (group.length > MAX_GROUP) {
@@ -193,57 +272,18 @@ export async function dedupeNode(
         );
         continue;
       }
-      groupsConsidered++;
-
-      // Sort so the best canonical is first: most-advanced status, then oldest
-      // (firstSeenAt asc), then id for determinism.
-      group.sort((a, b) => {
-        const rank = (STATUS_RANK[b.status] ?? 0) - (STATUS_RANK[a.status] ?? 0);
-        if (rank !== 0) return rank;
-        const t = a.firstSeenAt.getTime() - b.firstSeenAt.getTime();
-        if (t !== 0) return t;
-        return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
-      });
-
-      // Anchor-based merge: each anchor (canonical) absorbs only jobs adjudicated
-      // SAME directly against it. A job marked duplicate is added to `handled`
-      // and never re-pointed — so we never take the transitive closure of a
-      // non-transitive relation (no chains, no over-merge).
-      const handled = new Set<string>();
-      for (let i = 0; i < group.length; i++) {
-        const anchor = group[i]!;
-        if (handled.has(anchor.id)) continue;
-        for (let j = i + 1; j < group.length; j++) {
-          const other = group[j]!;
-          if (handled.has(other.id)) continue;
-          pairsAdjudicated++;
-          const verdict = await adjudicateSamePair(anchor, other);
-          if (!verdict.same) continue;
-          try {
-            await db.job.update({
-              where: { id: other.id },
-              data: { status: JobStatus.duplicate, duplicateOfId: anchor.id },
-            });
-            handled.add(other.id);
-            duplicatesMarked++;
-            console.log(
-              `[dedupe] "${other.title}" (${other.id}) → duplicate of "${anchor.title}" (${anchor.id}) — ${verdict.reason}`,
-            );
-          } catch (err) {
-            const message = err instanceof Error ? err.message : "unknown error";
-            console.error(`[dedupe] failed to mark ${other.id} duplicate: ${message}`);
-          }
-        }
-      }
+      groups.push(group);
     }
 
+    const counts = await mapPool(groups, DEDUPE_GROUP_CONCURRENCY, adjudicateGroup);
+    const pairsAdjudicated = counts.reduce((n, c) => n + c.pairs, 0);
+    const duplicatesMarked = counts.reduce((n, c) => n + c.dups, 0);
+
     console.log(
-      `[dedupe] groups=${groupsConsidered} pairs=${pairsAdjudicated} duplicatesMarked=${duplicatesMarked}`,
+      `[dedupe] groups=${groups.length} pairs=${pairsAdjudicated} duplicatesMarked=${duplicatesMarked}`,
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : "unknown error";
     console.error(`[dedupe] best-effort node failed, continuing without dedup: ${message}`);
   }
-
-  return {};
 }

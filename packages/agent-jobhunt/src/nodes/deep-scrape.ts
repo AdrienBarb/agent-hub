@@ -2,11 +2,16 @@ import "server-only";
 import Firecrawl from "@mendable/firecrawl-js";
 import { db } from "@hub/core/db";
 import { env } from "@hub/core/env";
-import type { JobHuntStateType } from "../state";
 import { fetchLinkedinJd, disposeLinkedinSession } from "../boards/linkedin";
 import { summarizeScrapeErrors, makeWarning, type RunWarning } from "../warnings";
 
 const CONCURRENCY = 5;
+// LinkedIn JDs share one Browserbase session and `fetchHtml` opens a fresh page
+// per call, so a few concurrent tabs are safe — kept low (3) to stay gentle on
+// the free-tier session and bound the per-tab challenge risk. This is what keeps
+// the deep-scrape step under the 800s ceiling on a big LinkedIn day: 44 strictly
+// sequential fetches at up to GOTO_TIMEOUT_MS (45s) each could alone exceed it.
+const LINKEDIN_CONCURRENCY = 3;
 const FIRECRAWL_TIMEOUT_MS = 60_000;
 const OUTAGE_MIN_SAMPLE = 3;
 
@@ -64,17 +69,17 @@ async function scrapeLinkedinOne(job: JobRow): Promise<ScrapeOutcome> {
   return outcome;
 }
 
-export async function deepScrapeNode(
-  state: JobHuntStateType,
-): Promise<Partial<JobHuntStateType>> {
+export async function deepScrapeNode(input: {
+  runId: string;
+}): Promise<{ deepScrapedCount: number; warnings: RunWarning[] }> {
   const jobs = (await db.job.findMany({
-    where: { runId: state.runId, rawMarkdown: null },
+    where: { runId: input.runId, rawMarkdown: null },
     select: { id: true, url: true, board: true, slug: true },
   })) as JobRow[];
 
   if (jobs.length === 0) {
     console.log("[deep-scrape] no jobs need JD scrape");
-    return { deepScrapedCount: 0 };
+    return { deepScrapedCount: 0, warnings: [] };
   }
 
   const linkedinJobs = jobs.filter((j) => j.board === "linkedin");
@@ -104,11 +109,17 @@ export async function deepScrapeNode(
       }
     }
 
-    // LinkedIn JDs share one Browserbase session — fetch sequentially to keep
-    // the free-tier session lean and avoid concurrent-tab flakiness.
+    // LinkedIn JDs share one Browserbase session — fetched in small concurrent
+    // batches (LINKEDIN_CONCURRENCY) rather than strictly sequentially, so the
+    // 44-fetch worst case (each up to 45s) can't alone blow this step's 800s
+    // budget. `fetchHtml` opens a fresh page per call, so the batch is tab-safe.
     let linkedinSucceeded = 0;
-    for (const job of linkedinJobs) {
-      if ((await scrapeLinkedinOne(job)) === "ok") linkedinSucceeded++;
+    for (let i = 0; i < linkedinJobs.length; i += LINKEDIN_CONCURRENCY) {
+      const chunk = linkedinJobs.slice(i, i + LINKEDIN_CONCURRENCY);
+      const results = await Promise.allSettled(chunk.map(scrapeLinkedinOne));
+      for (const r of results) {
+        if (r.status === "fulfilled" && r.value === "ok") linkedinSucceeded++;
+      }
     }
 
     // Outage guard counts ONLY Firecrawl rows — a LinkedIn outage is fail-soft
